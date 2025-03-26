@@ -1,0 +1,22 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "#I#",
+        "ICI",
+        "#I#"
+    ],
+    "key": {
+        "#": {
+            "item": "trinketsandbaubles:glowing_gem"
+        },
+        "I": {
+            "item": "trinketsandbaubles:mana_crystal"
+        },
+        "C": {
+            "item": "trinketsandbaubles:moon_rose"
+        }
+    },
+    "result": {
+        "item": "trinketsandbaubles:arcing_orb"
+    }
+}

@@ -1,0 +1,22 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "#I ",
+        "ICI",
+        " I "
+    ],
+    "key": {
+        "#": {
+            "item": "trinketsandbaubles:mana_crystal"
+        },
+        "I": {
+            "item": "trinketsandbaubles:glowing_ingot"
+        },
+        "C": {
+            "item": "trinketsandbaubles:faelis_food"
+        }
+    },
+    "result": {
+        "item": "trinketsandbaubles:faelis_ring"
+    }
+}

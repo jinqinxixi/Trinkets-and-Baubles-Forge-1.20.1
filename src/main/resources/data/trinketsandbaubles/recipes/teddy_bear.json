@@ -1,0 +1,24 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "###",
+        "*@*",
+        "###"
+    ],
+    "key": {
+        "#": {
+            "item": "minecraft:brown_wool"
+
+        },
+        "@": {
+            "item": "trinketsandbaubles:glowing_gem"
+        }, 
+        "*": {
+            "item": "minecraft:gray_wool"
+
+        }
+    },
+    "result": {
+        "item": "trinketsandbaubles:teddy_bear"
+    }
+}

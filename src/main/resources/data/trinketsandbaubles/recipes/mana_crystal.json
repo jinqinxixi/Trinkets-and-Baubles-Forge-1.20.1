@@ -1,0 +1,19 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "###",
+        "#C#",
+        "###"
+    ],
+    "key": {
+        "#": {
+            "item": "trinketsandbaubles:mana_candy"
+        },
+        "C": {
+            "item": "trinketsandbaubles:glowing_gem"
+        }
+    },
+    "result": {
+        "item": "trinketsandbaubles:mana_crystal"
+    }
+}

@@ -1,0 +1,22 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "#I ",
+        "ICI",
+        " I "
+    ],
+    "key": {
+        "#": {
+            "item": "trinketsandbaubles:mana_crystal"
+        },
+        "I": {
+            "item": "trinketsandbaubles:glowing_ingot"
+        },
+        "C": {
+            "item": "trinketsandbaubles:dragon_gem"
+        }
+    },
+    "result": {
+        "item": "trinketsandbaubles:dragons_ring"
+    }
+}

@@ -1,0 +1,25 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "XS#",
+        "SDS",
+        "#S#"
+    ],
+    "key": {
+        "D": {
+            "item": "minecraft:dragon_head"
+        },
+        "S": {
+            "item": "minecraft:diamond_sword"
+        },
+        "#": {
+            "item": "trinketsandbaubles:glowing_gem"
+        },
+        "X": {
+            "item": "trinketsandbaubles:glow_ring"
+        }
+    },
+    "result": {
+        "item": "trinketsandbaubles:dragons_eye"
+    }
+}

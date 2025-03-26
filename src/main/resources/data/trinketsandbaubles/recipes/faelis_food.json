@@ -1,0 +1,28 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "CFC",
+        "DGD",
+        "C#C"
+    ],
+    "key": {
+        "#": {
+            "item": "minecraft:pufferfish"
+        },
+        "F": {
+            "item": "minecraft:blue_orchid"
+        },
+        "D": {
+            "item": "minecraft:dragon_breath"
+        },
+        "C": {
+            "item": "trinketsandbaubles:mana_candy"
+        },
+        "G": {
+            "item": "trinketsandbaubles:mana_crystal"
+        }
+    },
+    "result": {
+        "item": "trinketsandbaubles:faelis_food"
+    }
+}

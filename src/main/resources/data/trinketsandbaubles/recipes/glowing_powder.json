@@ -1,0 +1,15 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "#"
+    ],
+    "key": {
+        "#": {
+            "item": "trinketsandbaubles:glowing_ingot"
+        }
+    },
+    "result": {
+        "item": "trinketsandbaubles:glowing_powder",
+        "count": 4
+    }
+}

@@ -1,0 +1,22 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "#S#",
+        "SDS",
+        "#S#"
+    ],
+    "key": {
+        "D": {
+            "item": "minecraft:dragon_egg"
+        },
+        "S": {
+            "item": "minecraft:jungle_log"
+        },
+        "#": {
+            "item": "trinketsandbaubles:glowing_gem"
+        }
+    },
+    "result": {
+        "item": "trinketsandbaubles:damage_shield"
+    }
+}

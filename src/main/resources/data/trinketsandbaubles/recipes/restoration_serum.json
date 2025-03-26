@@ -1,0 +1,22 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern": [
+		"!",
+		"@",
+		"$"
+	],
+	"key": {
+		"@": {
+			"item": "trinketsandbaubles:mana_reagent"
+		},
+		"!": {
+			"item": "minecraft:nether_star"
+		},
+		"$": {
+			"item": "minecraft:potion"
+		}
+	},
+	"result": {
+		"item": "trinketsandbaubles:restoration_serum"
+	}
+}

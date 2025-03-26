@@ -1,0 +1,22 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "#S#",
+        "SDS",
+        "#S#"
+    ],
+    "key": {
+        "#": {
+            "item": "minecraft:tropical_fish"
+        },
+        "D": {
+            "item": "minecraft:prismarine_crystals"
+        },
+        "S": {
+            "item": "trinketsandbaubles:glowing_ingot"
+        }
+    },
+    "result": {
+        "item": "trinketsandbaubles:sea_stone"
+    }
+}

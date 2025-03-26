@@ -1,0 +1,28 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "#!#",
+        "*@*",
+        "#$#"
+    ],
+    "key": {
+        "#": {
+            "item": "trinketsandbaubles:glowing_gem"
+        },
+        "@": {
+            "item": "trinketsandbaubles:mana_crystal"
+        }, 
+        "*": {
+            "item": "minecraft:dragon_breath"
+        },
+        "!": {
+            "item": "minecraft:potato"
+        },
+        "$": {
+            "item": "minecraft:beef"
+        }
+    },
+    "result": {
+        "item": "trinketsandbaubles:titan_spirit"
+    }
+}

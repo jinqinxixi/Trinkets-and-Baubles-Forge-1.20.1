@@ -1,0 +1,22 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "#S#",
+        "SDS",
+        "#S#"
+    ],
+    "key": {
+        "#": {
+            "item": "minecraft:iron_block"
+        },
+        "D": {
+            "item": "minecraft:redstone_block"
+        },
+        "S": {
+            "item": "trinketsandbaubles:glowing_ingot"
+        }
+    },
+    "result": {
+        "item": "trinketsandbaubles:polarized_stone"
+    }
+}

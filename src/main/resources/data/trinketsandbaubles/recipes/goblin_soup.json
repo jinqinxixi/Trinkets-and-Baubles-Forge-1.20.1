@@ -1,0 +1,37 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "FCB",
+        "DGD",
+        "#MS"
+    ],
+    "key": {
+        "#": {
+            "item": "minecraft:tropical_fish"
+        },
+        "F": {
+            "item": "minecraft:fermented_spider_eye"
+        },
+        "B": {
+            "item": "minecraft:bone"
+        },
+        "S": {
+            "item": "minecraft:chainmail_boots"
+        },
+        "M": {
+            "item": "minecraft:mushroom_stew"
+        },
+        "D": {
+            "item": "minecraft:dragon_breath"
+        },
+        "C": {
+            "item": "trinketsandbaubles:mana_candy"
+        },
+        "G": {
+            "item": "trinketsandbaubles:mana_crystal"
+        }
+    },
+    "result": {
+        "item": "trinketsandbaubles:goblin_soup"
+    }
+}

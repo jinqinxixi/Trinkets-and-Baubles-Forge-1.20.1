@@ -1,0 +1,22 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "#S#",
+        "SDS",
+        "#S#"
+    ],
+    "key": {
+        "S": {
+            "item": "trinketsandbaubles:glowing_powder"
+        },
+        "D": {
+            "item": "minecraft:diamond_block"
+        },
+        "#": {
+            "item": "trinketsandbaubles:glowing_ingot"
+        }
+    },
+    "result": {
+        "item": "trinketsandbaubles:glowing_gem"
+    }
+}

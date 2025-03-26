@@ -1,0 +1,19 @@
+{
+    "variants": {
+        "facing=north": {
+            "model": "trinketsandbaubles:block/moon_rose"
+        },
+        "facing=south": {
+            "model": "trinketsandbaubles:block/moon_rose",
+            "y": 180
+        },
+        "facing=west": {
+            "model": "trinketsandbaubles:block/moon_rose",
+            "y": 270
+        },
+        "facing=east": {
+            "model": "trinketsandbaubles:block/moon_rose",
+            "y": 90
+        }
+    }
+}

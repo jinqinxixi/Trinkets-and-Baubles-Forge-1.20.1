@@ -1,0 +1,22 @@
+{
+    "parent": "item/generated",
+    "textures": {
+        "layer0": "trinketsandbaubles:item/polarized_stone_off"
+    },
+    "overrides": [
+
+        {
+            "predicate": {
+                "trinketsandbaubles:deflection_mode": 1
+            },
+            "model": "trinketsandbaubles:item/polarized_stone_on"
+        },
+        {
+            "predicate": {
+                "trinketsandbaubles:attraction_mode": 1,
+                "trinketsandbaubles:deflection_mode": 0
+            },
+            "model": "trinketsandbaubles:item/polarized_stone_magnet"
+        }
+    ]
+}

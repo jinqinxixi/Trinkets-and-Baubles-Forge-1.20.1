@@ -1,0 +1,28 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "#!#",
+        "*@*",
+        "#$#"
+    ],
+    "key": {
+        "#": {
+            "item": "trinketsandbaubles:glowing_powder"
+        },
+        "@": {
+            "item": "trinketsandbaubles:mana_crystal"
+        }, 
+        "*": {
+            "item": "minecraft:dragon_breath"
+        },
+        "!": {
+            "item": "minecraft:ghast_tear"
+        },
+        "$": {
+            "item": "minecraft:water_bucket"
+        }
+    },
+    "result": {
+        "item": "trinketsandbaubles:fairy_dew"
+    }
+}
