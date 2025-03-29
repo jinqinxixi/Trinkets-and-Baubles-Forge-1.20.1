@@ -83,6 +83,25 @@ public class TrinketsandBaublesMod
                     DragonsEyeRenderer::onRenderWorld
             );
         }
+
+        //First aid mod Compatibility
+        if (FMLLoader.getLoadingModList().getModFileById("firstaid") != null) { //we basically check if the mod is loaded
+            MinecraftForge.EVENT_BUS.register(new Object() { // in case the mod is loaded we anonymously register the event
+                @SubscribeEvent
+                public void onDamage(FirstAidLivingDamageEvent event) {
+                    Player player = event.getEntity();
+                    if (CuriosApi.getCuriosHelper().findEquippedCurio(ModItem.DAMAGE_SHIELD.get(), player).isPresent()) {
+                        AbstractPlayerDamageModel after = event.getAfterDamage();
+                        if (after.HEAD.currentHealth < 1 || (after.BODY.currentHealth < 1)) {  // we check of the attack was lethal
+                            if (player.getRandom().nextInt(10) == 0) { //10% chance you can make this configurable
+                                event.setCanceled(true);
+                            }
+                        }
+                    }
+                }
+            });
+        }
+}
     }
 
     @SubscribeEvent
