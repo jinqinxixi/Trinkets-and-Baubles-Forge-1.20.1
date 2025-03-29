@@ -88,7 +88,7 @@ public class TrinketsandBaublesMod
         if (FMLLoader.getLoadingModList().getModFileById("firstaid") != null) { //we basically check if the mod is loaded
             MinecraftForge.EVENT_BUS.register(new Object() { // in case the mod is loaded we anonymously register the event
                 @SubscribeEvent
-                public void registerThirstItems(FirstAidLivingDamageEvent event) {
+                public void onDamage(FirstAidLivingDamageEvent event) {
                     Player player = event.getEntity();
                     if (CuriosApi.getCuriosHelper().findEquippedCurio(ModItem.DAMAGE_SHIELD.get(), player).isPresent()) {
                         AbstractPlayerDamageModel after = event.getAfterDamage();
