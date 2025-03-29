@@ -1,6 +1,6 @@
 package com.jinqinxixi.trinketsandbaubles.events;
 
-import com.jinqinxixi.trinketsandbaubles.config.Config;
+import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import com.jinqinxixi.trinketsandbaubles.capability.mana.ManaData;
 import com.jinqinxixi.trinketsandbaubles.modEffects.ModEffects;
 import com.jinqinxixi.trinketsandbaubles.network.handler.NetworkHandler;
@@ -92,9 +92,9 @@ public class DragonEffectServerEvents {
                         ).forEach(target -> {
                             if (target instanceof LivingEntity living) {
                                 double distance = target.position().subtract(playerPos).length();
-                                float damage = Config.DRAGON_BREATH_BASE_DAMAGE.get().floatValue() *
-                                        (float)(1.0 - (distance / range) * Config.DRAGON_BREATH_DECAY_RATE.get());
-                                damage = Math.max(Config.DRAGON_BREATH_MIN_DAMAGE.get().floatValue(), damage);
+                                float damage = ModConfig.DRAGON_BREATH_BASE_DAMAGE.get().floatValue() *
+                                        (float)(1.0 - (distance / range) * ModConfig.DRAGON_BREATH_DECAY_RATE.get());
+                                damage = Math.max(ModConfig.DRAGON_BREATH_MIN_DAMAGE.get().floatValue(), damage);
 
                                 target.setRemainingFireTicks(100);
                                 target.hurt(player.damageSources().playerAttack(player), damage);

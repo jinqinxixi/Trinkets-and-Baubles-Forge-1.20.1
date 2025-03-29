@@ -1,7 +1,7 @@
 package com.jinqinxixi.trinketsandbaubles;
 
 import com.jinqinxixi.trinketsandbaubles.block.ModBlocks;
-import com.jinqinxixi.trinketsandbaubles.config.Config;
+import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import com.jinqinxixi.trinketsandbaubles.items.baubles.PolarizedStoneItem;
 import com.jinqinxixi.trinketsandbaubles.items.baubles.ShieldofHonorItem;
 import com.jinqinxixi.trinketsandbaubles.client.renderer.DragonsEyeRenderer;
@@ -14,33 +14,35 @@ import com.jinqinxixi.trinketsandbaubles.capability.mana.ManaHudOverlay;
 import com.jinqinxixi.trinketsandbaubles.modifier.CurioAttributeEvents;
 import com.jinqinxixi.trinketsandbaubles.network.handler.NetworkHandler;
 import com.jinqinxixi.trinketsandbaubles.recast.AnvilRecastRegistry;
-import com.jinqinxixi.trinketsandbaubles.capability.shrink.ModCapabilities;
-import com.jinqinxixi.trinketsandbaubles.capability.shrink.PacketHandler;
-import com.jinqinxixi.trinketsandbaubles.capability.shrink.RenderEvents;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.logging.LogUtils;
+import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
+import ichttt.mods.firstaid.api.event.FirstAidLivingDamageEvent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RenderGuiEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.minecraftforge.fml.loading.FMLLoader;
 import org.slf4j.Logger;
+import top.theillusivec4.curios.api.CuriosApi;
 
 import static com.jinqinxixi.trinketsandbaubles.modEffects.ModEffects.EFFECTS;
 
@@ -68,14 +70,13 @@ public class TrinketsandBaublesMod
         // 配置注册
         ModLoadingContext.get().registerConfig(
                 net.minecraftforge.fml.config.ModConfig.Type.COMMON,
-                Config.SPEC,
+                ModConfig.SPEC,
                 "trinketsandbaubles-common.toml"
         );
 
         // 客户端专属内容集中处理
         if (FMLEnvironment.dist == Dist.CLIENT) {
             modEventBus.addListener(this::clientSetup);
-            MinecraftForge.EVENT_BUS.register(new RenderEvents());
             MinecraftForge.EVENT_BUS.addListener(
                     EventPriority.NORMAL,
                     false,
@@ -83,7 +84,6 @@ public class TrinketsandBaublesMod
                     DragonsEyeRenderer::onRenderWorld
             );
         }
-
         //First aid mod Compatibility
         if (FMLLoader.getLoadingModList().getModFileById("firstaid") != null) { //we basically check if the mod is loaded
             MinecraftForge.EVENT_BUS.register(new Object() { // in case the mod is loaded we anonymously register the event
@@ -101,13 +101,15 @@ public class TrinketsandBaublesMod
                 }
             });
         }
-}
     }
 
-    @SubscribeEvent
-    public static void registerCapabilities(RegisterCapabilitiesEvent event) {
-        ModCapabilities.register(event);
-    }
+
+
+
+
+
+
+
 
 
     @Mod.EventBusSubscriber(modid = MOD_ID)
@@ -188,10 +190,8 @@ public class TrinketsandBaublesMod
     private void commonSetup(final FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
             // 初始化战利品配置
-            Config.loadLootConfig();
+            ModConfig.loadLootConfig();
             AnvilRecastRegistry.registerAllRecipes();
-            // 初始化网络处理
-            PacketHandler.init();
 
             CurioAttributeEvents.init();
         });

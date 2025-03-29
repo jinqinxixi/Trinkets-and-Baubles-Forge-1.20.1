@@ -1,6 +1,6 @@
 package com.jinqinxixi.trinketsandbaubles.items.baubles;
 
-import com.jinqinxixi.trinketsandbaubles.config.Config;
+import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import com.jinqinxixi.trinketsandbaubles.modifier.ModifiableBaubleItem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -67,21 +67,21 @@ public class StoneofGreaterInertiaItem extends ModifiableBaubleItem {
         applyAttribute(player, Attributes.KNOCKBACK_RESISTANCE,
                 KNOCKBACK_RESIST_UUID,
                 "trinketsandbaubles.knockback_resist",
-                Config.GREATER_INERTIA_KNOCKBACK_RESISTANCE.get(),
+                ModConfig.GREATER_INERTIA_KNOCKBACK_RESISTANCE.get(),
                 AttributeModifier.Operation.ADDITION);
 
         // 移动速度
         applyAttribute(player, Attributes.MOVEMENT_SPEED,
                 MOVEMENT_SPEED_UUID,
                 "trinketsandbaubles.movement_speed",
-                Config.GREATER_INERTIA_MOVEMENT_SPEED.get(),
+                ModConfig.GREATER_INERTIA_MOVEMENT_SPEED.get(),
                 AttributeModifier.Operation.MULTIPLY_BASE);
 
         // 步高
         applyAttribute(player, ForgeMod.STEP_HEIGHT_ADDITION.get(),
                 STEP_HEIGHT_UUID,
                 "trinketsandbaubles.step_height",
-                Config.GREATER_INERTIA_STEP_HEIGHT.get(),
+                ModConfig.GREATER_INERTIA_STEP_HEIGHT.get(),
                 AttributeModifier.Operation.ADDITION);
     }
 
@@ -153,7 +153,7 @@ public class StoneofGreaterInertiaItem extends ModifiableBaubleItem {
 
             if (hasItem) {
                 player.setDeltaMovement(player.getDeltaMovement().add(0,
-                        Config.GREATER_INERTIA_JUMP_BOOST.get(), 0));
+                        ModConfig.GREATER_INERTIA_JUMP_BOOST.get(), 0));
             }
         }
     }
@@ -169,7 +169,7 @@ public class StoneofGreaterInertiaItem extends ModifiableBaubleItem {
 
             if (hasItem) {
                 event.setDamageMultiplier(event.getDamageMultiplier() *
-                        Config.GREATER_INERTIA_FALL_REDUCTION.get().floatValue());
+                        ModConfig.GREATER_INERTIA_FALL_REDUCTION.get().floatValue());
             }
         }
     }
@@ -179,16 +179,16 @@ public class StoneofGreaterInertiaItem extends ModifiableBaubleItem {
         tooltip.add(Component.translatable("item.trinketsandbaubles.greater_inertia_stone.tooltip")
                 .withStyle(ChatFormatting.GOLD));
         tooltip.add(Component.translatable("item.trinketsandbaubles.greater_inertia_stone.tooltip.knockback",
-                        String.format("%.1f", Config.GREATER_INERTIA_KNOCKBACK_RESISTANCE.get() * 100))
+                        String.format("%.1f", ModConfig.GREATER_INERTIA_KNOCKBACK_RESISTANCE.get() * 100))
                 .withStyle(ChatFormatting.BLUE));
         tooltip.add(Component.translatable("item.trinketsandbaubles.greater_inertia_stone.tooltip.speed",
-                        String.format("%.0f", Config.GREATER_INERTIA_MOVEMENT_SPEED.get() * 100))
+                        String.format("%.0f", ModConfig.GREATER_INERTIA_MOVEMENT_SPEED.get() * 100))
                 .withStyle(ChatFormatting.AQUA));
         tooltip.add(Component.translatable("item.trinketsandbaubles.greater_inertia_stone.tooltip.jump",
-                        String.format("%.0f", Config.GREATER_INERTIA_JUMP_BOOST.get() * 250))
+                        String.format("%.0f", ModConfig.GREATER_INERTIA_JUMP_BOOST.get() * 250))
                 .withStyle(ChatFormatting.DARK_AQUA));
         tooltip.add(Component.translatable("item.trinketsandbaubles.greater_inertia_stone.tooltip.fall",
-                        String.format("%.0f", (1 - Config.GREATER_INERTIA_FALL_REDUCTION.get()) * 100))
+                        String.format("%.0f", (1 - ModConfig.GREATER_INERTIA_FALL_REDUCTION.get()) * 100))
                 .withStyle(ChatFormatting.DARK_BLUE));
         tooltip.add(Component.translatable("item.trinketsandbaubles.greater_inertia_stone.tooltip4")
                 .withStyle(ChatFormatting.DARK_GREEN));

@@ -2,7 +2,7 @@ package com.jinqinxixi.trinketsandbaubles.recast;
 
 
 
-import com.jinqinxixi.trinketsandbaubles.config.Config;
+import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.AnvilUpdateEvent;
@@ -19,11 +19,11 @@ public class AnvilRecastHandler {
 
     // 通过方法获取当前配置值
     private static int getExpCost() {
-        return Config.getAnvilRecastExpCost();
+        return ModConfig.getAnvilRecastExpCost();
     }
 
     private static int getMaterialCost() {
-        return Config.getAnvilRecastMaterialCost();
+        return ModConfig.getAnvilRecastMaterialCost();
     }
 
     public static void registerRecipe(Item baseItem, Item tokenItem, Item resultItem) {

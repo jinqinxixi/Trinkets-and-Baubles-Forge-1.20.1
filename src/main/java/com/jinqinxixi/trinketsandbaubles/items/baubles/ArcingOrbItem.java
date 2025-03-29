@@ -1,6 +1,6 @@
 package com.jinqinxixi.trinketsandbaubles.items.baubles;
 
-import com.jinqinxixi.trinketsandbaubles.config.Config;
+import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import com.jinqinxixi.trinketsandbaubles.capability.mana.ManaData;
 import com.jinqinxixi.trinketsandbaubles.modifier.ModifiableBaubleItem;
 import net.minecraft.ChatFormatting;
@@ -77,16 +77,16 @@ public class ArcingOrbItem extends ModifiableBaubleItem  {
             attribute.addPermanentModifier(new AttributeModifier(
                     SPEED_MODIFIER_UUID,
                     "trinketsandbaubles.arcing_orb_speed",
-                    Config.SPEED_BOOST.get(),
+                    ModConfig.SPEED_BOOST.get(),
                     AttributeModifier.Operation.MULTIPLY_TOTAL
             ));
-        } else if (existing.getAmount() != Config.SPEED_BOOST.get()) {
+        } else if (existing.getAmount() != ModConfig.SPEED_BOOST.get()) {
             // 配置更新时处理
             attribute.removeModifier(SPEED_MODIFIER_UUID);
             attribute.addPermanentModifier(new AttributeModifier(
                     SPEED_MODIFIER_UUID,
                     "trinketsandbaubles.arcing_orb_speed",
-                    Config.SPEED_BOOST.get(),
+                    ModConfig.SPEED_BOOST.get(),
                     AttributeModifier.Operation.MULTIPLY_TOTAL
             ));
         }
@@ -131,10 +131,10 @@ public class ArcingOrbItem extends ModifiableBaubleItem  {
             return;
         }
 
-        if (ManaData.hasMana(player, Config.DASH_MANA_COST.get().floatValue())) {
+        if (ManaData.hasMana(player, ModConfig.DASH_MANA_COST.get().floatValue())) {
             performDash(player);
-            ManaData.consumeMana(player, Config.DASH_MANA_COST.get().floatValue());
-            stack.getOrCreateTag().putFloat(DASH_COOLDOWN_TAG, Config.DASH_COOLDOWN.get().floatValue());
+            ManaData.consumeMana(player, ModConfig.DASH_MANA_COST.get().floatValue());
+            stack.getOrCreateTag().putFloat(DASH_COOLDOWN_TAG, ModConfig.DASH_COOLDOWN.get().floatValue());
             playDashEffects(player);
         }
     }
@@ -172,29 +172,29 @@ public class ArcingOrbItem extends ModifiableBaubleItem  {
         // 获取玩家当前的垂直速度
         double currentVerticalSpeed = player.getDeltaMovement().y;
         if (currentVerticalSpeed < 0) {
-            upwardBoost += Math.min(Math.abs(currentVerticalSpeed) * Config.DASH_JUMP_BOOST.get(), 0.1);
+            upwardBoost += Math.min(Math.abs(currentVerticalSpeed) * ModConfig.DASH_JUMP_BOOST.get(), 0.1);
         }
 
         // 设置新的移动向量
         player.setDeltaMovement(
-                x * dashVelocity * Config.DASH_DISTANCE.get(),
+                x * dashVelocity * ModConfig.DASH_DISTANCE.get(),
                 currentVerticalSpeed + upwardBoost,
-                z * dashVelocity * Config.DASH_DISTANCE.get()
+                z * dashVelocity * ModConfig.DASH_DISTANCE.get()
         );
 
         // 调整推力
         player.push(
-                x * Config.DASH_DISTANCE.get() * pushFactor,
+                x * ModConfig.DASH_DISTANCE.get() * pushFactor,
                 0,
-                z * Config.DASH_DISTANCE.get() * pushFactor
+                z * ModConfig.DASH_DISTANCE.get() * pushFactor
         );
 
         // 检测路径上的实体并应用效果
         if (!player.level().isClientSide) {
             Vec3 endPos = startPos.add(
-                    x * Config.DASH_DISTANCE.get(),
+                    x * ModConfig.DASH_DISTANCE.get(),
                     0,
-                    z * Config.DASH_DISTANCE.get()
+                    z * ModConfig.DASH_DISTANCE.get()
             );
 
             AABB dashBox = new AABB(
@@ -292,7 +292,7 @@ public class ArcingOrbItem extends ModifiableBaubleItem  {
     public void stopCharging(ItemStack stack, Player player) {
         if (stack.getOrCreateTag().getBoolean(ARCING_ORB_CHARGING_TAG)) {
             float chargeAmount = stack.getOrCreateTag().getFloat(CHARGE_AMOUNT_TAG);
-            if (chargeAmount >= Config.MIN_CHARGE.get().floatValue()) {
+            if (chargeAmount >= ModConfig.MIN_CHARGE.get().floatValue()) {
                 releaseEnergyBeam(player, chargeAmount);
             }
             stack.getOrCreateTag().putBoolean(ARCING_ORB_CHARGING_TAG, false);
@@ -304,12 +304,12 @@ public class ArcingOrbItem extends ModifiableBaubleItem  {
         if (stack.getOrCreateTag().getBoolean(ARCING_ORB_CHARGING_TAG)) {
             float currentCharge = stack.getOrCreateTag().getFloat(CHARGE_AMOUNT_TAG);
 
-            if (currentCharge < Config.MAX_CHARGE.get() &&
-                    ManaData.hasMana(player, Config.CHARGE_RATE.get().floatValue())) {
-                ManaData.consumeMana(player, Config.CHARGE_RATE.get().floatValue());
+            if (currentCharge < ModConfig.MAX_CHARGE.get() &&
+                    ManaData.hasMana(player, ModConfig.CHARGE_RATE.get().floatValue())) {
+                ManaData.consumeMana(player, ModConfig.CHARGE_RATE.get().floatValue());
                 float chargeToAdd = Math.min(
-                        Config.CHARGE_RATE.get().floatValue(),
-                        Config.MAX_CHARGE.get().floatValue() - currentCharge
+                        ModConfig.CHARGE_RATE.get().floatValue(),
+                        ModConfig.MAX_CHARGE.get().floatValue() - currentCharge
                 );
                 stack.getOrCreateTag().putFloat(CHARGE_AMOUNT_TAG, currentCharge + chargeToAdd);
             }
@@ -329,7 +329,7 @@ public class ArcingOrbItem extends ModifiableBaubleItem  {
         float playerScale = player.getScale(); // 获取玩家当前的缩放比例
 
         // 根据玩家大小调整魔法阵大小和位置
-        double radius = (1.2 + (chargeAmount / Config.MAX_CHARGE.get().floatValue()) * 0.5) * playerScale;
+        double radius = (1.2 + (chargeAmount / ModConfig.MAX_CHARGE.get().floatValue()) * 0.5) * playerScale;
         float time = level.getGameTime() / 20.0f;
 
         // 根据玩家视线方向创建魔法阵平面
@@ -464,7 +464,7 @@ public class ArcingOrbItem extends ModifiableBaubleItem  {
     private void createEnergyPulse(ServerLevel level, Vec3 center, double radius, float time, Vec3 right, Vec3 top, float chargeAmount) {
         double pulseRadius = radius * (0.5 + Math.sin(time * 4) * 0.2);
         int pulsePoints = 12;
-        float intensity = chargeAmount / Config.MAX_CHARGE.get().floatValue();
+        float intensity = chargeAmount / ModConfig.MAX_CHARGE.get().floatValue();
 
         for (int i = 0; i < pulsePoints; i++) {
             double angle = (i * 2 * Math.PI / pulsePoints) + time * 2;
@@ -558,7 +558,7 @@ public class ArcingOrbItem extends ModifiableBaubleItem  {
         ).inflate(0.5);
 
         // 伤害处理
-        float damage = chargeAmount * Config.DAMAGE_MULTIPLIER.get().floatValue() * 2.0f;
+        float damage = chargeAmount * ModConfig.DAMAGE_MULTIPLIER.get().floatValue() * 2.0f;
         List<Entity> entities = level.getEntities(player, damageBox, entity -> entity != player);
         for (Entity entity : entities) {
             Vec3 entityPos = entity.position().add(0, entity.getBbHeight() * 0.5, 0);
@@ -584,7 +584,7 @@ public class ArcingOrbItem extends ModifiableBaubleItem  {
         double distance = start.distanceTo(end);
         int particles = (int) (distance * 20); // 增加粒子密度
         Vec3 step = end.subtract(start).scale(1.0 / particles);
-        float intensity = chargeAmount / Config.MAX_CHARGE.get().floatValue();
+        float intensity = chargeAmount / ModConfig.MAX_CHARGE.get().floatValue();
         double time = level.getGameTime() * 0.5;
 
         // 1. 创建内核光束系统
@@ -1171,17 +1171,17 @@ public class ArcingOrbItem extends ModifiableBaubleItem  {
                                 List<Component> tooltip, TooltipFlag flag) {
         // 速度加成信息
         tooltip.add(Component.translatable("item.trinketsandbaubles.arcing_orb.speed_boost",
-                        String.format("%.0f", Config.SPEED_BOOST.get() * 100))
+                        String.format("%.0f", ModConfig.SPEED_BOOST.get() * 100))
                 .withStyle(ChatFormatting.BLUE));
 
         // 伤害系数信息
         tooltip.add(Component.translatable("item.trinketsandbaubles.arcing_orb.damage_multiplier",
-                        String.format("%.3f", Config.DAMAGE_MULTIPLIER.get()))
+                        String.format("%.3f", ModConfig.DAMAGE_MULTIPLIER.get()))
                 .withStyle(ChatFormatting.GOLD));
 
         // 闪避消耗魔力信息
         tooltip.add(Component.translatable("item.trinketsandbaubles.arcing_orb.dash_cost",
-                        String.format("%.0f", Config.DASH_MANA_COST.get()))
+                        String.format("%.0f", ModConfig.DASH_MANA_COST.get()))
                 .withStyle(ChatFormatting.AQUA));
 
         // 充能状态信息

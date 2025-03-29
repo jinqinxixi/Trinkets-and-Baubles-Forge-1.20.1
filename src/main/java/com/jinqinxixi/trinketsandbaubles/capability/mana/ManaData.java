@@ -1,6 +1,6 @@
 package com.jinqinxixi.trinketsandbaubles.capability.mana;
 
-import com.jinqinxixi.trinketsandbaubles.config.Config;
+import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import com.jinqinxixi.trinketsandbaubles.network.handler.ManaNetworkHandler;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
@@ -38,7 +38,7 @@ public class ManaData {
         CompoundTag data = player.getPersistentData();
         return data.contains(MAX_MANA_KEY) ?
                 data.getInt(MAX_MANA_KEY) :
-                Config.DEFAULT_MAX_MANA.get();
+                ModConfig.DEFAULT_MAX_MANA.get();
     }
 
     public static void setMaxMana(Player player, int maxMana) {
@@ -100,7 +100,7 @@ public class ManaData {
 
         // 初始化所有数据
         if (!data.contains(MAX_MANA_KEY)) {
-            data.putInt(MAX_MANA_KEY, Config.DEFAULT_MAX_MANA.get());
+            data.putInt(MAX_MANA_KEY, ModConfig.DEFAULT_MAX_MANA.get());
         }
         if (!data.contains(MANA_KEY)) {
             data.putInt(MANA_KEY, getMaxMana(player));
@@ -153,19 +153,19 @@ public class ManaData {
                     int currentMana = getMana(player);
                     int maxMana = getMaxMana(player);
                     if (currentMana < maxMana) {
-                        int newMana = Math.min(currentMana + Config.CREATIVE_REGEN_RATE.get(), maxMana);
+                        int newMana = Math.min(currentMana + ModConfig.CREATIVE_REGEN_RATE.get(), maxMana);
                         setMana(player, newMana);
                     }
                 } else {
                     // 生存模式正常恢复
-                    if (currentTime - lastRegenTime >= Config.MANA_REGEN_INTERVAL.get() &&
-                            currentTime - lastManaChangeTime >= Config.MANA_REGEN_COOLDOWN.get()) {
+                    if (currentTime - lastRegenTime >= ModConfig.MANA_REGEN_INTERVAL.get() &&
+                            currentTime - lastManaChangeTime >= ModConfig.MANA_REGEN_COOLDOWN.get()) {
 
                         int currentMana = getMana(player);
                         int maxMana = getMaxMana(player);
 
                         if (currentMana < maxMana) {
-                            int newMana = Math.min(currentMana + Config.MANA_REGEN_RATE.get(), maxMana);
+                            int newMana = Math.min(currentMana + ModConfig.MANA_REGEN_RATE.get(), maxMana);
                             setMana(player, newMana);
                         }
 

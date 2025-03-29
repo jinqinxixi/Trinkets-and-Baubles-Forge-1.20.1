@@ -1,6 +1,6 @@
 package com.jinqinxixi.trinketsandbaubles.items.baubles;
 
-import com.jinqinxixi.trinketsandbaubles.config.Config;
+import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import com.jinqinxixi.trinketsandbaubles.modEffects.ModEffects;
 import com.jinqinxixi.trinketsandbaubles.modifier.ModifiableBaubleItem;
 import com.jinqinxixi.trinketsandbaubles.util.RaceEffectUtil;
@@ -127,21 +127,21 @@ public class FairiesRingItem extends ModifiableBaubleItem {
                                 List<Component> tooltip, TooltipFlag flag) {
         if (net.minecraft.client.gui.screens.Screen.hasShiftDown()) {
             // 详细信息
-            tooltip.add(Component.translatable("item.trinketsandbaubles.fairies_ring.tooltip1", Config.FAIRY_DEW_MAX_HEALTH.get() * 100)
+            tooltip.add(Component.translatable("item.trinketsandbaubles.fairies_ring.tooltip1", ModConfig.FAIRY_DEW_MAX_HEALTH.get() * 100)
                     .withStyle(ChatFormatting.RED));
-            tooltip.add(Component.translatable("item.trinketsandbaubles.fairies_ring.tooltip2", Config.FAIRY_DEW_MOVEMENT_SPEED.get() * 100)
+            tooltip.add(Component.translatable("item.trinketsandbaubles.fairies_ring.tooltip2", ModConfig.FAIRY_DEW_MOVEMENT_SPEED.get() * 100)
                     .withStyle(ChatFormatting.RED));
-            tooltip.add(Component.translatable("item.trinketsandbaubles.fairies_ring.tooltip3", Config.FAIRY_DEW_ATTACK_DAMAGE.get() * 100)
+            tooltip.add(Component.translatable("item.trinketsandbaubles.fairies_ring.tooltip3", ModConfig.FAIRY_DEW_ATTACK_DAMAGE.get() * 100)
                     .withStyle(ChatFormatting.RED));
-            tooltip.add(Component.translatable("item.trinketsandbaubles.fairies_ring.tooltip4", Config.FAIRY_DEW_ARMOR.get() * 100)
+            tooltip.add(Component.translatable("item.trinketsandbaubles.fairies_ring.tooltip4", ModConfig.FAIRY_DEW_ARMOR.get() * 100)
                     .withStyle(ChatFormatting.RED));
-            tooltip.add(Component.translatable("item.trinketsandbaubles.fairies_ring.tooltip5", Config.FAIRY_DEW_ARMOR_TOUGHNESS.get() * 100)
+            tooltip.add(Component.translatable("item.trinketsandbaubles.fairies_ring.tooltip5", ModConfig.FAIRY_DEW_ARMOR_TOUGHNESS.get() * 100)
                     .withStyle(ChatFormatting.RED));
-            tooltip.add(Component.translatable("item.trinketsandbaubles.fairies_ring.tooltip6", Config.FAIRY_DEW_REACH.get() * 100)
+            tooltip.add(Component.translatable("item.trinketsandbaubles.fairies_ring.tooltip6", ModConfig.FAIRY_DEW_REACH.get() * 100)
                     .withStyle(ChatFormatting.RED));
-            tooltip.add(Component.translatable("item.trinketsandbaubles.fairies_ring.tooltip7", Config.FAIRY_DEW_SWIM_SPEED.get() * 100)
+            tooltip.add(Component.translatable("item.trinketsandbaubles.fairies_ring.tooltip7", ModConfig.FAIRY_DEW_SWIM_SPEED.get() * 100)
                     .withStyle(ChatFormatting.RED));
-            tooltip.add(Component.translatable("item.trinketsandbaubles.fairies_ring.tooltip8", Config.FAIRY_DEW_JUMP_BOOST.get() * 100)
+            tooltip.add(Component.translatable("item.trinketsandbaubles.fairies_ring.tooltip8", ModConfig.FAIRY_DEW_JUMP_BOOST.get() * 100)
                     .withStyle(ChatFormatting.RED));
             tooltip.add(Component.translatable("item.trinketsandbaubles.fairies_ring.tooltip9")
                     .withStyle(ChatFormatting.GREEN));

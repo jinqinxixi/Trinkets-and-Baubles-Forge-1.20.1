@@ -2,7 +2,7 @@ package com.jinqinxixi.trinketsandbaubles.items.baubles;
 
 import com.jinqinxixi.trinketsandbaubles.network.message.DragonsEyeMessage.DragonsEyeToggleMessage;
 import com.jinqinxixi.trinketsandbaubles.client.keybind.KeyBindings;
-import com.jinqinxixi.trinketsandbaubles.config.Config;
+import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 
 import com.jinqinxixi.trinketsandbaubles.modifier.ModifiableBaubleItem;
 import com.jinqinxixi.trinketsandbaubles.network.message.DragonsEyeMessage.UpdateEffectsMessage;
@@ -300,7 +300,7 @@ public class DragonsEyeItem extends ModifiableBaubleItem {
 
         if (!(groupIndex == -1 && !scanChests)) {
             Set<Block> targetBlocks = scanChests ? CHEST_BLOCKS : ORE_GROUPS.get(groupIndex);
-            int scanRange = Config.DRAGONS_EYE_SCAN_RANGE.get();
+            int scanRange = ModConfig.DRAGONS_EYE_SCAN_RANGE.get();
 
             if (targetBlocks != null && !targetBlocks.isEmpty()) {
                 BlockPos.betweenClosedStream(
@@ -371,7 +371,7 @@ public class DragonsEyeItem extends ModifiableBaubleItem {
         tooltip.add(Component.translatable("item.trinketsandbaubles.dragons_eye.tooltip1"));
         tooltip.add(Component.translatable("item.trinketsandbaubles.dragons_eye.tooltip2"));
         tooltip.add(Component.translatable("item.dragons_eye.tooltip3",
-                        Config.DRAGONS_EYE_SCAN_RANGE.get()) // 使用配置值
+                        ModConfig.DRAGONS_EYE_SCAN_RANGE.get()) // 使用配置值
                 .withStyle(ChatFormatting.GOLD));
         super.appendHoverText(stack, level, tooltip, flag);
     }

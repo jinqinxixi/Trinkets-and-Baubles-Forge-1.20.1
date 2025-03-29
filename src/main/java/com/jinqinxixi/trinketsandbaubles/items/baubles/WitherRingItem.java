@@ -1,6 +1,6 @@
 package com.jinqinxixi.trinketsandbaubles.items.baubles;
 
-import com.jinqinxixi.trinketsandbaubles.config.Config;
+import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import com.jinqinxixi.trinketsandbaubles.modifier.ModifiableBaubleItem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -49,7 +49,7 @@ public class WitherRingItem extends ModifiableBaubleItem {
         tooltip.add(Component.translatable("item.trinketsandbaubles.wither_ring.tooltip.immunity")
                 .withStyle(ChatFormatting.YELLOW));
         tooltip.add(Component.translatable("item.trinketsandbaubles.wither_ring.tooltip.effect",
-                        String.format("%.0f", Config.WITHER_RING_CHANCE.get() * 100))
+                        String.format("%.0f", ModConfig.WITHER_RING_CHANCE.get() * 100))
                 .withStyle(ChatFormatting.DARK_RED));
         super.appendHoverText(stack, level, tooltip, flag);
     }
@@ -70,11 +70,11 @@ public class WitherRingItem extends ModifiableBaubleItem {
     }
 
     public static void onAttack(LivingEntity attacker, LivingEntity target) {
-        if (isEquipped(attacker) && attacker.getRandom().nextFloat() < Config.WITHER_RING_CHANCE.get()) {
+        if (isEquipped(attacker) && attacker.getRandom().nextFloat() < ModConfig.WITHER_RING_CHANCE.get()) {
             target.addEffect(new MobEffectInstance(
                     MobEffects.WITHER,
-                    Config.WITHER_RING_DURATION.get(),
-                    Config.WITHER_RING_AMPLIFIER.get(),
+                    ModConfig.WITHER_RING_DURATION.get(),
+                    ModConfig.WITHER_RING_AMPLIFIER.get(),
                     false, // 是否显示粒子
                     true  // 是否显示图标
             ));

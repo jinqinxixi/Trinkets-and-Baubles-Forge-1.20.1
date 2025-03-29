@@ -1,10 +1,11 @@
 package com.jinqinxixi.trinketsandbaubles.modEffects;
 
-import com.jinqinxixi.trinketsandbaubles.config.Config;
+
+import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import com.jinqinxixi.trinketsandbaubles.items.ModItem;
 import com.jinqinxixi.trinketsandbaubles.capability.mana.ManaData;
-import com.jinqinxixi.trinketsandbaubles.capability.shrink.ModCapabilities;
-import com.jinqinxixi.trinketsandbaubles.TrinketsandBaublesMod;
+
+import com.jinqinxixi.trinketsandbaubles.util.RaceScaleHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.effect.MobEffect;
@@ -50,39 +51,45 @@ public class FaelesEffect extends MobEffect {
 
     @Override
     public void addAttributeModifiers(LivingEntity pLivingEntity, AttributeMap pAttributeMap, int pAmplifier) {
+
+        // 使用工具类设置体型缩放
+        if (pLivingEntity != null) {
+            RaceScaleHelper.setSmoothModelScale(pLivingEntity,
+                    ModConfig.FAELES_SCALE_FACTOR.get().floatValue(),20);
+        }
         // 基础属性修改
         this.addAttributeModifier(
                 Attributes.ATTACK_DAMAGE,
                 "d141ef28-51c6-4b47-8a0d-6946e841c132",
-                Config.FAELES_ATTACK_DAMAGE.get(),
+                ModConfig.FAELES_ATTACK_DAMAGE.get(),
                 AttributeModifier.Operation.MULTIPLY_TOTAL
         );
 
         this.addAttributeModifier(
                 Attributes.ATTACK_SPEED,
                 "4520f278-fb8f-4c75-9336-5c3ab7c6134a",
-                Config.FAELES_ATTACK_SPEED.get(),
+                ModConfig.FAELES_ATTACK_SPEED.get(),
                 AttributeModifier.Operation.MULTIPLY_TOTAL
         );
 
         this.addAttributeModifier(
                 Attributes.MAX_HEALTH,
                 "dc3b4b8c-a02c-4bd8-82e9-204088927d1f",
-                Config.FAELES_MAX_HEALTH.get(),
+                ModConfig.FAELES_MAX_HEALTH.get(),
                 AttributeModifier.Operation.MULTIPLY_TOTAL
         );
 
         this.addAttributeModifier(
                 Attributes.ARMOR_TOUGHNESS,
                 "8fc5e73c-2cf2-4729-8128-d99f49aa37f2",
-                Config.FAELES_ARMOR_TOUGHNESS.get(),
+                ModConfig.FAELES_ARMOR_TOUGHNESS.get(),
                 AttributeModifier.Operation.MULTIPLY_TOTAL
         );
 
         this.addAttributeModifier(
                 Attributes.MOVEMENT_SPEED,
                 "3b8f4065-5f43-4939-8e6a-a34f2d67c55d",
-                Config.FAELES_MOVEMENT_SPEED.get(),
+                ModConfig.FAELES_MOVEMENT_SPEED.get(),
                 AttributeModifier.Operation.MULTIPLY_TOTAL
         );
 
@@ -90,14 +97,14 @@ public class FaelesEffect extends MobEffect {
         this.addAttributeModifier(
                 Attributes.LUCK,
                 "95eb4f0a-dd60-4ada-98c1-2ce5c3d4374c",
-                Config.FAELES_LUCK.get(),
+                ModConfig.FAELES_LUCK.get(),
                 AttributeModifier.Operation.ADDITION
         );
 
         this.addAttributeModifier(
                 ForgeMod.SWIM_SPEED.get(),
                 "7a925a64-d1e0-4cb9-8926-dd7848482bb4",
-                Config.FAELES_SWIM_SPEED.get(),
+                ModConfig.FAELES_SWIM_SPEED.get(),
                 AttributeModifier.Operation.MULTIPLY_TOTAL
         );
 
@@ -105,7 +112,7 @@ public class FaelesEffect extends MobEffect {
         this.addAttributeModifier(
                 Attributes.ATTACK_DAMAGE,
                 "b2461c37-8d2e-4a4d-95ac-d2169c49182a",
-                Config.FAELES_UNARMED_DAMAGE.get(),
+                ModConfig.FAELES_UNARMED_DAMAGE.get(),
                 AttributeModifier.Operation.ADDITION
         );
 
@@ -113,7 +120,7 @@ public class FaelesEffect extends MobEffect {
         this.addAttributeModifier(
                 ForgeMod.STEP_HEIGHT_ADDITION.get(),
                 "e8c9a6f5-4376-4e7b-9a5c-8f2e3d91d7c4",
-                Config.FAELES_STEP_HEIGHT.get(),
+                ModConfig.FAELES_STEP_HEIGHT.get(),
                 AttributeModifier.Operation.ADDITION
         );
 
@@ -121,9 +128,10 @@ public class FaelesEffect extends MobEffect {
         this.addAttributeModifier(
                 ForgeMod.BLOCK_REACH.get(),
                 "d74f3a1c-89b2-4b3e-bf8e-6d24d8c9517d",
-                Config.FAELES_REACH.get(),
+                ModConfig.FAELES_REACH.get(),
                 AttributeModifier.Operation.MULTIPLY_BASE
         );
+
 
         super.addAttributeModifiers(pLivingEntity, pAttributeMap, pAmplifier);
 
@@ -139,7 +147,7 @@ public class FaelesEffect extends MobEffect {
         LivingEntity entity = event.getEntity();
         if (entity instanceof Player player && player.hasEffect(ModEffects.FAELES.get())) {
             Vec3 motion = player.getDeltaMovement();
-            double multiplier = 1.0 + Config.FAELES_JUMP_BOOST.get();
+            double multiplier = 1.0 + ModConfig.FAELES_JUMP_BOOST.get();
             player.setDeltaMovement(motion.x, motion.y * multiplier, motion.z);
         }
     }
@@ -153,7 +161,8 @@ public class FaelesEffect extends MobEffect {
         if (effect != null) {
             // 直接移除当前效果
             player.removeEffect(ModEffects.FAELES.get());
-
+            RaceScaleHelper.setModelScale(player,
+                    ModConfig.FAELES_SCALE_FACTOR.get().floatValue());
             // 直接应用一个新的永久效果
             player.addEffect(new MobEffectInstance(
                     ModEffects.FAELES.get(),
@@ -178,7 +187,7 @@ public class FaelesEffect extends MobEffect {
                     player.setDeltaMovement(motion.x, 0, motion.z);
                 } else {
                     // 正常爬墙
-                    double upwardSpeed = Config.FAELES_CLIMB_SPEED.get();
+                    double upwardSpeed = ModConfig.FAELES_CLIMB_SPEED.get();
                     player.setDeltaMovement(motion.x, upwardSpeed, motion.z);
                 }
 
@@ -186,7 +195,7 @@ public class FaelesEffect extends MobEffect {
                 player.resetFallDistance();
 
                 // 减小水平移动以增加稳定性
-                double drag = Config.FAELES_CLIMB_HORIZONTAL_DRAG.get();
+                double drag = ModConfig.FAELES_CLIMB_HORIZONTAL_DRAG.get();
                 player.setDeltaMovement(player.getDeltaMovement().multiply(drag, 1.0, drag));
             }
         } else {
@@ -268,18 +277,6 @@ public class FaelesEffect extends MobEffect {
     @Override
     public void applyEffectTick(LivingEntity livingEntity, int amplifier) {
         if (livingEntity instanceof Player player) {
-            TrinketsandBaublesMod.LOGGER.debug("FairyDewEffect applying to player: {}", player.getName().getString());
-
-            // 处理缩放效果
-            livingEntity.getCapability(ModCapabilities.SHRINK_CAPABILITY).ifPresent(cap -> {
-                if (!cap.isShrunk()) {
-                    float scaleFactor = Config.FAELES_SCALE_FACTOR.get().floatValue();
-                    TrinketsandBaublesMod.LOGGER.debug("Applying shrink effect to player: {}, setting scale to: {}",
-                            player.getName().getString(), scaleFactor);
-                    cap.setScale(scaleFactor);
-                    cap.shrink(livingEntity);
-                }
-            });
 
             // 检查并设置最大魔力值
             CompoundTag data = player.getPersistentData();
@@ -292,7 +289,7 @@ public class FaelesEffect extends MobEffect {
                 data.putInt(ORIGINAL_MANA_TAG, baseMaxMana);
 
                 // 使用配置的魔力加成值
-                int newMaxMana = baseMaxMana - permanentDecrease + crystalBonus + Config.FAELES_MANA_BONUS.get();
+                int newMaxMana = baseMaxMana - permanentDecrease + crystalBonus + ModConfig.FAELES_MANA_BONUS.get();
                 ManaData.setMaxMana(player, newMaxMana);
                 data.putBoolean(MANA_BONUS_TAG, true);
             }
@@ -324,7 +321,7 @@ public class FaelesEffect extends MobEffect {
                                     new AttributeModifier(
                                             armorPenaltyUUID,
                                             "Armor Speed Penalty " + (i + 1),
-                                            Config.FAELES_ARMOR_SPEED_PENALTY.get(),
+                                            ModConfig.FAELES_ARMOR_SPEED_PENALTY.get(),
                                             AttributeModifier.Operation.MULTIPLY_TOTAL
                                     )
                             );
@@ -334,7 +331,7 @@ public class FaelesEffect extends MobEffect {
                 }
             }
             // 如果配置允许，处理爬墙
-            if (Config.FAELES_WALL_CLIMB.get()) {
+            if (ModConfig.FAELES_WALL_CLIMB.get()) {
                 handleWallClimb(player);
             }
         }
@@ -342,6 +339,12 @@ public class FaelesEffect extends MobEffect {
 
     @Override
     public void removeAttributeModifiers(LivingEntity pLivingEntity, AttributeMap pAttributeMap, int pAmplifier) {
+
+        // 使用工具类重置体型
+        if (pLivingEntity != null) {
+            RaceScaleHelper.setSmoothModelScale(pLivingEntity, 1.0f, 20); // 1秒过渡时间
+        }
+
         super.removeAttributeModifiers(pLivingEntity, pAttributeMap, pAmplifier);
 
         if (pLivingEntity instanceof Player player) {
@@ -371,15 +374,6 @@ public class FaelesEffect extends MobEffect {
                     movementSpeed.removeModifier(armorPenaltyUUID);
                 }
             }
-
-            // 处理缩放效果的移除
-            pLivingEntity.getCapability(ModCapabilities.SHRINK_CAPABILITY).ifPresent(cap -> {
-                if (cap.isShrunk()) {
-                    TrinketsandBaublesMod.LOGGER.debug("De-shrinking entity: {}, current scale was: {}",
-                            pLivingEntity.getName().getString(), cap.scale());
-                    cap.deShrink(pLivingEntity);
-                }
-            });
         }
         // 强制同步玩家属性
         if (pLivingEntity instanceof Player player) {
@@ -462,7 +456,7 @@ public class FaelesEffect extends MobEffect {
 
                                     // 计算并设置正确的魔力值
                                     int correctMana = originalMana - permanentDecrease + crystalBonus +
-                                            Config.FAELES_MANA_BONUS.get();
+                                            ModConfig.FAELES_MANA_BONUS.get();
                                     ManaData.setMaxMana(player, correctMana);
 
                                     // 标记魔力加成已应用

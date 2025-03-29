@@ -1,6 +1,6 @@
 package com.jinqinxixi.trinketsandbaubles.potion;
 
-import com.jinqinxixi.trinketsandbaubles.config.Config;
+import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import com.jinqinxixi.trinketsandbaubles.capability.mana.ManaData;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
@@ -42,12 +42,12 @@ public class ManaCrystalPotion extends Item {
 
             // 记录水晶增加的魔力值
             int crystalBonus = data.getInt("CrystalManaBonus");
-            crystalBonus += Config.MANA_CRYSTAL_MAX_INCREASE.get();  // 使用配置值
+            crystalBonus += ModConfig.MANA_CRYSTAL_MAX_INCREASE.get();  // 使用配置值
             data.putInt("CrystalManaBonus", crystalBonus);
 
             // 增加最大魔力值 (考虑永久减少值)
             int currentMaxMana = ManaData.getMaxMana(player);
-            ManaData.setMaxMana(player, currentMaxMana + Config.MANA_CRYSTAL_MAX_INCREASE.get());  // 使用配置值
+            ManaData.setMaxMana(player, currentMaxMana + ModConfig.MANA_CRYSTAL_MAX_INCREASE.get());  // 使用配置值
 
             // 恢复魔力值
             ManaData.addMana(player, MANA_RESTORE);
@@ -91,7 +91,7 @@ public class ManaCrystalPotion extends Item {
     public void appendHoverText(ItemStack stack, @Nullable Level level,
                                 List<Component> tooltip, TooltipFlag flag) {
         tooltip.add(Component.translatable("item.trinketsandbaubles.mana_crystal.tooltip",
-                        Config.MANA_CRYSTAL_MAX_INCREASE.get())
+                        ModConfig.MANA_CRYSTAL_MAX_INCREASE.get())
                 .withStyle(ChatFormatting.AQUA));
     }
 }

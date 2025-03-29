@@ -1,6 +1,6 @@
 package com.jinqinxixi.trinketsandbaubles.items.baubles;
 
-import com.jinqinxixi.trinketsandbaubles.config.Config;
+import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import com.jinqinxixi.trinketsandbaubles.modEffects.ModEffects;
 import com.jinqinxixi.trinketsandbaubles.modifier.ModifiableBaubleItem;
 import com.jinqinxixi.trinketsandbaubles.util.RaceEffectUtil;
@@ -127,11 +127,11 @@ public class ElvesRingItem extends ModifiableBaubleItem {
                                 List<Component> tooltip, TooltipFlag flag) {
         if (net.minecraft.client.gui.screens.Screen.hasShiftDown()) {
             // 详细信息
-            tooltip.add(Component.translatable("item.trinketsandbaubles.elves_ring.tooltip1", Config.ELVES_MOVEMENT_SPEED.get() * 100)
+            tooltip.add(Component.translatable("item.trinketsandbaubles.elves_ring.tooltip1", ModConfig.ELVES_MOVEMENT_SPEED.get() * 100)
                     .withStyle(ChatFormatting.BLUE));
-            tooltip.add(Component.translatable("item.trinketsandbaubles.elves_ring.tooltip2", Config.ELVES_ATTACK_SPEED.get() * 100)
+            tooltip.add(Component.translatable("item.trinketsandbaubles.elves_ring.tooltip2", ModConfig.ELVES_ATTACK_SPEED.get() * 100)
                     .withStyle(ChatFormatting.BLUE));
-            tooltip.add(Component.translatable("item.trinketsandbaubles.elves_ring.tooltip3", Config.ELVES_ATTACK_DAMAGE.get() * 100)
+            tooltip.add(Component.translatable("item.trinketsandbaubles.elves_ring.tooltip3", ModConfig.ELVES_ATTACK_DAMAGE.get() * 100)
                     .withStyle(ChatFormatting.RED));
         } else {
             tooltip.add(Component.translatable("item.trinketsandbaubles.elves_ring.tooltip11")

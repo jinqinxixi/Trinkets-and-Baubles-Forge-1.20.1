@@ -1,10 +1,10 @@
 package com.jinqinxixi.trinketsandbaubles.modEffects;
 
-import com.jinqinxixi.trinketsandbaubles.config.Config;
+import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import com.jinqinxixi.trinketsandbaubles.items.ModItem;
 import com.jinqinxixi.trinketsandbaubles.capability.mana.ManaData;
-import com.jinqinxixi.trinketsandbaubles.capability.shrink.ModCapabilities;
 import com.jinqinxixi.trinketsandbaubles.TrinketsandBaublesMod;
+import com.jinqinxixi.trinketsandbaubles.util.RaceScaleHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.effect.MobEffect;
@@ -48,48 +48,54 @@ public class TitanEffect extends MobEffect {
 
     @Override
     public void addAttributeModifiers(LivingEntity pLivingEntity, AttributeMap pAttributeMap, int pAmplifier) {
-
+        // 使用平滑过渡设置体型缩放
+        if (pLivingEntity != null) {
+            RaceScaleHelper.setSmoothModelScale(pLivingEntity,
+                    ModConfig.TITAN_SCALE_FACTOR.get().floatValue(),
+                    20); // 1秒过渡时间
+        }
             this.addAttributeModifier(
                     Attributes.ATTACK_SPEED,
                     "5D6F0BA2-1186-46AC-B896-C61C5CEE99CC",
-                    Config.TITAN_ATTACK_SPEED.get(),
+                    ModConfig.TITAN_ATTACK_SPEED.get(),
                     AttributeModifier.Operation.MULTIPLY_TOTAL);
 
             this.addAttributeModifier(
                     Attributes.ATTACK_DAMAGE,
                     "55FCED67-E92A-486E-9800-B47F202C4386",
-                    Config.TITAN_ATTACK_DAMAGE.get(),
+                    ModConfig.TITAN_ATTACK_DAMAGE.get(),
                     AttributeModifier.Operation.MULTIPLY_TOTAL);
 
             this.addAttributeModifier(
                     Attributes.MAX_HEALTH,
                     "2AD3F246-FEE1-4E67-B886-69FD380BB150",
-                    Config.TITAN_MAX_HEALTH.get(),
+                    ModConfig.TITAN_MAX_HEALTH.get(),
                     AttributeModifier.Operation.MULTIPLY_TOTAL);
 
             this.addAttributeModifier(
                     Attributes.KNOCKBACK_RESISTANCE,
                     "501E39C3-9F2A-4CCE-9A89-ACD6C7C3546A",
-                    Config.TITAN_KNOCKBACK_RESISTANCE.get(),
+                    ModConfig.TITAN_KNOCKBACK_RESISTANCE.get(),
                     AttributeModifier.Operation.MULTIPLY_TOTAL);
 
             this.addAttributeModifier(
                     Attributes.MOVEMENT_SPEED,
                     "91AEAA56-376B-4498-935B-2F7F68070635",
-                    Config.TITAN_MOVEMENT_SPEED.get(),
+                    ModConfig.TITAN_MOVEMENT_SPEED.get(),
                     AttributeModifier.Operation.MULTIPLY_TOTAL);
 
             this.addAttributeModifier(
                     ForgeMod.BLOCK_REACH.get(),
                     "D7184E46-5B46-4C99-9EA3-7E2987BF4C91",
-                    Config.TITAN_REACH_DISTANCE.get(),
+                    ModConfig.TITAN_REACH_DISTANCE.get(),
                     AttributeModifier.Operation.MULTIPLY_TOTAL);
 
             this.addAttributeModifier(
                     ForgeMod.STEP_HEIGHT_ADDITION.get(),
                     "8D062387-C3E4-4FD7-B47A-32E54CCB13C6",
-                    Config.TITAN_STEP_HEIGHT.get(),
+                    ModConfig.TITAN_STEP_HEIGHT.get(),
                     AttributeModifier.Operation.ADDITION);
+
 
         super.addAttributeModifiers(pLivingEntity, pAttributeMap, pAmplifier);
 
@@ -104,7 +110,7 @@ public class TitanEffect extends MobEffect {
         LivingEntity entity = event.getEntity();
         if (entity instanceof Player player && player.hasEffect(ModEffects.TITAN.get())) {
             Vec3 motion = player.getDeltaMovement();
-            double multiplier = 1.0 + Config.TITAN_JUMP_BOOST.get();
+            double multiplier = 1.0 + ModConfig.TITAN_JUMP_BOOST.get();
             player.setDeltaMovement(motion.x, motion.y * multiplier, motion.z);
         }
     }
@@ -118,6 +124,11 @@ public class TitanEffect extends MobEffect {
         if (effect != null) {
             // 直接移除当前效果
             player.removeEffect(ModEffects.TITAN.get());
+
+            // 重新设置体型大小
+            RaceScaleHelper.setModelScale(player,
+                    ModConfig.TITAN_SCALE_FACTOR.get().floatValue());
+
 
             // 直接应用一个新的永久效果
             player.addEffect(new MobEffectInstance(
@@ -136,18 +147,6 @@ public class TitanEffect extends MobEffect {
         if (livingEntity instanceof Player player) {
             Level level = player.level();
 
-            TrinketsandBaublesMod.LOGGER.debug("FairyDewEffect applying to player: {}", player.getName().getString());
-
-            livingEntity.getCapability(ModCapabilities.SHRINK_CAPABILITY).ifPresent(cap -> {
-                if (!cap.isShrunk()) {
-                    float scaleFactor = Config.TITAN_SCALE_FACTOR.get().floatValue();
-                    TrinketsandBaublesMod.LOGGER.debug("Applying shrink effect to player: {}, setting scale to: {}",
-                            player.getName().getString(), scaleFactor);
-                    cap.setScale(scaleFactor);
-                    cap.shrink(livingEntity);
-                }
-            });
-
             // 处理魔力值修改
             if (!level.isClientSide) {
                 CompoundTag data = player.getPersistentData();
@@ -160,7 +159,7 @@ public class TitanEffect extends MobEffect {
                     data.putInt(ORIGINAL_MANA_TAG, baseMaxMana);
 
                     // 使用配置的魔力修改值
-                    int newMaxMana = baseMaxMana - permanentDecrease + Config.TITAN_MANA_MODIFIER.get() + crystalBonus;
+                    int newMaxMana = baseMaxMana - permanentDecrease + ModConfig.TITAN_MANA_MODIFIER.get() + crystalBonus;
                     ManaData.setMaxMana(player, Math.max(0, newMaxMana));
                     data.putBoolean(MANA_PENALTY_TAG, true);
                 }
@@ -168,7 +167,7 @@ public class TitanEffect extends MobEffect {
 
             // 处理水中下沉
             if (player.isInWater()) {
-                player.setDeltaMovement(player.getDeltaMovement().add(0, -Config.TITAN_WATER_SINK_SPEED.get(), 0));
+                player.setDeltaMovement(player.getDeltaMovement().add(0, -ModConfig.TITAN_WATER_SINK_SPEED.get(), 0));
             }
 
 
@@ -252,6 +251,13 @@ public class TitanEffect extends MobEffect {
 
     @Override
     public void removeAttributeModifiers(LivingEntity pLivingEntity, AttributeMap pAttributeMap, int pAmplifier) {
+        // 使用工具类重置体型
+        if (pLivingEntity != null) {
+            RaceScaleHelper.setSmoothModelScale(pLivingEntity, 1.0f, 20); // 1秒过渡时间
+        }
+
+
+
         // 先调用父类方法移除所有属性修改器
         super.removeAttributeModifiers(pLivingEntity, pAttributeMap, pAmplifier);
 
@@ -277,13 +283,6 @@ public class TitanEffect extends MobEffect {
         TrinketsandBaublesMod.LOGGER.debug("Removing FairyDewEffect from entity: {}",
                 pLivingEntity.getName().getString());
 
-        pLivingEntity.getCapability(ModCapabilities.SHRINK_CAPABILITY).ifPresent(cap -> {
-            if (cap.isShrunk()) {
-                TrinketsandBaublesMod.LOGGER.debug("De-shrinking entity: {}, current scale was: {}",
-                        pLivingEntity.getName().getString(), cap.scale());
-                cap.deShrink(pLivingEntity);
-            }
-        });
         // 强制同步玩家属性
         if (pLivingEntity instanceof Player player) {
             // 强制同步生命值
@@ -375,7 +374,7 @@ public class TitanEffect extends MobEffect {
 
                                 // 计算并设置正确的魔力值
                                 int correctMana = originalMana - permanentDecrease + crystalBonus +
-                                        Config.TITAN_MANA_MODIFIER.get();
+                                        ModConfig.TITAN_MANA_MODIFIER.get();
                                 ManaData.setMaxMana(player, Math.max(0, correctMana)); // 确保魔力值不会低于0
 
                                 // 标记魔力修改已应用

@@ -1,6 +1,6 @@
 package com.jinqinxixi.trinketsandbaubles.items.baubles;
 
-import com.jinqinxixi.trinketsandbaubles.config.Config;
+import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import com.jinqinxixi.trinketsandbaubles.modEffects.ModEffects;
 import com.jinqinxixi.trinketsandbaubles.modifier.ModifiableBaubleItem;
 import com.jinqinxixi.trinketsandbaubles.util.RaceEffectUtil;
@@ -126,23 +126,23 @@ public class FaelisRingItem extends ModifiableBaubleItem {
                                 List<Component> tooltip, TooltipFlag flag) {
         if (net.minecraft.client.gui.screens.Screen.hasShiftDown()) {
             // 详细信息
-            tooltip.add(Component.translatable("item.trinketsandbaubles.faelis_ring.tooltip1", Config.FAELES_MAX_HEALTH.get() * 100)
+            tooltip.add(Component.translatable("item.trinketsandbaubles.faelis_ring.tooltip1", ModConfig.FAELES_MAX_HEALTH.get() * 100)
                     .withStyle(ChatFormatting.RED));
-            tooltip.add(Component.translatable("item.trinketsandbaubles.faelis_ring.tooltip2", Config.FAELES_MOVEMENT_SPEED.get() * 100)
+            tooltip.add(Component.translatable("item.trinketsandbaubles.faelis_ring.tooltip2", ModConfig.FAELES_MOVEMENT_SPEED.get() * 100)
                     .withStyle(ChatFormatting.BLUE));
-            tooltip.add(Component.translatable("item.trinketsandbaubles.faelis_ring.tooltip3", Config.FAELES_ATTACK_DAMAGE.get() * 100)
+            tooltip.add(Component.translatable("item.trinketsandbaubles.faelis_ring.tooltip3", ModConfig.FAELES_ATTACK_DAMAGE.get() * 100)
                     .withStyle(ChatFormatting.RED));
-            tooltip.add(Component.translatable("item.trinketsandbaubles.faelis_ring.tooltip4", Config.FAELES_ATTACK_SPEED.get() * 100)
+            tooltip.add(Component.translatable("item.trinketsandbaubles.faelis_ring.tooltip4", ModConfig.FAELES_ATTACK_SPEED.get() * 100)
                     .withStyle(ChatFormatting.BLUE));
-            tooltip.add(Component.translatable("item.trinketsandbaubles.faelis_ring.tooltip5", Config.FAELES_ARMOR_TOUGHNESS.get() * 100)
+            tooltip.add(Component.translatable("item.trinketsandbaubles.faelis_ring.tooltip5", ModConfig.FAELES_ARMOR_TOUGHNESS.get() * 100)
                     .withStyle(ChatFormatting.RED));
-            tooltip.add(Component.translatable("item.trinketsandbaubles.faelis_ring.tooltip6", Config.FAELES_LUCK.get())
+            tooltip.add(Component.translatable("item.trinketsandbaubles.faelis_ring.tooltip6", ModConfig.FAELES_LUCK.get())
                     .withStyle(ChatFormatting.BLUE));
-            tooltip.add(Component.translatable("item.trinketsandbaubles.faelis_ring.tooltip7", Config.FAELES_REACH.get() * 100)
+            tooltip.add(Component.translatable("item.trinketsandbaubles.faelis_ring.tooltip7", ModConfig.FAELES_REACH.get() * 100)
                     .withStyle(ChatFormatting.RED));
-            tooltip.add(Component.translatable("item.trinketsandbaubles.faelis_ring.tooltip8", Config.FAELES_SWIM_SPEED.get() * 100)
+            tooltip.add(Component.translatable("item.trinketsandbaubles.faelis_ring.tooltip8", ModConfig.FAELES_SWIM_SPEED.get() * 100)
                     .withStyle(ChatFormatting.BLUE));
-            tooltip.add(Component.translatable("item.trinketsandbaubles.faelis_ring.tooltip9", Config.FAELES_JUMP_BOOST.get() * 100)
+            tooltip.add(Component.translatable("item.trinketsandbaubles.faelis_ring.tooltip9", ModConfig.FAELES_JUMP_BOOST.get() * 100)
                     .withStyle(ChatFormatting.BLUE));
             tooltip.add(Component.translatable("item.trinketsandbaubles.faelis_ring.tooltip10")
                     .withStyle(ChatFormatting.BLUE));

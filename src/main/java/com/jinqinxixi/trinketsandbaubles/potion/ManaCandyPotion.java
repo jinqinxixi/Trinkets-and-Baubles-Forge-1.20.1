@@ -1,6 +1,6 @@
 package com.jinqinxixi.trinketsandbaubles.potion;
 
-import com.jinqinxixi.trinketsandbaubles.config.Config;
+import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import com.jinqinxixi.trinketsandbaubles.capability.mana.ManaData;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -34,7 +34,7 @@ public class ManaCandyPotion extends Item {
     public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity livingEntity) {
         if (!level.isClientSide && livingEntity instanceof Player player) {
             // 使用配置值来恢复魔力
-            ManaData.addMana(player, Config.MANA_CANDY_RESTORE.get());
+            ManaData.addMana(player, ModConfig.MANA_CANDY_RESTORE.get());
 
             // 如果不在创造模式，消耗一个物品
             if (!player.getAbilities().instabuild) {
@@ -75,7 +75,7 @@ public class ManaCandyPotion extends Item {
     public void appendHoverText(ItemStack stack, @Nullable Level level,
                                 List<Component> tooltip, TooltipFlag flag) {
         tooltip.add(Component.translatable("item.trinketsandbaubles.mana_candy.tooltip",
-                        Config.MANA_CANDY_RESTORE.get())
+                        ModConfig.MANA_CANDY_RESTORE.get())
                 .withStyle(ChatFormatting.AQUA));
     }
 }

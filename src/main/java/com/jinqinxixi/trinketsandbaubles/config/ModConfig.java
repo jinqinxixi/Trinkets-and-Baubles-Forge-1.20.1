@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 @Mod.EventBusSubscriber(modid = TrinketsandBaublesMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
-public class Config {
+public class ModConfig {
     private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
     public static final ForgeConfigSpec SPEC;
 
@@ -972,52 +972,52 @@ public class Config {
 
     static {
         // 初始化映射表
-        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/desert_pyramid"), Config.DESERT_PYRAMID_LOOT);
-        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/jungle_temple"), Config.JUNGLE_TEMPLE_LOOT);
-        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/abandoned_mineshaft"), Config.ABANDONED_MINESHAFT_LOOT);
-        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/stronghold_library"), Config.STRONGHOLD_LIBRARY_LOOT);
-        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/woodland_mansion"), Config.WOODLAND_MANSION_LOOT);
-        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/village/village_temple"), Config.VILLAGE_TEMPLE_LOOT);
-        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/shipwreck_treasure"), Config.SHIPWRECK_TREASURE_LOOT);
-        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/pillager_outpost"), Config.PILLAGER_OUTPOST_LOOT);
-        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/buried_treasure"), Config.BURIED_TREASURE_LOOT);
-        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/underwater_ruin_big"), Config.UNDERWATER_RUIN_BIG_LOOT);
-        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/underwater_ruin_small"), Config.UNDERWATER_RUIN_SMALL_LOOT);
-        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/igloo_chest"), Config.IGLOO_CHEST_LOOT);
-        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/bastion_treasure"), Config.BASTION_TREASURE_LOOT);
-        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/bastion_bridge"), Config.BASTION_BRIDGE_LOOT);
-        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/bastion_housing"), Config.BASTION_HOUSING_LOOT);
-        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/bastion_other"), Config.BASTION_OTHER_LOOT);
-        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/ruined_portal"), Config.RUINED_PORTAL_LOOT);
-        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/end_city_treasure"), Config.END_CITY_LOOT);
-        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/ancient_city"), Config.ANCIENT_CITY_LOOT);
-        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/simple_dungeon"), Config.SIMPLE_DUNGEON_LOOT);
-        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/stronghold_corridor"), Config.STRONGHOLD_CORRIDOR_LOOT);
-        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/fossil_dinosaur"), Config.FOSSIL_DINOSAUR_LOOT);
-        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/fossil_mammal"), Config.FOSSIL_MAMMAL_LOOT);
-        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/shipwreck_supply"), Config.SHIPWRECK_SUPPLY_LOOT);
-        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/woodland_mansion_cartography"), Config.WOODLAND_CARTOGRAPHY_LOOT);
-        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/stronghold_crossing"), Config.STRONGHOLD_CROSSING_LOOT);
-        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/shipwreck_map"), Config.SHIPWRECK_MAP_LOOT);
+        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/desert_pyramid"), ModConfig.DESERT_PYRAMID_LOOT);
+        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/jungle_temple"), ModConfig.JUNGLE_TEMPLE_LOOT);
+        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/abandoned_mineshaft"), ModConfig.ABANDONED_MINESHAFT_LOOT);
+        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/stronghold_library"), ModConfig.STRONGHOLD_LIBRARY_LOOT);
+        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/woodland_mansion"), ModConfig.WOODLAND_MANSION_LOOT);
+        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/village/village_temple"), ModConfig.VILLAGE_TEMPLE_LOOT);
+        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/shipwreck_treasure"), ModConfig.SHIPWRECK_TREASURE_LOOT);
+        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/pillager_outpost"), ModConfig.PILLAGER_OUTPOST_LOOT);
+        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/buried_treasure"), ModConfig.BURIED_TREASURE_LOOT);
+        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/underwater_ruin_big"), ModConfig.UNDERWATER_RUIN_BIG_LOOT);
+        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/underwater_ruin_small"), ModConfig.UNDERWATER_RUIN_SMALL_LOOT);
+        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/igloo_chest"), ModConfig.IGLOO_CHEST_LOOT);
+        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/bastion_treasure"), ModConfig.BASTION_TREASURE_LOOT);
+        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/bastion_bridge"), ModConfig.BASTION_BRIDGE_LOOT);
+        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/bastion_housing"), ModConfig.BASTION_HOUSING_LOOT);
+        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/bastion_other"), ModConfig.BASTION_OTHER_LOOT);
+        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/ruined_portal"), ModConfig.RUINED_PORTAL_LOOT);
+        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/end_city_treasure"), ModConfig.END_CITY_LOOT);
+        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/ancient_city"), ModConfig.ANCIENT_CITY_LOOT);
+        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/simple_dungeon"), ModConfig.SIMPLE_DUNGEON_LOOT);
+        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/stronghold_corridor"), ModConfig.STRONGHOLD_CORRIDOR_LOOT);
+        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/fossil_dinosaur"), ModConfig.FOSSIL_DINOSAUR_LOOT);
+        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/fossil_mammal"), ModConfig.FOSSIL_MAMMAL_LOOT);
+        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/shipwreck_supply"), ModConfig.SHIPWRECK_SUPPLY_LOOT);
+        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/woodland_mansion_cartography"), ModConfig.WOODLAND_CARTOGRAPHY_LOOT);
+        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/stronghold_crossing"), ModConfig.STRONGHOLD_CROSSING_LOOT);
+        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/shipwreck_map"), ModConfig.SHIPWRECK_MAP_LOOT);
         // 村庄职业
-        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/village/village_armorer"), Config.VILLAGE_ARMORER_LOOT);
-        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/village/village_butcher"), Config.VILLAGE_BUTCHER_LOOT);
-        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/village/village_cartographer"), Config.VILLAGE_CARTOGRAPHER_LOOT);
-        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/village/village_plains_house"), Config.VILLAGE_PLAINS_HOUSE_LOOT);
-        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/village/village_fisher"), Config.VILLAGE_FISHER_LOOT);
-        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/village/village_fletcher"), Config.VILLAGE_FLETCHER_LOOT);
-        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/village/village_tannery"), Config.VILLAGE_TANNERY_LOOT);
-        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/village/village_library"), Config.VILLAGE_LIBRARY_LOOT);
-        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/village/village_mason"), Config.VILLAGE_MASON_LOOT);
-        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/village/village_shepherd"), Config.VILLAGE_SHEPHERD_LOOT);
-        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/village/village_toolsmith"), Config.VILLAGE_TOOLSMITH_LOOT);
-        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/village/village_weaponsmith"), Config.VILLAGE_WEAPONSMITH_LOOT);
+        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/village/village_armorer"), ModConfig.VILLAGE_ARMORER_LOOT);
+        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/village/village_butcher"), ModConfig.VILLAGE_BUTCHER_LOOT);
+        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/village/village_cartographer"), ModConfig.VILLAGE_CARTOGRAPHER_LOOT);
+        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/village/village_plains_house"), ModConfig.VILLAGE_PLAINS_HOUSE_LOOT);
+        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/village/village_fisher"), ModConfig.VILLAGE_FISHER_LOOT);
+        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/village/village_fletcher"), ModConfig.VILLAGE_FLETCHER_LOOT);
+        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/village/village_tannery"), ModConfig.VILLAGE_TANNERY_LOOT);
+        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/village/village_library"), ModConfig.VILLAGE_LIBRARY_LOOT);
+        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/village/village_mason"), ModConfig.VILLAGE_MASON_LOOT);
+        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/village/village_shepherd"), ModConfig.VILLAGE_SHEPHERD_LOOT);
+        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/village/village_toolsmith"), ModConfig.VILLAGE_TOOLSMITH_LOOT);
+        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/village/village_weaponsmith"), ModConfig.VILLAGE_WEAPONSMITH_LOOT);
 
         // 村庄房屋
-        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/village/village_desert_house"), Config.VILLAGE_DESERT_HOUSE_LOOT);
-        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/village/village_snowy_house"), Config.VILLAGE_SNOWY_HOUSE_LOOT);
-        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/village/village_savanna_house"), Config.VILLAGE_SAVANNA_HOUSE_LOOT);
-        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/village/village_taiga_house"), Config.VILLAGE_TAIGA_HOUSE_LOOT);
+        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/village/village_desert_house"), ModConfig.VILLAGE_DESERT_HOUSE_LOOT);
+        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/village/village_snowy_house"), ModConfig.VILLAGE_SNOWY_HOUSE_LOOT);
+        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/village/village_savanna_house"), ModConfig.VILLAGE_SAVANNA_HOUSE_LOOT);
+        LOOT_MAPPING.put(new ResourceLocation("minecraft:chests/village/village_taiga_house"), ModConfig.VILLAGE_TAIGA_HOUSE_LOOT);
 
 
     }

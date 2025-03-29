@@ -1,6 +1,6 @@
 package com.jinqinxixi.trinketsandbaubles.items.baubles;
 
-import com.jinqinxixi.trinketsandbaubles.config.Config;
+import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import com.jinqinxixi.trinketsandbaubles.modifier.ModifiableBaubleItem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -52,11 +52,11 @@ public class PoisonStoneItem extends ModifiableBaubleItem {
     // 处理攻击事件
     private static void onAttack(LivingEntity attacker, LivingEntity target) {
         if (isEquipped(attacker)) {
-            if (attacker.getRandom().nextFloat() < Config.POISON_STONE_CHANCE.get()) {
+            if (attacker.getRandom().nextFloat() < ModConfig.POISON_STONE_CHANCE.get()) {
                 target.addEffect(new MobEffectInstance(
                         MobEffects.POISON,
-                        Config.POISON_STONE_DURATION.get(),
-                        Config.POISON_STONE_AMPLIFIER.get(),
+                        ModConfig.POISON_STONE_DURATION.get(),
+                        ModConfig.POISON_STONE_AMPLIFIER.get(),
                         false, // 是否显示粒子
                         true  // 是否显示图标
                 ));
@@ -67,7 +67,7 @@ public class PoisonStoneItem extends ModifiableBaubleItem {
     // 获取额外伤害倍率
     private static float getExtraDamageMultiplier(LivingEntity attacker, LivingEntity target) {
         if (isEquipped(attacker) && target.hasEffect(MobEffects.POISON)) {
-            return Config.POISON_STONE_DAMAGE_MULTIPLIER.get().floatValue();
+            return ModConfig.POISON_STONE_DAMAGE_MULTIPLIER.get().floatValue();
         }
         return 1.0F;
     }
@@ -116,10 +116,10 @@ public class PoisonStoneItem extends ModifiableBaubleItem {
         tooltip.add(Component.translatable("item.trinketsandbaubles.poison_stone.tooltip.immunity_hunger")
                 .withStyle(ChatFormatting.GREEN));
         tooltip.add(Component.translatable("item.trinketsandbaubles.poison_stone.tooltip.poison_chance",
-                        (int)(Config.POISON_STONE_CHANCE.get() * 100))
+                        (int)(ModConfig.POISON_STONE_CHANCE.get() * 100))
                 .withStyle(ChatFormatting.DARK_RED));
         tooltip.add(Component.translatable("item.trinketsandbaubles.poison_stone.tooltip.damage_bonus",
-                        String.format("%.1f", Config.POISON_STONE_DAMAGE_MULTIPLIER.get()))
+                        String.format("%.1f", ModConfig.POISON_STONE_DAMAGE_MULTIPLIER.get()))
                 .withStyle(ChatFormatting.AQUA));
         super.appendHoverText(stack, level, tooltip, flag);
     }

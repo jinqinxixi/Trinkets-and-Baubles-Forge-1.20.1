@@ -1,6 +1,6 @@
 package com.jinqinxixi.trinketsandbaubles.loot;
 
-import com.jinqinxixi.trinketsandbaubles.config.Config;
+import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -23,13 +23,13 @@ public class LootTableHandler {
     @SubscribeEvent
     public static void onLootTableLoad(LootTableLoadEvent event) {
         ResourceLocation tableId = event.getName();
-        List<Config.LootEntry> entries = Config.lootConfig.get(tableId);
+        List<ModConfig.LootEntry> entries = ModConfig.lootConfig.get(tableId);
 
         if (entries != null && !entries.isEmpty()) {
             LootPool.Builder poolBuilder = LootPool.lootPool()
                     .name("trinketsandbaubles_config_loot");
 
-            for (Config.LootEntry entry : entries) {
+            for (ModConfig.LootEntry entry : entries) {
                 Item item = BuiltInRegistries.ITEM.get(entry.itemId);
                 if (item != null) {
                     poolBuilder.add(LootItem.lootTableItem(item)

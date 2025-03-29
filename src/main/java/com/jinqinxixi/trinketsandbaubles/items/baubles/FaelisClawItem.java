@@ -1,6 +1,6 @@
 package com.jinqinxixi.trinketsandbaubles.items.baubles;
 
-import com.jinqinxixi.trinketsandbaubles.config.Config;
+import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import com.jinqinxixi.trinketsandbaubles.modEffects.ModEffects;
 import com.jinqinxixi.trinketsandbaubles.modifier.ModifiableBaubleItem;
 import net.minecraft.ChatFormatting;
@@ -41,7 +41,7 @@ public class FaelisClawItem extends ModifiableBaubleItem {
         return new AttributeModifier(
                 ATTACK_DAMAGE_UUID,
                 "FaelisClawDamageBoost",
-                Config.FAELIS_CLAW_DAMAGE_BOOST.get(),
+                ModConfig.FAELIS_CLAW_DAMAGE_BOOST.get(),
                 AttributeModifier.Operation.MULTIPLY_BASE
         );
     }
@@ -108,7 +108,7 @@ public class FaelisClawItem extends ModifiableBaubleItem {
                         .filter(mod -> mod.getId().equals(ATTACK_DAMAGE_UUID))
                         .findFirst()
                         .ifPresent(existingMod -> {
-                            if (Math.abs(existingMod.getAmount() - Config.FAELIS_CLAW_DAMAGE_BOOST.get()) > 0.0001) {
+                            if (Math.abs(existingMod.getAmount() - ModConfig.FAELIS_CLAW_DAMAGE_BOOST.get()) > 0.0001) {
                                 // 如果值不正确，重新应用修饰符
                                 removeAttributes(living);
                                 applyAttributes(living);
@@ -121,16 +121,16 @@ public class FaelisClawItem extends ModifiableBaubleItem {
     @Override
     public void appendHoverText(ItemStack stack, @Nullable net.minecraft.world.level.Level level, List<Component> tooltip, TooltipFlag flag) {
         tooltip.add(Component.translatable("item.trinketsandbaubles.faelis_claw.tooltip.damage_boost",
-                        String.format("%.0f", Config.FAELIS_CLAW_DAMAGE_BOOST.get() * 100))
+                        String.format("%.0f", ModConfig.FAELIS_CLAW_DAMAGE_BOOST.get() * 100))
                 .withStyle(ChatFormatting.RED));
 
         tooltip.add(Component.translatable("item.trinketsandbaubles.faelis_claw.tooltip.bleed_chance",
-                        String.format("%.0f", Config.FAELIS_CLAW_BLEED_CHANCE.get() * 100))
+                        String.format("%.0f", ModConfig.FAELIS_CLAW_BLEED_CHANCE.get() * 100))
                 .withStyle(ChatFormatting.DARK_RED));
 
         tooltip.add(Component.translatable("item.trinketsandbaubles.faelis_claw.tooltip.bleed_info",
                         1.0F,
-                        Config.FAELIS_CLAW_BLEED_DURATION.get() / 20)
+                        ModConfig.FAELIS_CLAW_BLEED_DURATION.get() / 20)
                 .withStyle(ChatFormatting.DARK_GREEN));
         super.appendHoverText(stack, level, tooltip, flag);
     }
@@ -148,11 +148,11 @@ public class FaelisClawItem extends ModifiableBaubleItem {
             Player player = (Player) event.getSource().getEntity();
             if (isEquipped(player) && event.getEntity() instanceof LivingEntity) {
                 LivingEntity target = (LivingEntity) event.getEntity();
-                if (player.getRandom().nextFloat() < Config.FAELIS_CLAW_BLEED_CHANCE.get()) {
-                    int baseDuration = Config.FAELIS_CLAW_BLEED_DURATION.get();
+                if (player.getRandom().nextFloat() < ModConfig.FAELIS_CLAW_BLEED_CHANCE.get()) {
+                    int baseDuration = ModConfig.FAELIS_CLAW_BLEED_DURATION.get();
                     int duration = player.hasEffect(ModEffects.FAELES.get()) ?
                             baseDuration :
-                            (int)(baseDuration * Config.FAELIS_CLAW_NORMAL_DURATION_MULTIPLIER.get());
+                            (int)(baseDuration * ModConfig.FAELIS_CLAW_NORMAL_DURATION_MULTIPLIER.get());
 
                     target.addEffect(new MobEffectInstance(ModEffects.BLEEDING.get(), duration));
                 }

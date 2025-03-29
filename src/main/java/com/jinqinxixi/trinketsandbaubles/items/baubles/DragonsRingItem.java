@@ -1,6 +1,6 @@
 package com.jinqinxixi.trinketsandbaubles.items.baubles;
 
-import com.jinqinxixi.trinketsandbaubles.config.Config;
+import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import com.jinqinxixi.trinketsandbaubles.modEffects.ModEffects;
 import com.jinqinxixi.trinketsandbaubles.modifier.ModifiableBaubleItem;
 import com.jinqinxixi.trinketsandbaubles.util.RaceEffectUtil;
@@ -163,11 +163,11 @@ public class DragonsRingItem extends ModifiableBaubleItem {
                                 List<Component> tooltip, TooltipFlag flag) {
         if (net.minecraft.client.gui.screens.Screen.hasShiftDown()) {
             // 详细信息
-            tooltip.add(Component.translatable("item.trinketsandbaubles.dragons_ring.tooltip1", Config.DRAGON_MAX_HEALTH_BOOST.get() * 100)
+            tooltip.add(Component.translatable("item.trinketsandbaubles.dragons_ring.tooltip1", ModConfig.DRAGON_MAX_HEALTH_BOOST.get() * 100)
                     .withStyle(ChatFormatting.BLUE));
-            tooltip.add(Component.translatable("item.trinketsandbaubles.dragons_ring.tooltip2", Config.DRAGON_ATTACK_DAMAGE_BOOST.get() * 100)
+            tooltip.add(Component.translatable("item.trinketsandbaubles.dragons_ring.tooltip2", ModConfig.DRAGON_ATTACK_DAMAGE_BOOST.get() * 100)
                     .withStyle(ChatFormatting.BLUE));
-            tooltip.add(Component.translatable("item.trinketsandbaubles.dragons_ring.tooltip3",Config.DRAGON_ARMOR_TOUGHNESS.get() * 100)
+            tooltip.add(Component.translatable("item.trinketsandbaubles.dragons_ring.tooltip3", ModConfig.DRAGON_ARMOR_TOUGHNESS.get() * 100)
                     .withStyle(ChatFormatting.BLUE));
 
         } else {
@@ -289,7 +289,7 @@ public class DragonsRingItem extends ModifiableBaubleItem {
         }
 
         Set<Block> targetBlocks = scanChests ? CHEST_BLOCKS : ORE_GROUPS.get(groupIndex);
-        int scanRange = Config.DRAGONS_EYE_SCAN_RANGE.get();
+        int scanRange = ModConfig.DRAGONS_EYE_SCAN_RANGE.get();
 
         // 创建存储位置的NBT列表
         ListTag targetsList = new ListTag();

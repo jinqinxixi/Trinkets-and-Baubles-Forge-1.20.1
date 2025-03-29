@@ -1,10 +1,11 @@
     package com.jinqinxixi.trinketsandbaubles.modEffects;
 
-    import com.jinqinxixi.trinketsandbaubles.config.Config;
+
+    import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
     import com.jinqinxixi.trinketsandbaubles.items.ModItem;
     import com.jinqinxixi.trinketsandbaubles.capability.mana.ManaData;
-    import com.jinqinxixi.trinketsandbaubles.capability.shrink.ModCapabilities;
     import com.jinqinxixi.trinketsandbaubles.TrinketsandBaublesMod;
+    import com.jinqinxixi.trinketsandbaubles.util.RaceScaleHelper;
     import net.minecraft.ChatFormatting;
     import net.minecraft.nbt.CompoundTag;
     import net.minecraft.network.chat.Component;
@@ -47,11 +48,17 @@
 
         @Override
         public void addAttributeModifiers(LivingEntity pLivingEntity, AttributeMap pAttributeMap, int pAmplifier) {
+            // 使用工具类设置体型缩放
+            if (pLivingEntity != null) {
+                RaceScaleHelper.setSmoothModelScale(pLivingEntity,
+                        ModConfig.DRAGON_SCALE_FACTOR.get().floatValue(),20);
+            }
+
             // 攻击伤害
             this.addAttributeModifier(
                     Attributes.ATTACK_DAMAGE,
                     "d141ef28-51c6-4b47-8a0d-6946e841c132",
-                    Config.DRAGON_ATTACK_DAMAGE_BOOST.get(),
+                    ModConfig.DRAGON_ATTACK_DAMAGE_BOOST.get(),
                     AttributeModifier.Operation.MULTIPLY_BASE
             );
 
@@ -59,7 +66,7 @@
             this.addAttributeModifier(
                     Attributes.MAX_HEALTH,
                     "dc3b4b8c-a02c-4bd8-82e9-204088927d1f",
-                    Config.DRAGON_MAX_HEALTH_BOOST.get(),
+                    ModConfig.DRAGON_MAX_HEALTH_BOOST.get(),
                     AttributeModifier.Operation.MULTIPLY_BASE
             );
 
@@ -67,9 +74,10 @@
             this.addAttributeModifier(
                     Attributes.ARMOR_TOUGHNESS,
                     "8fc5e73c-2cf2-4729-8128-d99f49aa37f2",
-                    Config.DRAGON_ARMOR_TOUGHNESS.get(),
+                    ModConfig.DRAGON_ARMOR_TOUGHNESS.get(),
                     AttributeModifier.Operation.MULTIPLY_BASE
             );
+
 
             super.addAttributeModifiers(pLivingEntity, pAttributeMap, pAmplifier);
 
@@ -89,7 +97,8 @@
             if (effect != null) {
                 // 直接移除当前效果
                 player.removeEffect(ModEffects.DRAGON.get());
-
+                RaceScaleHelper.setModelScale(player,
+                        ModConfig.DRAGON_SCALE_FACTOR.get().floatValue());
                 // 直接应用一个新的永久效果
                 player.addEffect(new MobEffectInstance(
                         ModEffects.DRAGON.get(),
@@ -108,8 +117,8 @@
                 float currentMana = ManaData.getMana(player);
 
                 // 计算每tick消耗的魔力
-                float manaCostPerTick = Config.DRAGON_FLIGHT_MANA_COST.get().floatValue() /
-                        Config.DRAGON_MANA_CHECK_INTERVAL.get().floatValue();
+                float manaCostPerTick = ModConfig.DRAGON_FLIGHT_MANA_COST.get().floatValue() /
+                        ModConfig.DRAGON_MANA_CHECK_INTERVAL.get().floatValue();
 
                 if (!player.isCreative()) {
                     boolean hasEnoughMana = currentMana >= manaCostPerTick;
@@ -143,7 +152,7 @@
                     }
 
                     if (player.getAbilities().flying) {
-                        player.getAbilities().setFlyingSpeed(0.05f * Config.DRAGON_FLIGHT_SPEED.get().floatValue());
+                        player.getAbilities().setFlyingSpeed(0.05f * ModConfig.DRAGON_FLIGHT_SPEED.get().floatValue());
                     }
                 }
 
@@ -159,7 +168,7 @@
                     data.putInt(ORIGINAL_MANA_TAG, baseMaxMana);
 
                     // 使用配置的魔力加成值
-                    int newMaxMana = baseMaxMana - permanentDecrease + crystalBonus + Config.DRAGON_MANA_BONUS.get();
+                    int newMaxMana = baseMaxMana - permanentDecrease + crystalBonus + ModConfig.DRAGON_MANA_BONUS.get();
                     ManaData.setMaxMana(player, newMaxMana);
                     data.putBoolean(BONUS_TAG, true);
                 }
@@ -184,16 +193,6 @@
                             false
                     ));
                 }
-                // 处理缩放效果
-                entity.getCapability(ModCapabilities.SHRINK_CAPABILITY).ifPresent(cap -> {
-                    if (!cap.isShrunk()) {
-                        float scaleFactor = Config.DRAGON_SCALE_FACTOR.get().floatValue();
-                        TrinketsandBaublesMod.LOGGER.debug("Applying shrink effect to player: {}, setting scale to: {}",
-                                player.getName().getString(), scaleFactor);
-                        cap.setScale(scaleFactor);
-                        cap.shrink(entity);
-                    }
-                });
             }
         }
 
@@ -311,6 +310,11 @@
 
         @Override
         public void removeAttributeModifiers(LivingEntity pLivingEntity, AttributeMap pAttributeMap, int pAmplifier) {
+
+            // 使用工具类重置体型
+            if (pLivingEntity != null) {
+                RaceScaleHelper.setSmoothModelScale(pLivingEntity, 1.0f, 20); // 1秒过渡时间
+            }
             super.removeAttributeModifiers(pLivingEntity, pAttributeMap, pAmplifier);
 
             if (pLivingEntity instanceof Player player) {
@@ -341,14 +345,6 @@
                 // 确保更新能力
                 player.onUpdateAbilities();
             }
-            // 处理缩放效果的移除
-            pLivingEntity.getCapability(ModCapabilities.SHRINK_CAPABILITY).ifPresent(cap -> {
-                if (cap.isShrunk()) {
-                    TrinketsandBaublesMod.LOGGER.debug("De-shrinking entity: {}, current scale was: {}",
-                            pLivingEntity.getName().getString(), cap.scale());
-                    cap.deShrink(pLivingEntity);
-                }
-            });
             // 强制同步玩家属性
             if (pLivingEntity instanceof Player player) {
                 // 强制同步生命值

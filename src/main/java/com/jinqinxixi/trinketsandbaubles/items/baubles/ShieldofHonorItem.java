@@ -1,6 +1,6 @@
 package com.jinqinxixi.trinketsandbaubles.items.baubles;
 
-import com.jinqinxixi.trinketsandbaubles.config.Config;
+import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import com.jinqinxixi.trinketsandbaubles.modifier.ModifiableBaubleItem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -77,20 +77,20 @@ public class ShieldofHonorItem extends ModifiableBaubleItem {
 
         // 应用基础伤害减免
         if (!entity.hasEffect(MobEffects.DAMAGE_RESISTANCE)) {
-            amount *= (1.0f - Config.SHIELD_DAMAGE_REDUCTION.get().floatValue());
+            amount *= (1.0f - ModConfig.SHIELD_DAMAGE_REDUCTION.get().floatValue());
         }
 
         // 爆炸伤害特殊处理
         if (source.is(DamageTypes.EXPLOSION) ||
                 source.is(DamageTypes.PLAYER_EXPLOSION) ||
                 source.is(DamageTypes.FIREWORKS)) {
-            amount *= Config.SHIELD_EXPLOSION_REDUCTION.get().floatValue();
+            amount *= ModConfig.SHIELD_EXPLOSION_REDUCTION.get().floatValue();
         }
 
         // 获取伤害计数
         int damageCount = entity.getPersistentData().getInt("shield_damage_count");
 
-        if (damageCount >= Config.SHIELD_MAX_DAMAGE_COUNT.get()) {
+        if (damageCount >= ModConfig.SHIELD_MAX_DAMAGE_COUNT.get()) {
             if (entity instanceof Player player) {
                 spawnProtectionParticles(player);
                 player.level().playSound(null,
@@ -125,11 +125,11 @@ public class ShieldofHonorItem extends ModifiableBaubleItem {
         tooltip.add(Component.translatable("item.trinketsandbaubles.shield_of_honor.tooltip2")
                 .withStyle(ChatFormatting.GRAY));
         tooltip.add(Component.translatable("item.trinketsandbaubles.shield_of_honor.tooltip.explosion",
-                        String.format("%.0f", (1.0f - Config.SHIELD_EXPLOSION_REDUCTION.get()) * 100))
+                        String.format("%.0f", (1.0f - ModConfig.SHIELD_EXPLOSION_REDUCTION.get()) * 100))
                 .withStyle(ChatFormatting.BLUE));
 
         tooltip.add(Component.translatable("item.trinketsandbaubles.shield_of_honor.tooltip4",
-                        Config.SHIELD_MAX_DAMAGE_COUNT.get())
+                        ModConfig.SHIELD_MAX_DAMAGE_COUNT.get())
                 .withStyle(ChatFormatting.AQUA));
 
         Player player = Minecraft.getInstance().player;
@@ -137,7 +137,7 @@ public class ShieldofHonorItem extends ModifiableBaubleItem {
             boolean hasResistance = player.hasEffect(MobEffects.DAMAGE_RESISTANCE);
             if (!hasResistance) {
                 tooltip.add(Component.translatable("item.trinketsandbaubles.shield_of_honor.tooltip.active",
-                                (int) (Config.SHIELD_DAMAGE_REDUCTION.get() * 100))
+                                (int) (ModConfig.SHIELD_DAMAGE_REDUCTION.get() * 100))
                         .withStyle(ChatFormatting.GREEN));
             } else {
                 tooltip.add(Component.translatable("item.trinketsandbaubles.shield_of_honor.tooltip.inactive")
@@ -145,7 +145,7 @@ public class ShieldofHonorItem extends ModifiableBaubleItem {
             }
         } else {
             tooltip.add(Component.translatable("item.trinketsandbaubles.shield_of_honor.tooltip.base",
-                            (int) (Config.SHIELD_DAMAGE_REDUCTION.get() * 100))
+                            (int) (ModConfig.SHIELD_DAMAGE_REDUCTION.get() * 100))
                     .withStyle(ChatFormatting.GOLD));
         }
         super.appendHoverText(stack, level, tooltip, flag);

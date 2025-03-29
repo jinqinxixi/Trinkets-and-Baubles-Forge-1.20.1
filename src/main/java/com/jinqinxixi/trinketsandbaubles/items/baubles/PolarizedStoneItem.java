@@ -1,6 +1,6 @@
 package com.jinqinxixi.trinketsandbaubles.items.baubles;
 
-import com.jinqinxixi.trinketsandbaubles.config.Config;
+import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import com.jinqinxixi.trinketsandbaubles.capability.mana.ManaData;
 import com.jinqinxixi.trinketsandbaubles.modifier.ModifiableBaubleItem;
 import net.minecraft.ChatFormatting;
@@ -58,7 +58,7 @@ public class PolarizedStoneItem extends ModifiableBaubleItem {
 
         // 添加魔力消耗信息
         tooltip.add(Component.translatable("item.trinketsandbaubles.polarized_stone.mana_cost",
-                        Config.POLARIZED_STONE_DEFLECTION_MANA_COST.get())
+                        ModConfig.POLARIZED_STONE_DEFLECTION_MANA_COST.get())
                 .withStyle(ChatFormatting.BLUE));
 
         // 添加模式状态信息
@@ -169,7 +169,7 @@ public class PolarizedStoneItem extends ModifiableBaubleItem {
 
         if (secondsElapsed >= 0.05f) {
             // 计算魔力消耗并转换为整数
-            int manaCost = Math.round(Config.POLARIZED_STONE_DEFLECTION_MANA_COST.get() * secondsElapsed);
+            int manaCost = Math.round(ModConfig.POLARIZED_STONE_DEFLECTION_MANA_COST.get() * secondsElapsed);
             int currentMana = ManaData.getMana(player);
 
             if (currentMana < manaCost) {
@@ -188,7 +188,7 @@ public class PolarizedStoneItem extends ModifiableBaubleItem {
 
     private void attractItemsAndXP(Level level, Player player) {
         Vec3 playerPos = player.position().add(0, 0.75, 0);
-        double range = Config.POLARIZED_STONE_ATTRACTION_RANGE.get();
+        double range = ModConfig.POLARIZED_STONE_ATTRACTION_RANGE.get();
         AABB attractionBox = new AABB(
                 playerPos.x - range, playerPos.y - range, playerPos.z - range,
                 playerPos.x + range, playerPos.y + range, playerPos.z + range
@@ -199,7 +199,7 @@ public class PolarizedStoneItem extends ModifiableBaubleItem {
         for (ItemEntity item : items) {
             if (!item.isRemoved() && item.getOwner() != player) {
                 Vec3 motion = playerPos.subtract(item.position()).normalize()
-                        .scale(Config.POLARIZED_STONE_ATTRACTION_SPEED.get());
+                        .scale(ModConfig.POLARIZED_STONE_ATTRACTION_SPEED.get());
                 item.setDeltaMovement(motion);
                 item.hasImpulse = true;
             }
@@ -210,7 +210,7 @@ public class PolarizedStoneItem extends ModifiableBaubleItem {
         for (ExperienceOrb orb : xpOrbs) {
             if (!orb.isRemoved()) {
                 Vec3 motion = playerPos.subtract(orb.position()).normalize()
-                        .scale(Config.POLARIZED_STONE_ATTRACTION_SPEED.get());
+                        .scale(ModConfig.POLARIZED_STONE_ATTRACTION_SPEED.get());
                 orb.setDeltaMovement(motion);
                 orb.hasImpulse = true;
             }
@@ -231,7 +231,7 @@ public class PolarizedStoneItem extends ModifiableBaubleItem {
 
     private void deflectProjectiles(Level level, Player player) {
         AABB deflectionBox = player.getBoundingBox()
-                .inflate(Config.POLARIZED_STONE_DEFLECTION_RANGE.get());
+                .inflate(ModConfig.POLARIZED_STONE_DEFLECTION_RANGE.get());
         List<Projectile> projectiles = level.getEntitiesOfClass(Projectile.class, deflectionBox);
 
         for (Projectile projectile : projectiles) {

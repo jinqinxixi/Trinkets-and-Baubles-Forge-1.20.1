@@ -1,10 +1,10 @@
 package com.jinqinxixi.trinketsandbaubles.modEffects;
 
-import com.jinqinxixi.trinketsandbaubles.config.Config;
+
+import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import com.jinqinxixi.trinketsandbaubles.items.ModItem;
 import com.jinqinxixi.trinketsandbaubles.capability.mana.ManaData;
-import com.jinqinxixi.trinketsandbaubles.capability.shrink.ModCapabilities;
-import com.jinqinxixi.trinketsandbaubles.TrinketsandBaublesMod;
+import com.jinqinxixi.trinketsandbaubles.util.RaceScaleHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.damagesource.DamageSource;
@@ -50,47 +50,55 @@ public class GoblinsEffect extends MobEffect {
 
     @Override
     public void addAttributeModifiers(LivingEntity pLivingEntity, AttributeMap pAttributeMap, int pAmplifier) {
+
+        // 使用工具类设置体型缩放
+        if (pLivingEntity != null) {
+            RaceScaleHelper.setSmoothModelScale(pLivingEntity,
+                    ModConfig.GOBLIN_SCALE_FACTOR.get().floatValue(),20);
+        }
+
         this.addAttributeModifier(
                 Attributes.ATTACK_DAMAGE,
                 "d141ef28-51c6-4b47-8a0d-6946e841c132",
-                Config.GOBLIN_ATTACK_DAMAGE.get(),
+                ModConfig.GOBLIN_ATTACK_DAMAGE.get(),
                 AttributeModifier.Operation.MULTIPLY_BASE
         );
 
         this.addAttributeModifier(
                 Attributes.MAX_HEALTH,
                 "dc3b4b8c-a02c-4bd8-82e9-204088927d1f",
-                Config.GOBLIN_MAX_HEALTH.get(),
+                ModConfig.GOBLIN_MAX_HEALTH.get(),
                 AttributeModifier.Operation.MULTIPLY_BASE
         );
 
         this.addAttributeModifier(
                 Attributes.MOVEMENT_SPEED,
                 "91AEAA56-376B-4498-935B-2F7F68070635",
-                Config.GOBLIN_MOVEMENT_SPEED.get(),
+                ModConfig.GOBLIN_MOVEMENT_SPEED.get(),
                 AttributeModifier.Operation.MULTIPLY_BASE
         );
 
         this.addAttributeModifier(
                 Attributes.LUCK,
                 "501E39C3-9F2A-4CCE-9A89-ACD6C7C3546A",
-                Config.GOBLIN_LUCK.get(),
+                ModConfig.GOBLIN_LUCK.get(),
                 AttributeModifier.Operation.ADDITION
         );
 
         this.addAttributeModifier(
                 ForgeMod.SWIM_SPEED.get(),
                 "606E2F94-D4C5-4B50-B89F-A023A0F3C102",
-                Config.GOBLIN_SWIM_SPEED.get(),
+                ModConfig.GOBLIN_SWIM_SPEED.get(),
                 AttributeModifier.Operation.MULTIPLY_BASE
         );
 
         this.addAttributeModifier(
                 ForgeMod.STEP_HEIGHT_ADDITION.get(),
                 "8D062387-C3E4-4FD7-B47A-32E54CCB13C6",
-                Config.GOBLIN_STEP_HEIGHT.get(),
+                ModConfig.GOBLIN_STEP_HEIGHT.get(),
                 AttributeModifier.Operation.ADDITION
         );
+
 
         super.addAttributeModifiers(pLivingEntity, pAttributeMap, pAmplifier);
 
@@ -110,6 +118,9 @@ public class GoblinsEffect extends MobEffect {
         if (effect != null) {
             // 直接移除当前效果
             player.removeEffect(ModEffects.GOBLIN.get());
+
+            RaceScaleHelper.setModelScale(player,
+                    ModConfig.GOBLIN_SCALE_FACTOR.get().floatValue());
 
             // 直接应用一个新的永久效果
             player.addEffect(new MobEffectInstance(
@@ -136,21 +147,10 @@ public class GoblinsEffect extends MobEffect {
                 data.putInt(ORIGINAL_MAX_MANA_KEY, baseMaxMana);
 
                 // 直接添加配置值(可以是正数或负数)
-                int newMaxMana = baseMaxMana - permanentDecrease + crystalBonus + Config.GOBLIN_MANA_PENALTY.get();
+                int newMaxMana = baseMaxMana - permanentDecrease + crystalBonus + ModConfig.GOBLIN_MANA_PENALTY.get();
                 ManaData.setMaxMana(player, Math.max(0, newMaxMana));
                 data.putBoolean(MANA_PENALTY_TAG, true);
             }
-
-            // 处理缩放效果
-            entity.getCapability(ModCapabilities.SHRINK_CAPABILITY).ifPresent(cap -> {
-                if (!cap.isShrunk()) {
-                    float scaleFactor = Config.GOBLIN_SCALE_FACTOR.get().floatValue();
-                    TrinketsandBaublesMod.LOGGER.debug("Applying shrink effect to player: {}, setting scale to: {}",
-                            player.getName().getString(), scaleFactor);
-                    cap.setScale(scaleFactor);
-                    cap.shrink(entity);
-                }
-            });
 
             if (player.getVehicle() instanceof Horse horse) {
                 // 给玩家添加BUFF
@@ -194,7 +194,7 @@ public class GoblinsEffect extends MobEffect {
                         source.is(net.minecraft.world.damagesource.DamageTypes.EXPLOSION)) {
 
                     float currentDamage = event.getAmount();
-                    float reducedDamage = currentDamage * Config.GOBLIN_DAMAGE_REDUCTION.get().floatValue();
+                    float reducedDamage = currentDamage * ModConfig.GOBLIN_DAMAGE_REDUCTION.get().floatValue();
                     event.setAmount(reducedDamage);
                 }
             }
@@ -296,7 +296,7 @@ public class GoblinsEffect extends MobEffect {
                                 player.getPersistentData().putInt(ORIGINAL_MAX_MANA_KEY, originalMana);
 
                                 // 计算并设置正确的魔力值，使用配置的惩罚值
-                                int correctMana = originalMana - permanentDecrease + crystalBonus + Config.GOBLIN_MANA_PENALTY.get();
+                                int correctMana = originalMana - permanentDecrease + crystalBonus + ModConfig.GOBLIN_MANA_PENALTY.get();
                                 ManaData.setMaxMana(player, Math.max(0, correctMana)); // 确保魔力值不会低于0
 
                                 // 标记魔力惩罚已应用
@@ -318,6 +318,11 @@ public class GoblinsEffect extends MobEffect {
 
     @Override
     public void removeAttributeModifiers(LivingEntity pLivingEntity, AttributeMap pAttributeMap, int pAmplifier) {
+
+        // 使用工具类重置体型
+        if (pLivingEntity != null) {
+            RaceScaleHelper.setSmoothModelScale(pLivingEntity, 1.0f, 20);
+        }
         // 先移除所有属性修改器
         super.removeAttributeModifiers(pLivingEntity, pAttributeMap, pAmplifier);
 
@@ -339,16 +344,6 @@ public class GoblinsEffect extends MobEffect {
                 data.remove(ORIGINAL_MAX_MANA_KEY);
                 data.remove("GoblinEffect");
             }
-
-            // 处理缩小效果
-            pLivingEntity.getCapability(ModCapabilities.SHRINK_CAPABILITY).ifPresent(cap -> {
-                if (cap.isShrunk()) {
-                    TrinketsandBaublesMod.LOGGER.debug("De-shrinking entity: {}, current scale was: {}",
-                            pLivingEntity.getName().getString(), cap.scale());
-                    cap.deShrink(pLivingEntity);
-                    cap.sync(pLivingEntity);
-                }
-            });
         }
         // 强制同步玩家属性
         if (pLivingEntity instanceof Player player) {

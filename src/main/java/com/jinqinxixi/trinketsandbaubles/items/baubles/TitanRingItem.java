@@ -1,6 +1,6 @@
 package com.jinqinxixi.trinketsandbaubles.items.baubles;
 
-import com.jinqinxixi.trinketsandbaubles.config.Config;
+import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import com.jinqinxixi.trinketsandbaubles.modEffects.ModEffects;
 import com.jinqinxixi.trinketsandbaubles.modifier.ModifiableBaubleItem;
 import com.jinqinxixi.trinketsandbaubles.util.RaceEffectUtil;
@@ -128,17 +128,17 @@ public class TitanRingItem extends ModifiableBaubleItem {
                                 List<Component> tooltip, TooltipFlag flag) {
         if (net.minecraft.client.gui.screens.Screen.hasShiftDown()) {
             // 详细信息
-            tooltip.add(Component.translatable("item.trinketsandbaubles.titan_ring.tooltip1", Config.TITAN_MAX_HEALTH.get() * 100)
+            tooltip.add(Component.translatable("item.trinketsandbaubles.titan_ring.tooltip1", ModConfig.TITAN_MAX_HEALTH.get() * 100)
                     .withStyle(ChatFormatting.BLUE));
-            tooltip.add(Component.translatable("item.trinketsandbaubles.titan_ring.tooltip2", Config.TITAN_KNOCKBACK_RESISTANCE.get() * 100)
+            tooltip.add(Component.translatable("item.trinketsandbaubles.titan_ring.tooltip2", ModConfig.TITAN_KNOCKBACK_RESISTANCE.get() * 100)
                     .withStyle(ChatFormatting.BLUE));
-            tooltip.add(Component.translatable("item.trinketsandbaubles.titan_ring.tooltip3", Config.TITAN_ATTACK_DAMAGE.get() * 100)
+            tooltip.add(Component.translatable("item.trinketsandbaubles.titan_ring.tooltip3", ModConfig.TITAN_ATTACK_DAMAGE.get() * 100)
                     .withStyle(ChatFormatting.BLUE));
-            tooltip.add(Component.translatable("item.trinketsandbaubles.titan_ring.tooltip4", Config.TITAN_ATTACK_SPEED.get() * 100)
+            tooltip.add(Component.translatable("item.trinketsandbaubles.titan_ring.tooltip4", ModConfig.TITAN_ATTACK_SPEED.get() * 100)
                     .withStyle(ChatFormatting.RED));
-            tooltip.add(Component.translatable("item.trinketsandbaubles.titan_ring.tooltip5", Config.TITAN_REACH_DISTANCE.get() * 100)
+            tooltip.add(Component.translatable("item.trinketsandbaubles.titan_ring.tooltip5", ModConfig.TITAN_REACH_DISTANCE.get() * 100)
                     .withStyle(ChatFormatting.BLUE));
-            tooltip.add(Component.translatable("item.trinketsandbaubles.titan_ring.tooltip6", Config.TITAN_JUMP_BOOST.get() * 100)
+            tooltip.add(Component.translatable("item.trinketsandbaubles.titan_ring.tooltip6", ModConfig.TITAN_JUMP_BOOST.get() * 100)
                     .withStyle(ChatFormatting.BLUE));
             tooltip.add(Component.translatable("item.trinketsandbaubles.titan_ring.tooltip7")
                     .withStyle(ChatFormatting.BLUE));

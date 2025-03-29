@@ -1,10 +1,10 @@
 package com.jinqinxixi.trinketsandbaubles.modEffects;
 
-import com.jinqinxixi.trinketsandbaubles.config.Config;
+
+import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import com.jinqinxixi.trinketsandbaubles.items.ModItem;
 import com.jinqinxixi.trinketsandbaubles.capability.mana.ManaData;
-import com.jinqinxixi.trinketsandbaubles.capability.shrink.ModCapabilities;
-import com.jinqinxixi.trinketsandbaubles.TrinketsandBaublesMod;
+import com.jinqinxixi.trinketsandbaubles.util.RaceScaleHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
@@ -45,11 +45,17 @@ public class DwarvesEffect extends MobEffect {
 
     @Override
     public void addAttributeModifiers(LivingEntity pLivingEntity, AttributeMap pAttributeMap, int pAmplifier) {
+
+        // 使用工具类设置体型缩放
+        if (pLivingEntity != null) {
+            RaceScaleHelper.setSmoothModelScale(pLivingEntity,
+                    ModConfig.DWARVES_SCALE_FACTOR.get().floatValue(),20);
+        }
         // 攻击速度
         this.addAttributeModifier(
                 Attributes.ATTACK_SPEED,
                 "4520f278-fb8f-4c75-9336-5c3ab7c6134a",
-                Config.DWARVES_ATTACK_SPEED.get(),
+                ModConfig.DWARVES_ATTACK_SPEED.get(),
                 AttributeModifier.Operation.MULTIPLY_TOTAL
         );
 
@@ -57,7 +63,7 @@ public class DwarvesEffect extends MobEffect {
         this.addAttributeModifier(
                 Attributes.ATTACK_DAMAGE,
                 "d141ef28-51c6-4b47-8a0d-6946e841c132",
-                Config.DWARVES_ATTACK_DAMAGE.get(),
+                ModConfig.DWARVES_ATTACK_DAMAGE.get(),
                 AttributeModifier.Operation.MULTIPLY_TOTAL
         );
 
@@ -65,7 +71,7 @@ public class DwarvesEffect extends MobEffect {
         this.addAttributeModifier(
                 Attributes.MAX_HEALTH,
                 "dc3b4b8c-a02c-4bd8-82e9-204088927d1f",
-                Config.DWARVES_MAX_HEALTH.get(),
+                ModConfig.DWARVES_MAX_HEALTH.get(),
                 AttributeModifier.Operation.MULTIPLY_TOTAL
         );
 
@@ -73,7 +79,7 @@ public class DwarvesEffect extends MobEffect {
         this.addAttributeModifier(
                 Attributes.ARMOR_TOUGHNESS,
                 "8fc5e73c-2cf2-4729-8128-d99f49aa37f2",
-                Config.DWARVES_ARMOR_TOUGHNESS.get(),
+                ModConfig.DWARVES_ARMOR_TOUGHNESS.get(),
                 AttributeModifier.Operation.MULTIPLY_TOTAL
         );
 
@@ -81,7 +87,7 @@ public class DwarvesEffect extends MobEffect {
         this.addAttributeModifier(
                 Attributes.KNOCKBACK_RESISTANCE,
                 "95eb4f0a-dd60-4ada-98c1-2ce5c3d4374c",
-                Config.DWARVES_KNOCKBACK_RESISTANCE.get(),
+                ModConfig.DWARVES_KNOCKBACK_RESISTANCE.get(),
                 AttributeModifier.Operation.ADDITION
         );
 
@@ -89,9 +95,11 @@ public class DwarvesEffect extends MobEffect {
         this.addAttributeModifier(
                 Attributes.MOVEMENT_SPEED,
                 "3b8f4065-5f43-4939-8e6a-a34f2d67c55d",
-                Config.DWARVES_MOVEMENT_SPEED.get(),
+                ModConfig.DWARVES_MOVEMENT_SPEED.get(),
                 AttributeModifier.Operation.MULTIPLY_TOTAL
         );
+
+
 
         super.addAttributeModifiers(pLivingEntity, pAttributeMap, pAmplifier);
 
@@ -111,6 +119,8 @@ public class DwarvesEffect extends MobEffect {
         if (effect != null) {
             // 直接移除当前效果
             player.removeEffect(ModEffects.DWARVES.get());
+            RaceScaleHelper.setModelScale(player,
+                    ModConfig.DWARVES_SCALE_FACTOR.get().floatValue());
 
             // 直接应用一个新的永久效果
             player.addEffect(new MobEffectInstance(
@@ -155,17 +165,6 @@ public class DwarvesEffect extends MobEffect {
                 if (currentMaxMana != newMaxMana) {
                     ManaData.setMaxMana(player, newMaxMana);
                 }
-
-                // 处理缩放效果
-                entity.getCapability(ModCapabilities.SHRINK_CAPABILITY).ifPresent(cap -> {
-                    if (!cap.isShrunk()) {
-                        float scaleFactor = Config.DWARVES_SCALE_FACTOR.get().floatValue();
-                        TrinketsandBaublesMod.LOGGER.debug("Applying shrink effect to player: {}, setting scale to: {}",
-                                player.getName().getString(), scaleFactor);
-                        cap.setScale(scaleFactor);
-                        cap.shrink(entity);
-                    }
-                });
             }
 
 
@@ -185,6 +184,11 @@ public class DwarvesEffect extends MobEffect {
 
     @Override
     public void removeAttributeModifiers(LivingEntity pLivingEntity, AttributeMap pAttributeMap, int pAmplifier) {
+
+        // 使用工具类重置体型
+        if (pLivingEntity != null) {
+            RaceScaleHelper.setSmoothModelScale(pLivingEntity, 1.0f, 20); // 1秒过渡时间
+        }
         super.removeAttributeModifiers(pLivingEntity, pAttributeMap, pAmplifier);
 
         if (pLivingEntity instanceof Player player) {
@@ -204,14 +208,6 @@ public class DwarvesEffect extends MobEffect {
             player.setHealth(player.getHealth());
         }
 
-        // 处理缩放效果的移除
-        pLivingEntity.getCapability(ModCapabilities.SHRINK_CAPABILITY).ifPresent(cap -> {
-            if (cap.isShrunk()) {
-                TrinketsandBaublesMod.LOGGER.debug("De-shrinking entity: {}, current scale was: {}",
-                        pLivingEntity.getName().getString(), cap.scale());
-                cap.deShrink(pLivingEntity);
-            }
-        });
         // 强制同步玩家属性
         if (pLivingEntity instanceof Player player) {
             // 强制同步生命值

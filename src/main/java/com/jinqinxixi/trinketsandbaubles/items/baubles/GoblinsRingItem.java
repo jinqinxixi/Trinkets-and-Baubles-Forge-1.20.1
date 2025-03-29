@@ -1,6 +1,6 @@
 package com.jinqinxixi.trinketsandbaubles.items.baubles;
 
-import com.jinqinxixi.trinketsandbaubles.config.Config;
+import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import com.jinqinxixi.trinketsandbaubles.modEffects.ModEffects;
 import com.jinqinxixi.trinketsandbaubles.modifier.ModifiableBaubleItem;
 import com.jinqinxixi.trinketsandbaubles.util.RaceEffectUtil;
@@ -129,15 +129,15 @@ public class GoblinsRingItem extends ModifiableBaubleItem {
                                 List<Component> tooltip, TooltipFlag flag) {
         if (net.minecraft.client.gui.screens.Screen.hasShiftDown()) {
             // 详细信息
-            tooltip.add(Component.translatable("item.trinketsandbaubles.goblins_ring.tooltip1", Config.GOBLIN_MAX_HEALTH.get() * 100)
+            tooltip.add(Component.translatable("item.trinketsandbaubles.goblins_ring.tooltip1", ModConfig.GOBLIN_MAX_HEALTH.get() * 100)
                     .withStyle(ChatFormatting.RED));
-            tooltip.add(Component.translatable("item.trinketsandbaubles.goblins_ring.tooltip2", Config.GOBLIN_MOVEMENT_SPEED.get() * 100)
+            tooltip.add(Component.translatable("item.trinketsandbaubles.goblins_ring.tooltip2", ModConfig.GOBLIN_MOVEMENT_SPEED.get() * 100)
                     .withStyle(ChatFormatting.BLUE));
-            tooltip.add(Component.translatable("item.trinketsandbaubles.goblins_ring.tooltip3", Config.GOBLIN_ATTACK_DAMAGE.get() * 100)
+            tooltip.add(Component.translatable("item.trinketsandbaubles.goblins_ring.tooltip3", ModConfig.GOBLIN_ATTACK_DAMAGE.get() * 100)
                     .withStyle(ChatFormatting.RED));
-            tooltip.add(Component.translatable("item.trinketsandbaubles.goblins_ring.tooltip4", Config.GOBLIN_LUCK.get())
+            tooltip.add(Component.translatable("item.trinketsandbaubles.goblins_ring.tooltip4", ModConfig.GOBLIN_LUCK.get())
                     .withStyle(ChatFormatting.BLUE));
-            tooltip.add(Component.translatable("item.trinketsandbaubles.goblins_ring.tooltip5", Config.GOBLIN_SWIM_SPEED.get() * 100)
+            tooltip.add(Component.translatable("item.trinketsandbaubles.goblins_ring.tooltip5", ModConfig.GOBLIN_SWIM_SPEED.get() * 100)
                     .withStyle(ChatFormatting.BLUE));
         } else {
             tooltip.add(Component.translatable("item.trinketsandbaubles.goblins_ring.tooltip11")

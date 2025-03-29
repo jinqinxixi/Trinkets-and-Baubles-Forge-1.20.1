@@ -1,6 +1,6 @@
 package com.jinqinxixi.trinketsandbaubles.items.baubles;
 
-import com.jinqinxixi.trinketsandbaubles.config.Config;
+import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 
 import com.jinqinxixi.trinketsandbaubles.modifier.ModifiableBaubleItem;
 import net.minecraft.ChatFormatting;
@@ -45,8 +45,8 @@ public class EnderQueensCrownItem extends ModifiableBaubleItem {
                                 List<Component> tooltip, TooltipFlag flag) {
         tooltip.add(Component.translatable("item.trinketsandbaubles.ender_queens_crown.tooltip.enderman_follow"));
         tooltip.add(Component.translatable("item.trinketsandbaubles.ender_queens_crown.tooltip.damage_immunity",
-                (int) (Config.DAMAGE_IMMUNITY_CHANCE.get() * 100)).withStyle(ChatFormatting.DARK_RED));
-        if (Config.WATER_DAMAGE_ENABLED.get()) {
+                (int) (ModConfig.DAMAGE_IMMUNITY_CHANCE.get() * 100)).withStyle(ChatFormatting.DARK_RED));
+        if (ModConfig.WATER_DAMAGE_ENABLED.get()) {
             tooltip.add(Component.translatable("item.trinketsandbaubles.ender_queens_crown.tooltip.water_damage"));
         }
         super.appendHoverText(stack, level, tooltip, flag);
@@ -56,11 +56,11 @@ public class EnderQueensCrownItem extends ModifiableBaubleItem {
     public void curioTick(SlotContext slotContext, ItemStack stack) {
         super.curioTick(slotContext, stack);
         if (slotContext.entity() instanceof Player player && !player.level().isClientSide) {
-            if (Config.WATER_DAMAGE_ENABLED.get() && player.isInWater()) {
+            if (ModConfig.WATER_DAMAGE_ENABLED.get() && player.isInWater()) {
                 player.hurt(player.damageSources().drown(), 1.0F);
             }
 
-            AABB searchBox = player.getBoundingBox().inflate(Config.ENDERMAN_FOLLOW_RANGE.get());
+            AABB searchBox = player.getBoundingBox().inflate(ModConfig.ENDERMAN_FOLLOW_RANGE.get());
             player.level().getEntitiesOfClass(EnderMan.class, searchBox).forEach(enderman -> {
                 if (enderman.getTarget() == player) {
                     enderman.setTarget(null);
@@ -129,7 +129,7 @@ public class EnderQueensCrownItem extends ModifiableBaubleItem {
             return false;
         }
 
-        if (entity.getRandom().nextFloat() < Config.DAMAGE_IMMUNITY_CHANCE.get()) {
+        if (entity.getRandom().nextFloat() < ModConfig.DAMAGE_IMMUNITY_CHANCE.get()) {
             teleportRandomly(entity);
             summonEnderman(entity);
             if (source.getEntity() instanceof LivingEntity attacker) {
@@ -153,7 +153,7 @@ public class EnderQueensCrownItem extends ModifiableBaubleItem {
 
     private static void teleportRandomly(LivingEntity entity) {
         RandomSource random = entity.getRandom();
-        double range = Config.TELEPORT_RANGE.get();
+        double range = ModConfig.TELEPORT_RANGE.get();
         double d0 = entity.getX() + (random.nextDouble() - 0.5D) * range;
         double d1 = entity.getY() + (random.nextDouble() - 0.5D) * range;
         double d2 = entity.getZ() + (random.nextDouble() - 0.5D) * range;
@@ -199,7 +199,7 @@ public class EnderQueensCrownItem extends ModifiableBaubleItem {
             }
         }
 
-        AABB searchBox = defender.getBoundingBox().inflate(Config.ENDERMAN_FOLLOW_RANGE.get());
+        AABB searchBox = defender.getBoundingBox().inflate(ModConfig.ENDERMAN_FOLLOW_RANGE.get());
         defender.level().getEntitiesOfClass(EnderMan.class, searchBox).forEach(enderman -> {
             boolean isControlled = enderman.getPersistentData().getBoolean(CROWN_CONTROLLED_TAG);
             boolean isSummoned = enderman.getPersistentData().getBoolean(CROWN_SUMMONED_TAG);

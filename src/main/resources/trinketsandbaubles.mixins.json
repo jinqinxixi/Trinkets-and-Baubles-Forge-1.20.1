@@ -6,7 +6,7 @@
   "compatibilityLevel": "JAVA_17",
   "refmap": "trinketsandbaubles.refmap.json",
   "mixins": [
-    "EntityMixin","PlayerMixin","BlockStateMixin","LivingEntityAccessor"
+    "PlayerMixin","BlockStateMixin","LivingEntityAccessor"
   ],
   "client": ["CameraMixin"
   ],

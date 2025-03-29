@@ -1,10 +1,11 @@
 package com.jinqinxixi.trinketsandbaubles.modEffects;
 
-import com.jinqinxixi.trinketsandbaubles.config.Config;
+
+import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import com.jinqinxixi.trinketsandbaubles.items.ModItem;
 import com.jinqinxixi.trinketsandbaubles.capability.mana.ManaData;
-import com.jinqinxixi.trinketsandbaubles.capability.shrink.ModCapabilities;
 import com.jinqinxixi.trinketsandbaubles.TrinketsandBaublesMod;
+import com.jinqinxixi.trinketsandbaubles.util.RaceScaleHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.effect.MobEffect;
@@ -46,46 +47,54 @@ public class FairyDewEffect extends MobEffect {
 
     @Override
     public void addAttributeModifiers(LivingEntity pLivingEntity, AttributeMap pAttributeMap, int pAmplifier) {
+        // 使用工具类设置体型缩放
+        if (pLivingEntity != null) {
+            RaceScaleHelper.setSmoothModelScale(pLivingEntity,
+                    ModConfig.FAIRY_DEW_SCALE_FACTOR.get().floatValue(),20);
+        }
+
         // 在这里添加属性修改器，而不是在构造函数中
         this.addAttributeModifier(Attributes.MAX_HEALTH,
                 "5D6F0BA2-1186-46AC-B896-C61C5CEE99CC",
-                Config.FAIRY_DEW_MAX_HEALTH.get(),
+                ModConfig.FAIRY_DEW_MAX_HEALTH.get(),
                 AttributeModifier.Operation.MULTIPLY_TOTAL);
 
         this.addAttributeModifier(Attributes.ATTACK_DAMAGE,
                 "55FCED67-E92A-486E-9800-B47F202C4386",
-                Config.FAIRY_DEW_ATTACK_DAMAGE.get(),
+                ModConfig.FAIRY_DEW_ATTACK_DAMAGE.get(),
                 AttributeModifier.Operation.MULTIPLY_TOTAL);
 
         this.addAttributeModifier(Attributes.ARMOR,
                 "2AD3F246-FEE1-4E67-B886-69FD380BB150",
-                Config.FAIRY_DEW_ARMOR.get(),
+                ModConfig.FAIRY_DEW_ARMOR.get(),
                 AttributeModifier.Operation.MULTIPLY_TOTAL);
 
         this.addAttributeModifier(Attributes.ARMOR_TOUGHNESS,
                 "501E39C3-9F2A-4CCE-9A89-ACD6C7C3546A",
-                Config.FAIRY_DEW_ARMOR_TOUGHNESS.get(),
+                ModConfig.FAIRY_DEW_ARMOR_TOUGHNESS.get(),
                 AttributeModifier.Operation.MULTIPLY_TOTAL);
 
         this.addAttributeModifier(Attributes.MOVEMENT_SPEED,
                 "91AEAA56-376B-4498-935B-2F7F68070635",
-                Config.FAIRY_DEW_MOVEMENT_SPEED.get(),
+                ModConfig.FAIRY_DEW_MOVEMENT_SPEED.get(),
                 AttributeModifier.Operation.MULTIPLY_TOTAL);
 
         this.addAttributeModifier(ForgeMod.SWIM_SPEED.get(),
                 "606E2F94-D4C5-4B50-B89F-A023A0F3C102",
-                Config.FAIRY_DEW_SWIM_SPEED.get(),
+                ModConfig.FAIRY_DEW_SWIM_SPEED.get(),
                 AttributeModifier.Operation.MULTIPLY_TOTAL);
 
         this.addAttributeModifier(ForgeMod.BLOCK_REACH.get(),
                 "D7184E46-5B46-4C99-9EA3-7E2987BF4C91",
-                Config.FAIRY_DEW_REACH.get(),
+                ModConfig.FAIRY_DEW_REACH.get(),
                 AttributeModifier.Operation.MULTIPLY_TOTAL);
 
         this.addAttributeModifier(ForgeMod.STEP_HEIGHT_ADDITION.get(),
                 "8D062387-C3E4-4FD7-B47A-32E54CCB13C6",
-                Config.FAIRY_DEW_STEP_HEIGHT.get(),
+                ModConfig.FAIRY_DEW_STEP_HEIGHT.get(),
                 AttributeModifier.Operation.ADDITION);
+
+
 
         super.addAttributeModifiers(pLivingEntity, pAttributeMap, pAmplifier);
 
@@ -101,7 +110,7 @@ public class FairyDewEffect extends MobEffect {
         LivingEntity entity = event.getEntity();
         if (entity instanceof Player player && player.hasEffect(ModEffects.FAIRY_DEW.get())) {
             Vec3 motion = player.getDeltaMovement();
-            double multiplier = 1.0 + Config.FAIRY_DEW_JUMP_BOOST.get();
+            double multiplier = 1.0 + ModConfig.FAIRY_DEW_JUMP_BOOST.get();
             player.setDeltaMovement(motion.x, motion.y * multiplier, motion.z);
         }
     }
@@ -115,7 +124,8 @@ public class FairyDewEffect extends MobEffect {
         if (effect != null) {
             // 直接移除当前效果
             player.removeEffect(ModEffects.FAIRY_DEW.get());
-
+            RaceScaleHelper.setModelScale(player,
+                    ModConfig.FAIRY_DEW_SCALE_FACTOR.get().floatValue());
             // 直接应用一个新的永久效果
             player.addEffect(new MobEffectInstance(
                     ModEffects.FAIRY_DEW.get(),
@@ -135,20 +145,9 @@ public class FairyDewEffect extends MobEffect {
             if (!player.isCreative() && !player.getAbilities().mayfly) {
                 player.getAbilities().mayfly = true;
                 // 只在首次设置飞行能力时设置速度
-                player.getAbilities().setFlyingSpeed(0.05f * Config.FAIRY_DEW_FLIGHT_SPEED.get().floatValue());
+                player.getAbilities().setFlyingSpeed(0.05f * ModConfig.FAIRY_DEW_FLIGHT_SPEED.get().floatValue());
                 player.onUpdateAbilities();
             }
-
-            // 处理缩放效果
-            livingEntity.getCapability(ModCapabilities.SHRINK_CAPABILITY).ifPresent(cap -> {
-                if (!cap.isShrunk()) {
-                    float scaleFactor = Config.FAIRY_DEW_SCALE_FACTOR.get().floatValue();
-                    TrinketsandBaublesMod.LOGGER.debug("Applying shrink effect to player: {}, setting scale to: {}",
-                            player.getName().getString(), scaleFactor);
-                    cap.setScale(scaleFactor);
-                    cap.shrink(livingEntity);
-                }
-            });
 
             // 处理魔力值
             CompoundTag data = player.getPersistentData();
@@ -160,13 +159,13 @@ public class FairyDewEffect extends MobEffect {
                 int baseMaxMana = currentMaxMana - crystalBonus + permanentDecrease;
                 data.putInt(ORIGINAL_MANA_TAG, baseMaxMana);
 
-                int newMaxMana = baseMaxMana - permanentDecrease + crystalBonus + Config.FAIRY_DEW_MANA_BONUS.get();
+                int newMaxMana = baseMaxMana - permanentDecrease + crystalBonus + ModConfig.FAIRY_DEW_MANA_BONUS.get();
                 ManaData.setMaxMana(player, newMaxMana);
                 data.putBoolean(BONUS_TAG, true);
             }
 
             // 如果配置允许，处理爬墙
-            if (Config.FAIRY_DEW_WALL_CLIMB.get()) {
+            if (ModConfig.FAIRY_DEW_WALL_CLIMB.get()) {
                 handleWallClimb(player);
             }
         }
@@ -184,7 +183,7 @@ public class FairyDewEffect extends MobEffect {
                     player.setDeltaMovement(motion.x, 0, motion.z);
                 } else {
                     // 正常爬墙
-                    double upwardSpeed = Config.FAIRY_DEW_CLIMB_SPEED.get();
+                    double upwardSpeed = ModConfig.FAIRY_DEW_CLIMB_SPEED.get();
                     player.setDeltaMovement(motion.x, upwardSpeed, motion.z);
                 }
 
@@ -192,7 +191,7 @@ public class FairyDewEffect extends MobEffect {
                 player.resetFallDistance();
 
                 // 减小水平移动以增加稳定性
-                double drag = Config.FAIRY_DEW_CLIMB_HORIZONTAL_DRAG.get();
+                double drag = ModConfig.FAIRY_DEW_CLIMB_HORIZONTAL_DRAG.get();
                 player.setDeltaMovement(player.getDeltaMovement().multiply(drag, 1.0, drag));
             }
         } else {
@@ -274,6 +273,11 @@ public class FairyDewEffect extends MobEffect {
 
     @Override
     public void removeAttributeModifiers(LivingEntity pLivingEntity, AttributeMap pAttributeMap, int pAmplifier) {
+
+        // 使用工具类重置体型
+        if (pLivingEntity != null) {
+            RaceScaleHelper.setSmoothModelScale(pLivingEntity, 1.0f, 20);
+        }
         // 先移除所有属性修改器（调用父类的方法）
         super.removeAttributeModifiers(pLivingEntity, pAttributeMap, pAmplifier);
 
@@ -304,14 +308,6 @@ public class FairyDewEffect extends MobEffect {
         }
         TrinketsandBaublesMod.LOGGER.debug("Removing FairyDewEffect from entity: {}",
                 pLivingEntity.getName().getString());
-
-        pLivingEntity.getCapability(ModCapabilities.SHRINK_CAPABILITY).ifPresent(cap -> {
-            if (cap.isShrunk()) {
-                TrinketsandBaublesMod.LOGGER.debug("De-shrinking entity: {}, current scale was: {}",
-                        pLivingEntity.getName().getString(), cap.scale());
-                cap.deShrink(pLivingEntity);
-            }
-        });
         // 强制同步玩家属性
         if (pLivingEntity instanceof Player player) {
             // 强制同步生命值
@@ -376,15 +372,6 @@ public class FairyDewEffect extends MobEffect {
                                         false   // showIcon
                                 ));
 
-                                // 处理缩小效果同步
-                                event.getOriginal().getCapability(ModCapabilities.SHRINK_CAPABILITY).ifPresent(old -> {
-                                    CompoundTag nbt = old.serializeNBT();
-                                    event.getEntity().getCapability(ModCapabilities.SHRINK_CAPABILITY).ifPresent(cap -> {
-                                        cap.deserializeNBT(nbt);
-                                        cap.sync(event.getEntity());
-                                    });
-                                });
-
                                 // 魔力值相关数据处理
                                 if (effectData.contains(ORIGINAL_MANA_TAG)) {
                                     int originalMana = effectData.getInt(ORIGINAL_MANA_TAG);
@@ -398,7 +385,7 @@ public class FairyDewEffect extends MobEffect {
 
                                     // 计算并设置正确的魔力值
                                     int correctMana = originalMana - permanentDecrease + crystalBonus +
-                                            Config.FAIRY_DEW_MANA_BONUS.get();
+                                            ModConfig.FAIRY_DEW_MANA_BONUS.get();
                                     ManaData.setMaxMana(player, correctMana);
 
                                     // 标记魔力加成已应用

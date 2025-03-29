@@ -1,6 +1,6 @@
 package com.jinqinxixi.trinketsandbaubles.potion;
 
-import com.jinqinxixi.trinketsandbaubles.config.Config;
+import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import com.jinqinxixi.trinketsandbaubles.capability.mana.ManaData;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
@@ -41,7 +41,7 @@ public class ManaReagentPotion extends Item {
                 // 记录永久性减少
                 int permanentDecrease = data.getInt("PermanentManaDecrease");
                 data.putInt("PermanentManaDecrease",
-                        permanentDecrease + Config.MANA_REAGENT_MAX_DECREASE.get());
+                        permanentDecrease + ModConfig.MANA_REAGENT_MAX_DECREASE.get());
 
                 // 获取当前的水晶加成
                 int crystalBonus = data.getInt("CrystalManaBonus");
@@ -49,7 +49,7 @@ public class ManaReagentPotion extends Item {
                 // 更新当前魔力值 (保持水晶加成不变)
                 int currentMaxMana = ManaData.getMaxMana(player);
                 ManaData.setMaxMana(player,
-                        currentMaxMana - Config.MANA_REAGENT_MAX_DECREASE.get());
+                        currentMaxMana - ModConfig.MANA_REAGENT_MAX_DECREASE.get());
             }
 
             if (!player.getAbilities().instabuild) {
@@ -91,7 +91,7 @@ public class ManaReagentPotion extends Item {
     public void appendHoverText(ItemStack stack, @Nullable Level level,
                                 List<Component> tooltip, TooltipFlag flag) {
         tooltip.add(Component.translatable("item.trinketsandbaubles.mana_reagent.tooltip",
-                        Config.MANA_REAGENT_MAX_DECREASE.get())
+                        ModConfig.MANA_REAGENT_MAX_DECREASE.get())
                 .withStyle(ChatFormatting.RED));
     }
 }

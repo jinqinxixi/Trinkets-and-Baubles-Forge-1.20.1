@@ -1,6 +1,6 @@
 package com.jinqinxixi.trinketsandbaubles.modifier;
 
-import com.jinqinxixi.trinketsandbaubles.config.Config;
+import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -63,7 +63,7 @@ public abstract class ModifiableBaubleItem extends Item implements ICurioItem {
 
     @Override
     public void inventoryTick(ItemStack stack, Level world, Entity entity, int slot, boolean selected) {
-        if (!Config.isModifierEnabled()) return;
+        if (!ModConfig.isModifierEnabled()) return;
         super.inventoryTick(stack, world, entity, slot, selected);
         if (!world.isClientSide && entity instanceof Player) {
             initializeModifier(stack);
@@ -71,7 +71,7 @@ public abstract class ModifiableBaubleItem extends Item implements ICurioItem {
     }
 
     protected void initializeModifier(ItemStack stack) {
-        if (!Config.isModifierEnabled()) return;
+        if (!ModConfig.isModifierEnabled()) return;
         CompoundTag tag = stack.getOrCreateTag();
         if (!tag.getBoolean(INITIALIZED_TAG)) {
             Modifier selected = getRandomModifier();
@@ -131,7 +131,7 @@ public abstract class ModifiableBaubleItem extends Item implements ICurioItem {
     }
 
     protected void applyModifier(Player player, ItemStack stack) {
-        if (!Config.isModifierEnabled()) return;
+        if (!ModConfig.isModifierEnabled()) return;
 
         CompoundTag modifierTag = stack.getTagElement(MODIFIER_TAG);
         if (modifierTag != null) {
@@ -232,7 +232,7 @@ public abstract class ModifiableBaubleItem extends Item implements ICurioItem {
 
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
-        if (!Config.isModifierEnabled()) {
+        if (!ModConfig.isModifierEnabled()) {
             return;
         }
 

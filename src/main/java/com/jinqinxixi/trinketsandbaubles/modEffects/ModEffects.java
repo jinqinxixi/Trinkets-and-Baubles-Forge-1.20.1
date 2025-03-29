@@ -9,7 +9,7 @@ public class ModEffects {
     public static final DeferredRegister<MobEffect> EFFECTS =
             DeferredRegister.create(ForgeRegistries.MOB_EFFECTS, "trinketsandbaubles");
 
-//    // 注册恢复药剂效果
+    // 注册恢复药剂效果
     public static final RegistryObject<MobEffect> FAIRY_DEW =
             EFFECTS.register("fairy_dew", FairyDewEffect::new);
 

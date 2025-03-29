@@ -1,10 +1,12 @@
 package com.jinqinxixi.trinketsandbaubles.modEffects;
 
-import com.jinqinxixi.trinketsandbaubles.config.Config;
+
+import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import com.jinqinxixi.trinketsandbaubles.items.ModItem;
 import com.jinqinxixi.trinketsandbaubles.capability.mana.ManaData;
-import com.jinqinxixi.trinketsandbaubles.capability.shrink.ModCapabilities;
+
 import com.jinqinxixi.trinketsandbaubles.TrinketsandBaublesMod;
+import com.jinqinxixi.trinketsandbaubles.util.RaceScaleHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.world.effect.MobEffect;
@@ -44,23 +46,30 @@ public class ElvesEffect extends MobEffect {
 
     @Override
     public void addAttributeModifiers(LivingEntity pLivingEntity, AttributeMap pAttributeMap, int pAmplifier) {
+        // 使用工具类设置体型缩放
+        if (pLivingEntity != null) {
+            RaceScaleHelper.setSmoothModelScale(pLivingEntity,
+                    ModConfig.ELVES_SCALE_FACTOR.get().floatValue(),20);
+        }
         this.addAttributeModifier(
                 Attributes.ATTACK_SPEED,
                 "5D6F0BA2-1186-46AC-B896-C61C5CEE99CC",
-                Config.ELVES_ATTACK_SPEED.get(),
+                ModConfig.ELVES_ATTACK_SPEED.get(),
                 AttributeModifier.Operation.MULTIPLY_TOTAL);
 
         this.addAttributeModifier(
                 Attributes.ATTACK_DAMAGE,
                 "55FCED67-E92A-486E-9800-B47F202C4386",
-                Config.ELVES_ATTACK_DAMAGE.get(),
+                ModConfig.ELVES_ATTACK_DAMAGE.get(),
                 AttributeModifier.Operation.MULTIPLY_TOTAL);
 
         this.addAttributeModifier(
                 Attributes.MOVEMENT_SPEED,
                 "91AEAA56-376B-4498-935B-2F7F68070635",
-                Config.ELVES_MOVEMENT_SPEED.get(),
+                ModConfig.ELVES_MOVEMENT_SPEED.get(),
                 AttributeModifier.Operation.MULTIPLY_TOTAL);
+
+
 
         super.addAttributeModifiers(pLivingEntity, pAttributeMap, pAmplifier);
 
@@ -80,7 +89,8 @@ public class ElvesEffect extends MobEffect {
         if (effect != null) {
             // 直接移除当前效果
             player.removeEffect(ModEffects.ELVES.get());
-
+            RaceScaleHelper.setModelScale(player,
+                    ModConfig.ELVES_SCALE_FACTOR.get().floatValue());
             // 直接应用一个新的永久效果
             player.addEffect(new MobEffectInstance(
                     ModEffects.ELVES.get(),
@@ -112,18 +122,6 @@ public class ElvesEffect extends MobEffect {
         if (livingEntity instanceof Player player) {
             CompoundTag data = player.getPersistentData();
 
-            TrinketsandBaublesMod.LOGGER.debug("FairyDewEffect applying to player: {}", player.getName().getString());
-
-            // 处理缩放效果
-            livingEntity.getCapability(ModCapabilities.SHRINK_CAPABILITY).ifPresent(cap -> {
-                if (!cap.isShrunk()) {
-                    float scaleFactor = Config.ELVES_SCALE_FACTOR.get().floatValue();
-                    TrinketsandBaublesMod.LOGGER.debug("Applying shrink effect to player: {}, setting scale to: {}",
-                            player.getName().getString(), scaleFactor);
-                    cap.setScale(scaleFactor);
-                    cap.shrink(livingEntity);
-                }
-            });
 
             // 处理魔力加成
             if (!data.contains(MANA_BONUS_TAG)) {
@@ -135,7 +133,7 @@ public class ElvesEffect extends MobEffect {
                 data.putInt(ORIGINAL_MAX_MANA_KEY, baseMaxMana);
 
                 // 使用配置的魔力加成值
-                int newMaxMana = baseMaxMana - permanentDecrease + crystalBonus + Config.ELVES_MANA_BONUS.get();
+                int newMaxMana = baseMaxMana - permanentDecrease + crystalBonus + ModConfig.ELVES_MANA_BONUS.get();
                 ManaData.setMaxMana(player, newMaxMana);
                 data.putBoolean(MANA_BONUS_TAG, true);
             }
@@ -158,8 +156,8 @@ public class ElvesEffect extends MobEffect {
                         double baseAttackSpeed = player.getAttributeBaseValue(Attributes.ATTACK_SPEED);
 
                         // 计算实际的增益值（基础值 * 配置的百分比）
-                        double movementSpeedBonus = baseMovementSpeed * Config.ELVES_FOREST_MOVEMENT_SPEED.get();
-                        double attackSpeedBonus = baseAttackSpeed * Config.ELVES_FOREST_ATTACK_SPEED.get();
+                        double movementSpeedBonus = baseMovementSpeed * ModConfig.ELVES_FOREST_MOVEMENT_SPEED.get();
+                        double attackSpeedBonus = baseAttackSpeed * ModConfig.ELVES_FOREST_ATTACK_SPEED.get();
 
                         // 添加移动速度增益
                         movementSpeed.addTransientModifier(
@@ -183,8 +181,8 @@ public class ElvesEffect extends MobEffect {
 
                         TrinketsandBaublesMod.LOGGER.debug("Applied forest bonuses to player: {}, Movement Speed: +{}%, Attack Speed: +{}%",
                                 player.getName().getString(),
-                                Config.ELVES_FOREST_MOVEMENT_SPEED.get() * 100,
-                                Config.ELVES_FOREST_ATTACK_SPEED.get() * 100);
+                                ModConfig.ELVES_FOREST_MOVEMENT_SPEED.get() * 100,
+                                ModConfig.ELVES_FOREST_ATTACK_SPEED.get() * 100);
 
                     } catch (IllegalArgumentException e) {
                         TrinketsandBaublesMod.LOGGER.error("Error applying forest bonuses: {}", e.getMessage());
@@ -197,6 +195,11 @@ public class ElvesEffect extends MobEffect {
     // 处理效果移除时的魔力值恢复
     @Override
     public void removeAttributeModifiers(LivingEntity pLivingEntity, AttributeMap pAttributeMap, int pAmplifier) {
+
+        // 使用工具类重置体型
+        if (pLivingEntity != null) {
+            RaceScaleHelper.setSmoothModelScale(pLivingEntity, 1.0f, 20); // 1秒过渡时间
+        }
         super.removeAttributeModifiers(pLivingEntity, pAttributeMap, pAmplifier);
 
         if (pLivingEntity instanceof Player player) {
@@ -225,13 +228,6 @@ public class ElvesEffect extends MobEffect {
                 attackSpeed.removeModifier(UUID.fromString("5D6F0BA2-1186-46AC-B896-C61C5CEE99CC"));
             }
         }
-        pLivingEntity.getCapability(ModCapabilities.SHRINK_CAPABILITY).ifPresent(cap -> {
-            if (cap.isShrunk()) {
-                TrinketsandBaublesMod.LOGGER.debug("De-shrinking entity: {}, current scale was: {}",
-                        pLivingEntity.getName().getString(), cap.scale());
-                cap.deShrink(pLivingEntity);
-            }
-        });
         // 强制同步玩家属性
         if (pLivingEntity instanceof Player player) {
             // 强制同步生命值
@@ -345,7 +341,7 @@ public class ElvesEffect extends MobEffect {
         if (event.getSource().getDirectEntity() instanceof Arrow) {
             if (event.getSource().getEntity() instanceof Player player) {
                 if (player.hasEffect(ModEffects.ELVES.get()) && player.isCrouching()) {
-                    float newDamage = event.getAmount() * Config.ELVES_BOW_DAMAGE_BOOST.get().floatValue();
+                    float newDamage = event.getAmount() * ModConfig.ELVES_BOW_DAMAGE_BOOST.get().floatValue();
                     event.setAmount(newDamage);
                 }
             }
