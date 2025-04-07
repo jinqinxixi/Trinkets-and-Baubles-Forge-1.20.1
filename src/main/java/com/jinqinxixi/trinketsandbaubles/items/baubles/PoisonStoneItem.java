@@ -74,16 +74,18 @@ public class PoisonStoneItem extends ModifiableBaubleItem {
 
     @SubscribeEvent
     public static void onLivingHurt(LivingHurtEvent event) {
-        if (event.getSource().getEntity() instanceof LivingEntity attacker) {
-            LivingEntity target = event.getEntity();
+        if (ModConfig.POISON_STONE_ACTIVATE_DAMAGE_EVENT.get()) {                // We add a boolean to control when this event fires or not
+            if (event.getSource().getEntity() instanceof LivingEntity attacker) {
+                LivingEntity target = event.getEntity();
 
-            // 处理中毒效果
-            onAttack(attacker, target);
+                // 处理中毒效果
+                onAttack(attacker, target);
 
-            // 处理额外伤害
-            float multiplier = getExtraDamageMultiplier(attacker, target);
-            if (multiplier > 1.0F) {
-                event.setAmount(event.getAmount() * multiplier);
+                // 处理额外伤害
+                float multiplier = getExtraDamageMultiplier(attacker, target);
+                if (multiplier > 1.0F) {
+                    event.setAmount(event.getAmount() * multiplier);
+                }
             }
         }
     }
