@@ -9,14 +9,11 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
 
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Mod.EventBusSubscriber(modid = TrinketsandBaublesMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ModConfig {
-    private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
+    public static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
     public static final ForgeConfigSpec SPEC;
 
     //修饰系统
@@ -45,7 +42,12 @@ public class ModConfig {
     public static final ForgeConfigSpec.DoubleValue DASH_JUMP_BOOST;
 
     // 龙眼扫描范围配置
-    public static final ForgeConfigSpec.IntValue DRAGONS_EYE_SCAN_RANGE;
+    public static ForgeConfigSpec.ConfigValue<List<? extends String>> VALUABLE_ORES;
+    public static ForgeConfigSpec.ConfigValue<List<? extends String>> COMMON_ORES;
+    public static ForgeConfigSpec.ConfigValue<List<? extends String>> REDSTONE_ORES;
+    public static ForgeConfigSpec.IntValue MAX_RENDER_BLOCKS;
+    public static ForgeConfigSpec.IntValue RENDER_RANGE;
+
 
     // 末影王冠配置
     public static final ForgeConfigSpec.DoubleValue ENDERMAN_FOLLOW_RANGE;
@@ -73,7 +75,7 @@ public class ModConfig {
     public static final ForgeConfigSpec.IntValue POISON_STONE_DURATION;
     public static final ForgeConfigSpec.IntValue POISON_STONE_AMPLIFIER;
     public static final ForgeConfigSpec.DoubleValue POISON_STONE_DAMAGE_MULTIPLIER;
-
+    public static final ForgeConfigSpec.BooleanValue POISON_STONE_ACTIVATE_DAMAGE_EVENT;
     // 极化之石配置
     public static final ForgeConfigSpec.DoubleValue POLARIZED_STONE_ATTRACTION_RANGE;
     public static final ForgeConfigSpec.DoubleValue POLARIZED_STONE_ATTRACTION_SPEED;
@@ -84,6 +86,8 @@ public class ModConfig {
     public static final ForgeConfigSpec.IntValue SHIELD_MAX_DAMAGE_COUNT;
     public static final ForgeConfigSpec.DoubleValue SHIELD_DAMAGE_REDUCTION;
     public static final ForgeConfigSpec.DoubleValue SHIELD_EXPLOSION_REDUCTION;
+    public static ForgeConfigSpec.BooleanValue ENABLE_DAMAGE_SHIELD_EFFECT;
+    public static ForgeConfigSpec.DoubleValue DAMAGE_SHIELD_TRIGGER_CHANCE;
 
     // 大惯性之石配置
     public static final ForgeConfigSpec.DoubleValue GREATER_INERTIA_KNOCKBACK_RESISTANCE;
@@ -319,9 +323,50 @@ public class ModConfig {
                 .defineInRange("arcingOrb.dashJumpBoost", 0.3D, 0.0D, 1.0D);
 
         // 巨龙之眼
-        DRAGONS_EYE_SCAN_RANGE = BUILDER
-                .comment("龙眼扫描范围")
-                .defineInRange("dragonsEye.scanRange", 12, 4, 64);
+        MAX_RENDER_BLOCKS = BUILDER
+                .comment("最大渲染方块数量\n" +
+                        "更大的数值可能会影响性能\n" +
+                        "范围: 50-10000")
+                .defineInRange("dragonsEye.max_render_blocks", 200, 50, 10000);
+
+        RENDER_RANGE = BUILDER
+                .comment("渲染范围（以方块为单位）\n" +
+                        "这个值会被平方来计算实际范围\n" +
+                        "默认值12表示12*12的范围\n" +
+                        "范围: 1-128")
+                .defineInRange("dragonsEye.render_range", 12, 1, 128);
+
+        VALUABLE_ORES = BUILDER
+                .comment("贵重矿物组 - 在这里添加要探测的额外贵重矿石\n" +
+                        "添加方式示例：\n" +
+                        "[\"minecraft:ancient_debris\", \"create:zinc_ore\", \"thermal:silver_ore\"]\n" +
+                        "或者每个矿石单独一行：\n" +
+                        "[\n" +
+                        "    \"minecraft:ancient_debris\",\n" +
+                        "    \"create:zinc_ore\",\n" +
+                        "    \"thermal:silver_ore\"\n" +
+                        "]")
+                .defineList("dragonsEye.valuable.ores",
+                        Arrays.asList(),
+                        entry -> entry instanceof String);
+
+        COMMON_ORES = BUILDER
+                .comment("常见矿物组 - 在这里添加要探测的额外普通矿石\n" +
+                        "添加方式示例：\n" +
+                        "[\"create:copper_ore\", \"thermal:tin_ore\", \"mekanism:osmium_ore\"]\n" +
+                        "注意：每个矿石ID之间需要用逗号分隔，最后一个不需要加逗号")
+                .defineList("dragonsEye.common.ores",
+                        Arrays.asList(),
+                        entry -> entry instanceof String);
+
+        REDSTONE_ORES = BUILDER
+                .comment("红石矿物组 - 在这里添加要探测的额外红石类矿石\n" +
+                        "添加方式示例：\n" +
+                        "[\"thermal:cinnabar_ore\", \"projectred:electrotine_ore\"]\n" +
+                        "注意：矿石ID格式必须是 模组id:方块id")
+                .defineList("dragonsEye.redstone.ores",
+                        Arrays.asList(),
+                        entry -> entry instanceof String);
 
         // 末影王冠
         ENDERMAN_FOLLOW_RANGE = BUILDER
@@ -389,6 +434,10 @@ public class ModConfig {
                 .comment("对中毒目标的伤害倍率")
                 .defineInRange("poisonStone.damageMultiplier", 2.0D, 1.0D, 500.0D);
 
+        POISON_STONE_ACTIVATE_DAMAGE_EVENT = BUILDER
+                .comment("是否启用毒石的伤害加成效果")
+                .define("activateDamageEvent", true);
+
         // 极化之石
         POLARIZED_STONE_ATTRACTION_RANGE = BUILDER
                 .comment("物品吸引范围")
@@ -418,6 +467,23 @@ public class ModConfig {
         SHIELD_EXPLOSION_REDUCTION = BUILDER
                 .comment("爆炸伤害减免系数")
                 .defineInRange("shield.explosionReduction", 0.25D, 0.0D, 1.0D);
+
+        ENABLE_DAMAGE_SHIELD_EFFECT = BUILDER
+                .comment("是否启用伤害护盾效果\n" +
+                        "需要安装前置模组 First Aid 才能生效\n" +
+                        "true - 启用\n" +
+                        "false - 禁用\n" +
+                        "注意：此功能需要安装 First Aid 模组才能正常工作，如果没安装可以忽略此配置")
+                .define("shield.enable_effect", true);
+
+        DAMAGE_SHIELD_TRIGGER_CHANCE = BUILDER
+                .comment("伤害护盾触发概率\n" +
+                        "需要安装前置模组 First Aid 才能生效\n" +
+                        "范围: 0.0 到 1.0\n" +
+                        "例如: 0.1 表示 10% 的触发概率\n" +
+                        "注意：此功能需要安装 First Aid 模组才能正常工作，如果没安装可以忽略此配置")
+                .defineInRange("shield.trigger_chance", 0.1, 0.0, 1.0);
+
 
         // 大惯性之石
         GREATER_INERTIA_KNOCKBACK_RESISTANCE = BUILDER
