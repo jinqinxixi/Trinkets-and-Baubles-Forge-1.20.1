@@ -36,7 +36,6 @@ public class PolarizedStoneToggleMessage {
                         ItemStack stack = slotResult.stack();
                         if (message.isDeflectionToggle) {
                             boolean newDeflection = !stack.getOrCreateTag().getBoolean(PolarizedStoneItem.DEFLECTION_MODE_TAG);
-                            stack.getOrCreateTag().putLong(PolarizedStoneItem.LAST_UPDATE_TAG, System.currentTimeMillis());
                             stack.getOrCreateTag().putBoolean(PolarizedStoneItem.DEFLECTION_MODE_TAG, newDeflection);
                             serverPlayer.displayClientMessage(Component.translatable(
                                     "item.trinketsandbaubles.polarized_stone.deflection_" + (newDeflection ? "on" : "off")), true);

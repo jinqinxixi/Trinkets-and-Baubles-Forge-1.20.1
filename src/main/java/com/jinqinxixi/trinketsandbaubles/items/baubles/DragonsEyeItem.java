@@ -17,6 +17,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -67,14 +68,19 @@ public class DragonsEyeItem extends ModifiableBaubleItem {
             "all"       // 所有矿物
     );
 
-    static {
+    public static void initializeOreGroups() {
+        // 清空现有组，以防重复初始化
+        ORE_GROUPS.clear();
+
         // 初始化贵重矿物组
         Set<Block> valuableOres = new HashSet<>(Arrays.asList(
                 Blocks.DIAMOND_ORE, Blocks.DEEPSLATE_DIAMOND_ORE,
                 Blocks.EMERALD_ORE, Blocks.DEEPSLATE_EMERALD_ORE,
                 Blocks.GOLD_ORE, Blocks.DEEPSLATE_GOLD_ORE,
-                Blocks.ANCIENT_DEBRIS // 添加远古残骸
+                Blocks.ANCIENT_DEBRIS
         ));
+        // 从配置添加额外的贵重矿物
+        addConfiguredBlocks(ModConfig.VALUABLE_ORES.get(), valuableOres);
 
         // 初始化常见矿物组
         Set<Block> commonOres = new HashSet<>(Arrays.asList(
@@ -83,32 +89,49 @@ public class DragonsEyeItem extends ModifiableBaubleItem {
                 Blocks.COPPER_ORE, Blocks.DEEPSLATE_COPPER_ORE,
                 Blocks.NETHER_QUARTZ_ORE, Blocks.NETHER_GOLD_ORE
         ));
+        // 从配置添加额外的常见矿物
+        addConfiguredBlocks(ModConfig.COMMON_ORES.get(), commonOres);
 
         // 初始化红石相关矿物组
         Set<Block> redstoneOres = new HashSet<>(Arrays.asList(
                 Blocks.REDSTONE_ORE, Blocks.DEEPSLATE_REDSTONE_ORE,
                 Blocks.LAPIS_ORE, Blocks.DEEPSLATE_LAPIS_ORE
         ));
-
-        // 创建所有矿物的集合
-        Set<Block> allOres = new HashSet<>();
-        allOres.addAll(valuableOres);
-        allOres.addAll(commonOres);
-        allOres.addAll(redstoneOres);
+        // 从配置添加额外的红石相关矿物
+        addConfiguredBlocks(ModConfig.REDSTONE_ORES.get(), redstoneOres);
 
         // 添加到组列表中
         ORE_GROUPS.add(valuableOres);
         ORE_GROUPS.add(commonOres);
         ORE_GROUPS.add(redstoneOres);
-        ORE_GROUPS.add(allOres);
 
         // 初始化箱子类方块
+        CHEST_BLOCKS.clear();
         BuiltInRegistries.BLOCK.stream()
                 .filter(b -> b instanceof ShulkerBoxBlock ||
                         BuiltInRegistries.BLOCK.getKey(b).getPath().contains("chest") ||
                         BuiltInRegistries.BLOCK.getKey(b).getPath().contains("barrel"))
                 .forEach(CHEST_BLOCKS::add);
     }
+
+
+    // 添加用于从配置加载方块的辅助方法
+    private static void addConfiguredBlocks(List<? extends String> configList, Set<Block> blockSet) {
+        for (String blockId : configList) {
+            try {
+                ResourceLocation resourceLocation = new ResourceLocation(blockId);
+                Block block = BuiltInRegistries.BLOCK.get(resourceLocation);
+                if (block != Blocks.AIR) {
+                    blockSet.add(block);
+                } else {
+                    TrinketsandBaublesMod.LOGGER.warn("Could not find block with id: " + blockId);
+                }
+            } catch (Exception e) {
+                TrinketsandBaublesMod.LOGGER.error("Error adding configured block: " + blockId, e);
+            }
+        }
+    }
+
 
     public DragonsEyeItem(Properties properties) {
         super(properties);
@@ -300,7 +323,8 @@ public class DragonsEyeItem extends ModifiableBaubleItem {
 
         if (!(groupIndex == -1 && !scanChests)) {
             Set<Block> targetBlocks = scanChests ? CHEST_BLOCKS : ORE_GROUPS.get(groupIndex);
-            int scanRange = ModConfig.DRAGONS_EYE_SCAN_RANGE.get();
+            // 使用配置的扫描范围
+            int scanRange = ModConfig.RENDER_RANGE.get();
 
             if (targetBlocks != null && !targetBlocks.isEmpty()) {
                 BlockPos.betweenClosedStream(
@@ -310,7 +334,6 @@ public class DragonsEyeItem extends ModifiableBaubleItem {
                             try {
                                 return targetBlocks.contains(player.level().getBlockState(pos).getBlock());
                             } catch (Exception e) {
-                                TrinketsandBaublesMod.LOGGER.error("Error checking block at {}: {}", pos, e.getMessage());
                                 return false;
                             }
                         })
@@ -371,7 +394,7 @@ public class DragonsEyeItem extends ModifiableBaubleItem {
         tooltip.add(Component.translatable("item.trinketsandbaubles.dragons_eye.tooltip1"));
         tooltip.add(Component.translatable("item.trinketsandbaubles.dragons_eye.tooltip2"));
         tooltip.add(Component.translatable("item.dragons_eye.tooltip3",
-                        ModConfig.DRAGONS_EYE_SCAN_RANGE.get()) // 使用配置值
+                        ModConfig.RENDER_RANGE.get()) // 使用配置值
                 .withStyle(ChatFormatting.GOLD));
         super.appendHoverText(stack, level, tooltip, flag);
     }

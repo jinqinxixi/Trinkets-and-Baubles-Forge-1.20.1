@@ -76,6 +76,10 @@ public class ClientForgeEvents {
         if (!player.hasEffect(ModEffects.DRAGON.get())) {
             return;
         }
+        // 飞行能力切换
+        if (KeyBindings.DRAGON_FLIGHT_TOGGLE_KEY.consumeClick()) {
+            ClientNetworkHandler.sendDragonFlightToggle();
+        }
 
         // 夜视切换
         if (event.getKey() == GLFW.GLFW_KEY_I &&

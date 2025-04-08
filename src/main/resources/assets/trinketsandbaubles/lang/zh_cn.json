@@ -92,6 +92,7 @@
   "key.trinketsandbaubles.dash": "闪避",
   "key.trinketsandbaubles.charge": "魔法光束",
 
+
   "key.trinketsandbaubles.dragon_night_vision": "龙之夜视",
   "key.trinketsandbaubles.dragon_breath": "龙息",
 
@@ -276,6 +277,7 @@
   "item.trinketsandbaubles.dragons_ring.tooltip13": "获得防火",
   "item.trinketsandbaubles.dragons_ring.tooltip14": "按 I 开启龙之夜视",
   "item.trinketsandbaubles.dragons_ring.tooltip15": "按 J 切换矿物探测功能",
+  "item.trinketsandbaubles.dragons_ring.tooltip16": "按 L 开关飞行能力",
   "item.trinketsandbaubles.dragons_ring.press_shift": "按住 §eSHIFT§7 查看详细信息",
   "item.trinketsandbaubles.dragons_ring.tooltip1": "• +%s%% 最大生命值",
   "item.trinketsandbaubles.dragons_ring.tooltip2": "• +%s%% 攻击伤害",
@@ -311,7 +313,10 @@
   "modifier.trinketsandbaubles.rash": "鲁莽：攻击速度",
   "modifier.trinketsandbaubles.intrepid": "勇猛：攻击速度",
   "modifier.trinketsandbaubles.violent": "暴力：攻击速度",
-  "tooltip.trinketsandbaubles.unidentified": "◆ 未鉴定"
+  "tooltip.trinketsandbaubles.unidentified": "◆ 未鉴定",
 
+  "message.trinketsandbaubles.dragon.flight.enabled": "龙戒飞行能力已启用",
+  "message.trinketsandbaubles.dragon.flight.disabled": "龙戒飞行能力已禁用",
+  "key.trinketsandbaubles.dragon_flight_toggle": "（开/关）龙戒飞行能力"
 
 }

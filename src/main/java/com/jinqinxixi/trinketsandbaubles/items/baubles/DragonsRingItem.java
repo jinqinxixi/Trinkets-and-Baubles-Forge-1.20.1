@@ -1,8 +1,11 @@
 package com.jinqinxixi.trinketsandbaubles.items.baubles;
 
+import com.jinqinxixi.trinketsandbaubles.TrinketsandBaublesMod;
 import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import com.jinqinxixi.trinketsandbaubles.modEffects.ModEffects;
 import com.jinqinxixi.trinketsandbaubles.modifier.ModifiableBaubleItem;
+import com.jinqinxixi.trinketsandbaubles.network.handler.NetworkHandler;
+import com.jinqinxixi.trinketsandbaubles.network.message.DragonsEyeMessage.UpdateTargetsMessage;
 import com.jinqinxixi.trinketsandbaubles.util.RaceEffectUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -10,6 +13,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
@@ -181,6 +185,8 @@ public class DragonsRingItem extends ModifiableBaubleItem {
                     .withStyle(ChatFormatting.DARK_GREEN));
             tooltip.add(Component.translatable("item.trinketsandbaubles.dragons_ring.tooltip15")
                     .withStyle(ChatFormatting.AQUA));
+            tooltip.add(Component.translatable("item.trinketsandbaubles.dragons_ring.tooltip16")
+                    .withStyle(ChatFormatting.DARK_AQUA));
             tooltip.add(Component.translatable("item.trinketsandbaubles.dragons_ring.press_shift")
                     .withStyle(ChatFormatting.GRAY));
         }
@@ -197,7 +203,10 @@ public class DragonsRingItem extends ModifiableBaubleItem {
         return false;
     }
 
-    static {
+    public static void initializeOreGroups() {
+        // 清空现有组，以防重复初始化
+        ORE_GROUPS.clear();
+
         // 初始化贵重矿物组
         Set<Block> valuableOres = new HashSet<>(Arrays.asList(
                 Blocks.DIAMOND_ORE, Blocks.DEEPSLATE_DIAMOND_ORE,
@@ -205,6 +214,8 @@ public class DragonsRingItem extends ModifiableBaubleItem {
                 Blocks.GOLD_ORE, Blocks.DEEPSLATE_GOLD_ORE,
                 Blocks.ANCIENT_DEBRIS
         ));
+        // 从配置添加额外的贵重矿物
+        addConfiguredBlocks(ModConfig.VALUABLE_ORES.get(), valuableOres);
 
         // 初始化常见矿物组
         Set<Block> commonOres = new HashSet<>(Arrays.asList(
@@ -213,32 +224,49 @@ public class DragonsRingItem extends ModifiableBaubleItem {
                 Blocks.COPPER_ORE, Blocks.DEEPSLATE_COPPER_ORE,
                 Blocks.NETHER_QUARTZ_ORE, Blocks.NETHER_GOLD_ORE
         ));
+        // 从配置添加额外的常见矿物
+        addConfiguredBlocks(ModConfig.COMMON_ORES.get(), commonOres);
 
         // 初始化红石相关矿物组
         Set<Block> redstoneOres = new HashSet<>(Arrays.asList(
                 Blocks.REDSTONE_ORE, Blocks.DEEPSLATE_REDSTONE_ORE,
                 Blocks.LAPIS_ORE, Blocks.DEEPSLATE_LAPIS_ORE
         ));
-
-        // 创建所有矿物的集合
-        Set<Block> allOres = new HashSet<>();
-        allOres.addAll(valuableOres);
-        allOres.addAll(commonOres);
-        allOres.addAll(redstoneOres);
+        // 从配置添加额外的红石相关矿物
+        addConfiguredBlocks(ModConfig.REDSTONE_ORES.get(), redstoneOres);
 
         // 添加到组列表中
         ORE_GROUPS.add(valuableOres);
         ORE_GROUPS.add(commonOres);
         ORE_GROUPS.add(redstoneOres);
-        ORE_GROUPS.add(allOres);
 
         // 初始化箱子类方块
+        CHEST_BLOCKS.clear();
         BuiltInRegistries.BLOCK.stream()
                 .filter(b -> b instanceof ShulkerBoxBlock ||
                         BuiltInRegistries.BLOCK.getKey(b).getPath().contains("chest") ||
                         BuiltInRegistries.BLOCK.getKey(b).getPath().contains("barrel"))
                 .forEach(CHEST_BLOCKS::add);
     }
+
+
+    // 添加用于从配置加载方块的辅助方法
+    private static void addConfiguredBlocks(List<? extends String> configList, Set<Block> blockSet) {
+        for (String blockId : configList) {
+            try {
+                ResourceLocation resourceLocation = new ResourceLocation(blockId);
+                Block block = BuiltInRegistries.BLOCK.get(resourceLocation);
+                if (block != Blocks.AIR) {
+                    blockSet.add(block);
+                } else {
+                    TrinketsandBaublesMod.LOGGER.warn("Could not find block with id: " + blockId);
+                }
+            } catch (Exception e) {
+                TrinketsandBaublesMod.LOGGER.error("Error adding configured block: " + blockId, e);
+            }
+        }
+    }
+
     public static void handleModeToggle(ServerPlayer player, ItemStack stack) {
         CompoundTag nbt = stack.getOrCreateTag();
         boolean isChestMode = nbt.getBoolean(TAG_TARGET_MODE);
@@ -278,33 +306,41 @@ public class DragonsRingItem extends ModifiableBaubleItem {
         player.displayClientMessage(Component.translatable(translationKey), true);
     }
     public static void updateTargets(ServerPlayer player, ItemStack stack) {
+        if (player.level().isClientSide) return;
+
         CompoundTag nbt = stack.getOrCreateTag();
         boolean scanChests = nbt.getBoolean(TAG_TARGET_MODE);
         int groupIndex = nbt.getInt(TAG_ORE_GROUP_INDEX);
 
-        if (groupIndex == -1 && !scanChests) {
-            // 存储空列表
-            nbt.put(TAG_DRAGONS_EYE_TARGETS, new ListTag());
-            return;
+        ListTag targetsList = new ListTag();
+
+        if (!(groupIndex == -1 && !scanChests)) {
+            Set<Block> targetBlocks = scanChests ? CHEST_BLOCKS : ORE_GROUPS.get(groupIndex);
+            // 使用配置的扫描范围
+            int scanRange = ModConfig.RENDER_RANGE.get();
+
+            if (targetBlocks != null && !targetBlocks.isEmpty()) {
+                BlockPos.betweenClosedStream(
+                                player.blockPosition().offset(-scanRange, -scanRange, -scanRange),
+                                player.blockPosition().offset(scanRange, scanRange, scanRange))
+                        .filter(pos -> {
+                            try {
+                                return targetBlocks.contains(player.level().getBlockState(pos).getBlock());
+                            } catch (Exception e) {
+                                return false;
+                            }
+                        })
+                        .forEach(pos -> {
+                            CompoundTag posTag = new CompoundTag();
+                            posTag.putInt("X", pos.getX());
+                            posTag.putInt("Y", pos.getY());
+                            posTag.putInt("Z", pos.getZ());
+                            targetsList.add(posTag);
+                        });
+            }
         }
 
-        Set<Block> targetBlocks = scanChests ? CHEST_BLOCKS : ORE_GROUPS.get(groupIndex);
-        int scanRange = ModConfig.DRAGONS_EYE_SCAN_RANGE.get();
-
-        // 创建存储位置的NBT列表
-        ListTag targetsList = new ListTag();
-        BlockPos.betweenClosedStream(
-                        player.blockPosition().offset(-scanRange, -scanRange, -scanRange),
-                        player.blockPosition().offset(scanRange, scanRange, scanRange))
-                .filter(pos -> targetBlocks.contains(player.level().getBlockState(pos).getBlock()))
-                .forEach(pos -> {
-                    CompoundTag posTag = new CompoundTag();
-                    posTag.putInt("X", pos.getX());
-                    posTag.putInt("Y", pos.getY());
-                    posTag.putInt("Z", pos.getZ());
-                    targetsList.add(posTag);
-                });
-
+        // 更新服务端 NBT
         nbt.put(TAG_DRAGONS_EYE_TARGETS, targetsList);
     }
     public static int[] getColorForGroup(int groupIndex, boolean isChestMode) {

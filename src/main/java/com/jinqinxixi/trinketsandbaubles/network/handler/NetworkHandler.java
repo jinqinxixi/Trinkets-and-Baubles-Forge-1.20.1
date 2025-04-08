@@ -1,9 +1,6 @@
 package com.jinqinxixi.trinketsandbaubles.network.handler;
 
-import com.jinqinxixi.trinketsandbaubles.network.message.DragonRingMessage.DragonBreathMessage;
-import com.jinqinxixi.trinketsandbaubles.network.message.DragonRingMessage.DragonNightVisionMessage;
-import com.jinqinxixi.trinketsandbaubles.network.message.DragonRingMessage.StopDragonBreathMessage;
-import com.jinqinxixi.trinketsandbaubles.network.message.DragonRingMessage.SyncDragonBreathMessage;
+import com.jinqinxixi.trinketsandbaubles.network.message.DragonRingMessage.*;
 import com.jinqinxixi.trinketsandbaubles.network.message.DragonsEyeMessage.DragonsEyeToggleMessage;
 import com.jinqinxixi.trinketsandbaubles.network.message.DragonsEyeMessage.UpdateEffectsMessage;
 import com.jinqinxixi.trinketsandbaubles.network.message.DragonsEyeMessage.UpdateTargetsMessage;
@@ -71,6 +68,12 @@ public class NetworkHandler {
                 .encoder(UpdateTargetsMessage::encode)
                 .decoder(UpdateTargetsMessage::decode)
                 .consumerMainThread(UpdateTargetsMessage::handle)
+                .add();
+
+        INSTANCE.messageBuilder(DragonFlightToggleMessage.class, nextId())
+                .encoder(DragonFlightToggleMessage::encode)
+                .decoder(DragonFlightToggleMessage::decode)
+                .consumerMainThread(DragonFlightToggleMessage::handle)
                 .add();
 
     }

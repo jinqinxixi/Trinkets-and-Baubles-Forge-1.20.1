@@ -36,7 +36,7 @@ public class PolarizedStoneItem extends ModifiableBaubleItem {
     // NBT 标签常量
     public static final String DEFLECTION_MODE_TAG = "DeflectionMode";
     public static final String ATTRACTION_MODE_TAG = "AttractionMode";
-    public static final String LAST_UPDATE_TAG = "LastUpdate";
+
 
 
     private static final Modifier[] MODIFIERS = Modifier.values();
@@ -103,7 +103,6 @@ public class PolarizedStoneItem extends ModifiableBaubleItem {
         if (!level.isClientSide) {
             if (player.isShiftKeyDown()) {
                 boolean newDeflection = !stack.getOrCreateTag().getBoolean(DEFLECTION_MODE_TAG);
-                stack.getOrCreateTag().putLong(LAST_UPDATE_TAG, System.currentTimeMillis());
                 stack.getOrCreateTag().putBoolean(DEFLECTION_MODE_TAG, newDeflection);
                 player.displayClientMessage(Component.translatable(
                         "item.trinketsandbaubles.polarized_stone.deflection_" + (newDeflection ? "on" : "off")), true);
@@ -121,7 +120,16 @@ public class PolarizedStoneItem extends ModifiableBaubleItem {
     public void inventoryTick(ItemStack stack, Level level, Entity entity, int slot, boolean selected) {
         super.inventoryTick(stack, level, entity, slot, selected);
         if (!level.isClientSide && entity instanceof Player player) {
-            updateManaConsumption(player, stack);
+            // 检查物品是否在饰品栏中
+            boolean isInCurio = CuriosApi.getCuriosInventory(player).resolve()
+                    .flatMap(curios -> curios.findFirstCurio(item -> item == stack))
+                    .isPresent();
+
+            // 只有当物品不在饰品栏时才在这里处理
+            if (!isInCurio) {
+                updateManaConsumption(player, stack);
+            }
+
             if (isAttractionActive(stack)) {
                 attractItemsAndXP(level, player);
             }
@@ -136,6 +144,7 @@ public class PolarizedStoneItem extends ModifiableBaubleItem {
         super.curioTick(slotContext, stack);
         if (slotContext.entity() instanceof Player player) {
             if (!player.level().isClientSide) {
+                // 在饰品栏中时在这里处理
                 updateManaConsumption(player, stack);
                 if (isAttractionActive(stack)) {
                     attractItemsAndXP(player.level(), player);
@@ -161,16 +170,10 @@ public class PolarizedStoneItem extends ModifiableBaubleItem {
             return;
         }
 
-        long currentTime = System.currentTimeMillis();
-        long lastUpdate = stack.hasTag() ? stack.getTag().getLong(LAST_UPDATE_TAG) : currentTime;
-
-        // 限制最大时间间隔为100ms，防止一次性消耗过多魔力
-        float secondsElapsed = Math.min((currentTime - lastUpdate) / 1000.0f, 0.1f);
-
-        if (secondsElapsed >= 0.05f) {
-            // 计算魔力消耗并转换为整数
-            int manaCost = Math.round(ModConfig.POLARIZED_STONE_DEFLECTION_MANA_COST.get() * secondsElapsed);
-            int currentMana = ManaData.getMana(player);
+        // 每20tick（1秒）检查一次魔力消耗
+        if (player.tickCount % 20 == 0) {
+            float manaCost = ModConfig.POLARIZED_STONE_DEFLECTION_MANA_COST.get().floatValue();
+            float currentMana = ManaData.getMana(player);
 
             if (currentMana < manaCost) {
                 // 魔力不足，关闭防御模式
@@ -178,11 +181,9 @@ public class PolarizedStoneItem extends ModifiableBaubleItem {
                 player.displayClientMessage(Component.translatable(
                         "item.trinketsandbaubles.polarized_stone.no_mana"), true);
             } else {
-                // 消耗魔力
+                // 消耗魔力（每秒消耗一次完整的配置值）
                 ManaData.consumeMana(player, manaCost);
             }
-
-            stack.getOrCreateTag().putLong(LAST_UPDATE_TAG, currentTime);
         }
     }
 

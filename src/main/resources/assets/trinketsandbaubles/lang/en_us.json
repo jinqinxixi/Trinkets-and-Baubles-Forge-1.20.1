@@ -266,6 +266,7 @@
   "item.trinketsandbaubles.dragons_ring.tooltip13": "Grants Fire Resistance",
   "item.trinketsandbaubles.dragons_ring.tooltip14": "Press I to toggle Dragon Night Vision",
   "item.trinketsandbaubles.dragons_ring.tooltip15": "Press J to toggle Ore Detection",
+  "item.trinketsandbaubles.dragons_ring.tooltip16": "Press L to toggle flight ability",
   "item.trinketsandbaubles.dragons_ring.press_shift": "Hold §eSHIFT§7 for details",
   "item.trinketsandbaubles.dragons_ring.tooltip1": "• +%s%% Max Health",
   "item.trinketsandbaubles.dragons_ring.tooltip2": "• +%s%% Attack Damage",
@@ -302,5 +303,9 @@
   "modifier.trinketsandbaubles.rash": "Rash: Attack Speed",
   "modifier.trinketsandbaubles.intrepid": "Intrepid: Attack Speed",
   "modifier.trinketsandbaubles.violent": "Violent: Attack Speed",
-  "tooltip.trinketsandbaubles.unidentified": "◆ Unidentified"
+  "tooltip.trinketsandbaubles.unidentified": "◆ Unidentified",
+
+  "message.trinketsandbaubles.dragon.flight.enabled": "Dragon Ring Flight Ability Enabled",
+  "message.trinketsandbaubles.dragon.flight.disabled": "Dragon Ring Flight Ability Disabled",
+  "key.trinketsandbaubles.dragon_flight_toggle": "Toggle Dragon Ring Flight Ability"
 }

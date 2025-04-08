@@ -18,33 +18,33 @@ public class ManaData {
     private static final String LAST_MANA_CHANGE_TIME_KEY = "lastManaChangeTime";
 
     // 基础魔力操作
-    public static int getMana(Player player) {
+    public static float getMana(Player player) {
         CompoundTag data = player.getPersistentData();
-        return data.getInt(MANA_KEY);
+        return data.getFloat(MANA_KEY);
     }
 
-    public static void setMana(Player player, int mana) {
+    public static void setMana(Player player, float mana) {
         CompoundTag data = player.getPersistentData();
-        int maxMana = getMaxMana(player);
-        int newMana = Math.max(0, Math.min(mana, maxMana));
-        data.putInt(MANA_KEY, newMana);
+        float maxMana = getMaxMana(player);
+        float newMana = Math.max(0f, Math.min(mana, maxMana));
+        data.putFloat(MANA_KEY, newMana);
 
         if (player instanceof ServerPlayer serverPlayer) {
             syncManaToClient(serverPlayer);
         }
     }
 
-    public static int getMaxMana(Player player) {
+    public static float getMaxMana(Player player) {
         CompoundTag data = player.getPersistentData();
         return data.contains(MAX_MANA_KEY) ?
-                data.getInt(MAX_MANA_KEY) :
-                ModConfig.DEFAULT_MAX_MANA.get();
+                data.getFloat(MAX_MANA_KEY) :
+                ModConfig.DEFAULT_MAX_MANA.get().floatValue();
     }
 
-    public static void setMaxMana(Player player, int maxMana) {
+    public static void setMaxMana(Player player, float maxMana) {
         CompoundTag data = player.getPersistentData();
-        maxMana = Math.max(10, maxMana); // 最小值为10
-        data.putInt(MAX_MANA_KEY, maxMana);
+        maxMana = Math.max(10f, maxMana); // 最小值为10
+        data.putFloat(MAX_MANA_KEY, maxMana);
 
         validateMana(player);
         if (player instanceof ServerPlayer serverPlayer) {
@@ -57,13 +57,13 @@ public class ManaData {
         if (!player.level().isClientSide) {
             CompoundTag data = player.getPersistentData();
             data.putLong(LAST_MANA_CHANGE_TIME_KEY, player.level().getGameTime());
-            setMana(player, (int)(getMana(player) - amount));
+            setMana(player, getMana(player) - amount);
         }
     }
 
     public static void addMana(Player player, float amount) {
         if (!player.level().isClientSide) {
-            setMana(player, (int)(getMana(player) + amount));
+            setMana(player, getMana(player) + amount);
         }
     }
 
@@ -83,8 +83,8 @@ public class ManaData {
     }
 
     public static void validateMana(Player player) {
-        int current = getMana(player);
-        int max = getMaxMana(player);
+        float current = getMana(player);
+        float max = getMaxMana(player);
         if (current > max) {
             setMana(player, max);
         } else if (current < 0) {
@@ -100,10 +100,10 @@ public class ManaData {
 
         // 初始化所有数据
         if (!data.contains(MAX_MANA_KEY)) {
-            data.putInt(MAX_MANA_KEY, ModConfig.DEFAULT_MAX_MANA.get());
+            data.putFloat(MAX_MANA_KEY, ModConfig.DEFAULT_MAX_MANA.get().floatValue());
         }
         if (!data.contains(MANA_KEY)) {
-            data.putInt(MANA_KEY, getMaxMana(player));
+            data.putFloat(MANA_KEY, getMaxMana(player));
         }
         if (!data.contains(LAST_MANA_REGEN_TIME_KEY)) {
             data.putLong(LAST_MANA_REGEN_TIME_KEY, player.level().getGameTime());
@@ -111,6 +111,19 @@ public class ManaData {
         if (!data.contains(LAST_MANA_CHANGE_TIME_KEY)) {
             data.putLong(LAST_MANA_CHANGE_TIME_KEY, player.level().getGameTime());
         }
+
+        // 处理旧版本数据兼容性
+        if (data.contains(MANA_KEY) && data.contains(MAX_MANA_KEY)) {
+            if (data.contains(MANA_KEY, CompoundTag.TAG_INT)) {
+                float oldMana = data.getInt(MANA_KEY);
+                data.putFloat(MANA_KEY, oldMana);
+            }
+            if (data.contains(MAX_MANA_KEY, CompoundTag.TAG_INT)) {
+                float oldMaxMana = data.getInt(MAX_MANA_KEY);
+                data.putFloat(MAX_MANA_KEY, oldMaxMana);
+            }
+        }
+
         // 确保服务器端数据有效
         validateMana(player);
 
@@ -119,11 +132,7 @@ public class ManaData {
             // 延迟1tick后同步，确保客户端完全加载
             serverPlayer.level().getServer().tell(new net.minecraft.server.TickTask(
                     serverPlayer.level().getServer().getTickCount() + 1,
-                    () -> {
-                        System.out.println("准备发送初始魔力同步");
-                        System.out.println("发送魔力同步：" + getMana(player) + "/" + getMaxMana(player));
-                        syncManaToClient(serverPlayer);
-                    }
+                    () -> syncManaToClient(serverPlayer)
             ));
         }
     }
@@ -150,10 +159,10 @@ public class ManaData {
 
                 // 创造模式快速恢复
                 if (player.isCreative()) {
-                    int currentMana = getMana(player);
-                    int maxMana = getMaxMana(player);
+                    float currentMana = getMana(player);
+                    float maxMana = getMaxMana(player);
                     if (currentMana < maxMana) {
-                        int newMana = Math.min(currentMana + ModConfig.CREATIVE_REGEN_RATE.get(), maxMana);
+                        float newMana = Math.min(currentMana + ModConfig.CREATIVE_REGEN_RATE.get().floatValue(), maxMana);
                         setMana(player, newMana);
                     }
                 } else {
@@ -161,11 +170,11 @@ public class ManaData {
                     if (currentTime - lastRegenTime >= ModConfig.MANA_REGEN_INTERVAL.get() &&
                             currentTime - lastManaChangeTime >= ModConfig.MANA_REGEN_COOLDOWN.get()) {
 
-                        int currentMana = getMana(player);
-                        int maxMana = getMaxMana(player);
+                        float currentMana = getMana(player);
+                        float maxMana = getMaxMana(player);
 
                         if (currentMana < maxMana) {
-                            int newMana = Math.min(currentMana + ModConfig.MANA_REGEN_RATE.get(), maxMana);
+                            float newMana = Math.min(currentMana + ModConfig.MANA_REGEN_RATE.get().floatValue(), maxMana);
                             setMana(player, newMana);
                         }
 
@@ -175,7 +184,6 @@ public class ManaData {
             }
         }
     }
-
 
     // 玩家克隆事件（死亡、维度传送等）
     @SubscribeEvent
@@ -188,17 +196,17 @@ public class ManaData {
         CompoundTag newData = player.getPersistentData();
 
         if (originalData.contains(MAX_MANA_KEY)) {
-            newData.putInt(MAX_MANA_KEY, originalData.getInt(MAX_MANA_KEY));
+            newData.putFloat(MAX_MANA_KEY, originalData.getFloat(MAX_MANA_KEY));
         }
 
         // 如果不是死亡传送，保持当前魔力值
         if (!event.isWasDeath()) {
             if (originalData.contains(MANA_KEY)) {
-                newData.putInt(MANA_KEY, originalData.getInt(MANA_KEY));
+                newData.putFloat(MANA_KEY, originalData.getFloat(MANA_KEY));
             }
         } else {
             // 死亡重生时重置为最大魔力值
-            newData.putInt(MANA_KEY, getMaxMana(player));
+            newData.putFloat(MANA_KEY, getMaxMana(player));
         }
 
         // 重置计时器

@@ -151,15 +151,16 @@ public class TitanEffect extends MobEffect {
             if (!level.isClientSide) {
                 CompoundTag data = player.getPersistentData();
                 if (!data.contains(MANA_PENALTY_TAG)) {
-                    int currentMaxMana = ManaData.getMaxMana(player);
-                    int crystalBonus = data.getInt(CRYSTAL_BONUS_TAG);
-                    int permanentDecrease = data.getInt("PermanentManaDecrease");
+                    float currentMaxMana = ManaData.getMaxMana(player);
+                    float crystalBonus = data.getInt(CRYSTAL_BONUS_TAG);
+                    float permanentDecrease = data.getInt("PermanentManaDecrease");
 
-                    int baseMaxMana = currentMaxMana - crystalBonus + permanentDecrease;
-                    data.putInt(ORIGINAL_MANA_TAG, baseMaxMana);
+                    float baseMaxMana = currentMaxMana - crystalBonus + permanentDecrease;
+                    data.putFloat(ORIGINAL_MANA_TAG, baseMaxMana);
 
                     // 使用配置的魔力修改值
-                    int newMaxMana = baseMaxMana - permanentDecrease + ModConfig.TITAN_MANA_MODIFIER.get() + crystalBonus;
+                    float newMaxMana = baseMaxMana - permanentDecrease +
+                            ModConfig.TITAN_MANA_MODIFIER.get().floatValue() + crystalBonus;
                     ManaData.setMaxMana(player, Math.max(0, newMaxMana));
                     data.putBoolean(MANA_PENALTY_TAG, true);
                 }
@@ -255,9 +256,6 @@ public class TitanEffect extends MobEffect {
         if (pLivingEntity != null) {
             RaceScaleHelper.setSmoothModelScale(pLivingEntity, 1.0f, 20); // 1秒过渡时间
         }
-
-
-
         // 先调用父类方法移除所有属性修改器
         super.removeAttributeModifiers(pLivingEntity, pAttributeMap, pAmplifier);
 
@@ -266,12 +264,12 @@ public class TitanEffect extends MobEffect {
             CompoundTag data = player.getPersistentData();
             if (data.contains(MANA_PENALTY_TAG)) {
                 if (data.contains(ORIGINAL_MANA_TAG)) {
-                    int baseMaxMana = data.getInt(ORIGINAL_MANA_TAG);
-                    int crystalBonus = data.getInt(CRYSTAL_BONUS_TAG);
-                    int permanentDecrease = data.getInt("PermanentManaDecrease");
+                    float baseMaxMana = data.getFloat(ORIGINAL_MANA_TAG);
+                    float crystalBonus = data.getInt(CRYSTAL_BONUS_TAG);
+                    float permanentDecrease = data.getInt("PermanentManaDecrease");
 
                     // 恢复到基础值，考虑永久减少和水晶加成
-                    int restoredMana = baseMaxMana - permanentDecrease + crystalBonus;
+                    float restoredMana = baseMaxMana - permanentDecrease + crystalBonus;
                     ManaData.setMaxMana(player, restoredMana);
                 }
                 // 清理标记
@@ -314,10 +312,10 @@ public class TitanEffect extends MobEffect {
                 effectData.putInt("Duration", effect.getDuration());
                 effectData.putInt("Amplifier", effect.getAmplifier());
 
-                // 保存所有魔力相关数据
+                // 保存所有魔力相关数据为浮点数
                 if (playerData.contains(ORIGINAL_MANA_TAG)) {
-                    effectData.putInt(ORIGINAL_MANA_TAG,
-                            playerData.getInt(ORIGINAL_MANA_TAG));
+                    effectData.putFloat(ORIGINAL_MANA_TAG,
+                            playerData.getFloat(ORIGINAL_MANA_TAG));
                 }
                 if (playerData.contains(CRYSTAL_BONUS_TAG)) {
                     effectData.putInt(CRYSTAL_BONUS_TAG,
@@ -363,30 +361,29 @@ public class TitanEffect extends MobEffect {
 
                             // 如果存在原始魔力值数据，直接设置正确的魔力值
                             if (effectData.contains(ORIGINAL_MANA_TAG)) {
-                                int originalMana = effectData.getInt(ORIGINAL_MANA_TAG);
-                                int crystalBonus = effectData.contains(CRYSTAL_BONUS_TAG) ?
+                                float originalMana = effectData.getFloat(ORIGINAL_MANA_TAG);
+                                float crystalBonus = effectData.contains(CRYSTAL_BONUS_TAG) ?
                                         effectData.getInt(CRYSTAL_BONUS_TAG) : 0;
-                                int permanentDecrease = effectData.contains("PermanentManaDecrease") ?
+                                float permanentDecrease = effectData.contains("PermanentManaDecrease") ?
                                         effectData.getInt("PermanentManaDecrease") : 0;
 
                                 // 保存原始值
-                                player.getPersistentData().putInt(ORIGINAL_MANA_TAG, originalMana);
+                                player.getPersistentData().putFloat(ORIGINAL_MANA_TAG, originalMana);
 
                                 // 计算并设置正确的魔力值
-                                int correctMana = originalMana - permanentDecrease + crystalBonus +
-                                        ModConfig.TITAN_MANA_MODIFIER.get();
-                                ManaData.setMaxMana(player, Math.max(0, correctMana)); // 确保魔力值不会低于0
+                                float correctMana = originalMana - permanentDecrease + crystalBonus +
+                                        ModConfig.TITAN_MANA_MODIFIER.get().floatValue();
+                                ManaData.setMaxMana(player, Math.max(0, correctMana));
 
                                 // 标记魔力修改已应用
                                 player.getPersistentData().putBoolean(MANA_PENALTY_TAG, true);
 
                                 // 保存其他相关数据
                                 if (effectData.contains(CRYSTAL_BONUS_TAG)) {
-                                    player.getPersistentData().putInt(CRYSTAL_BONUS_TAG, crystalBonus);
+                                    player.getPersistentData().putInt(CRYSTAL_BONUS_TAG, (int)crystalBonus);
                                 }
                                 if (effectData.contains("PermanentManaDecrease")) {
-                                    player.getPersistentData().putInt("PermanentManaDecrease",
-                                            permanentDecrease);
+                                    player.getPersistentData().putInt("PermanentManaDecrease", (int)permanentDecrease);
                                 }
                             }
                         }

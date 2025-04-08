@@ -139,15 +139,16 @@ public class GoblinsEffect extends MobEffect {
         if (!entity.level().isClientSide && entity instanceof Player player) {
             CompoundTag data = player.getPersistentData();
             if (!data.contains(MANA_PENALTY_TAG)) {
-                int currentMaxMana = ManaData.getMaxMana(player);
-                int crystalBonus = data.getInt(CRYSTAL_BONUS_TAG);
-                int permanentDecrease = data.getInt("PermanentManaDecrease");
+                float currentMaxMana = ManaData.getMaxMana(player);
+                float crystalBonus = data.getInt(CRYSTAL_BONUS_TAG);
+                float permanentDecrease = data.getInt("PermanentManaDecrease");
 
-                int baseMaxMana = currentMaxMana - crystalBonus + permanentDecrease;
-                data.putInt(ORIGINAL_MAX_MANA_KEY, baseMaxMana);
+                float baseMaxMana = currentMaxMana - crystalBonus + permanentDecrease;
+                data.putFloat(ORIGINAL_MAX_MANA_KEY, baseMaxMana);
 
                 // 直接添加配置值(可以是正数或负数)
-                int newMaxMana = baseMaxMana - permanentDecrease + crystalBonus + ModConfig.GOBLIN_MANA_PENALTY.get();
+                float newMaxMana = baseMaxMana - permanentDecrease + crystalBonus +
+                        ModConfig.GOBLIN_MANA_PENALTY.get().floatValue();
                 ManaData.setMaxMana(player, Math.max(0, newMaxMana));
                 data.putBoolean(MANA_PENALTY_TAG, true);
             }
@@ -223,10 +224,10 @@ public class GoblinsEffect extends MobEffect {
                 effectData.putInt("Duration", effect.getDuration());
                 effectData.putInt("Amplifier", effect.getAmplifier());
 
-                // 保存所有魔力相关数据
+                // 保存所有魔力相关数据为浮点数
                 if (playerData.contains(ORIGINAL_MAX_MANA_KEY)) {
-                    effectData.putInt(ORIGINAL_MAX_MANA_KEY,
-                            playerData.getInt(ORIGINAL_MAX_MANA_KEY));
+                    effectData.putFloat(ORIGINAL_MAX_MANA_KEY,
+                            playerData.getFloat(ORIGINAL_MAX_MANA_KEY));
                 }
                 if (playerData.contains(CRYSTAL_BONUS_TAG)) {
                     effectData.putInt(CRYSTAL_BONUS_TAG,
@@ -286,28 +287,29 @@ public class GoblinsEffect extends MobEffect {
 
                             // 如果存在原始魔力值数据，直接设置正确的魔力值
                             if (effectData.contains(ORIGINAL_MAX_MANA_KEY)) {
-                                int originalMana = effectData.getInt(ORIGINAL_MAX_MANA_KEY);
-                                int crystalBonus = effectData.contains(CRYSTAL_BONUS_TAG) ?
+                                float originalMana = effectData.getFloat(ORIGINAL_MAX_MANA_KEY);
+                                float crystalBonus = effectData.contains(CRYSTAL_BONUS_TAG) ?
                                         effectData.getInt(CRYSTAL_BONUS_TAG) : 0;
-                                int permanentDecrease = effectData.contains("PermanentManaDecrease") ?
+                                float permanentDecrease = effectData.contains("PermanentManaDecrease") ?
                                         effectData.getInt("PermanentManaDecrease") : 0;
 
                                 // 保存原始值
-                                player.getPersistentData().putInt(ORIGINAL_MAX_MANA_KEY, originalMana);
+                                player.getPersistentData().putFloat(ORIGINAL_MAX_MANA_KEY, originalMana);
 
                                 // 计算并设置正确的魔力值，使用配置的惩罚值
-                                int correctMana = originalMana - permanentDecrease + crystalBonus + ModConfig.GOBLIN_MANA_PENALTY.get();
-                                ManaData.setMaxMana(player, Math.max(0, correctMana)); // 确保魔力值不会低于0
+                                float correctMana = originalMana - permanentDecrease + crystalBonus +
+                                        ModConfig.GOBLIN_MANA_PENALTY.get().floatValue();
+                                ManaData.setMaxMana(player, Math.max(0, correctMana));
 
                                 // 标记魔力惩罚已应用
                                 player.getPersistentData().putBoolean(MANA_PENALTY_TAG, true);
 
                                 // 保存其他相关数据
                                 if (effectData.contains(CRYSTAL_BONUS_TAG)) {
-                                    player.getPersistentData().putInt(CRYSTAL_BONUS_TAG, crystalBonus);
+                                    player.getPersistentData().putInt(CRYSTAL_BONUS_TAG, (int)crystalBonus);
                                 }
                                 if (effectData.contains("PermanentManaDecrease")) {
-                                    player.getPersistentData().putInt("PermanentManaDecrease", permanentDecrease);
+                                    player.getPersistentData().putInt("PermanentManaDecrease", (int)permanentDecrease);
                                 }
                             }
                         }
@@ -331,12 +333,12 @@ public class GoblinsEffect extends MobEffect {
             CompoundTag data = player.getPersistentData();
             if (data.contains(MANA_PENALTY_TAG)) {
                 if (data.contains(ORIGINAL_MAX_MANA_KEY)) {
-                    int baseMaxMana = data.getInt(ORIGINAL_MAX_MANA_KEY);
-                    int crystalBonus = data.getInt(CRYSTAL_BONUS_TAG);
-                    int permanentDecrease = data.getInt("PermanentManaDecrease");
+                    float baseMaxMana = data.getFloat(ORIGINAL_MAX_MANA_KEY);
+                    float crystalBonus = data.getInt(CRYSTAL_BONUS_TAG);
+                    float permanentDecrease = data.getInt("PermanentManaDecrease");
 
                     // 恢复到基础值，考虑永久减少和水晶加成
-                    int restoredMana = baseMaxMana - permanentDecrease + crystalBonus;
+                    float restoredMana = baseMaxMana - permanentDecrease + crystalBonus;
                     ManaData.setMaxMana(player, restoredMana);
                 }
                 // 清理标记

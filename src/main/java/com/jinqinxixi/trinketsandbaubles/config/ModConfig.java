@@ -80,7 +80,7 @@ public class ModConfig {
     public static final ForgeConfigSpec.DoubleValue POLARIZED_STONE_ATTRACTION_RANGE;
     public static final ForgeConfigSpec.DoubleValue POLARIZED_STONE_ATTRACTION_SPEED;
     public static final ForgeConfigSpec.DoubleValue POLARIZED_STONE_DEFLECTION_RANGE;
-    public static final ForgeConfigSpec.IntValue POLARIZED_STONE_DEFLECTION_MANA_COST;
+    public static final ForgeConfigSpec.DoubleValue POLARIZED_STONE_DEFLECTION_MANA_COST;
 
     // 荣誉之盾配置
     public static final ForgeConfigSpec.IntValue SHIELD_MAX_DAMAGE_COUNT;
@@ -109,6 +109,7 @@ public class ModConfig {
     public static final ForgeConfigSpec.IntValue DRAGON_MANA_BONUS;
     public static final ForgeConfigSpec.DoubleValue DRAGON_FLIGHT_MANA_COST;
     public static final ForgeConfigSpec.DoubleValue DRAGON_MANA_CHECK_INTERVAL;
+    public static final ForgeConfigSpec.DoubleValue DRAGON_BREATH_MANA_COST;
     public static final ForgeConfigSpec.DoubleValue DRAGON_BREATH_BASE_DAMAGE;
     public static final ForgeConfigSpec.DoubleValue DRAGON_BREATH_MIN_DAMAGE;
     public static final ForgeConfigSpec.DoubleValue DRAGON_BREATH_DECAY_RATE;
@@ -452,8 +453,8 @@ public class ModConfig {
                 .defineInRange("polarizedStone.deflectionRange", 2.0D, 1.0D, 10.0D);
 
         POLARIZED_STONE_DEFLECTION_MANA_COST = BUILDER
-                .comment("每秒防御消耗魔力")
-                .defineInRange("polarizedStone.deflectionManaCost", 8, 1, 5000);
+                .comment("每秒防御消耗魔力/秒")
+                .defineInRange("polarizedStone.deflectionManaCost", 5.0D, 0.0D, 5000.0D);
 
         // 荣誉之盾
         SHIELD_MAX_DAMAGE_COUNT = BUILDER
@@ -542,11 +543,15 @@ public class ModConfig {
 
         DRAGON_FLIGHT_MANA_COST = BUILDER
                 .comment("每秒飞行消耗魔力值")
-                .defineInRange("dragon.flightManaCost", 5.0D, -1.0D, 100.0D);
+                .defineInRange("dragon.flightManaCost", 5.0D, 0.0D, 1000.0D);
 
         DRAGON_MANA_CHECK_INTERVAL = BUILDER
                 .comment("魔力检查间隔(tick)")
-                .defineInRange("dragon.manaCheckInterval", 20.0D, 1.0D, 100.0D);
+                .defineInRange("dragon.manaCheckInterval", 20.0D, 1.0D, 200.0D);
+
+        DRAGON_BREATH_MANA_COST = BUILDER
+                .comment("每秒龙息消耗魔力")
+                .defineInRange("dragon.breathManaCost", 5.0D, 0.0D, 5000.0D);
 
         DRAGON_BREATH_BASE_DAMAGE = BUILDER
                 .comment("龙息基础伤害")

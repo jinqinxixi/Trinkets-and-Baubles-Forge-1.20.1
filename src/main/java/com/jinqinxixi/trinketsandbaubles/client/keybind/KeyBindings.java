@@ -79,4 +79,13 @@ public class KeyBindings {
             GLFW.GLFW_KEY_R,
             "key.categories.trinketsandbaubles"
     );
+
+    // 龙之效果的飞行能力切换
+    public static final KeyMapping DRAGON_FLIGHT_TOGGLE_KEY = new KeyMapping(
+            "key.trinketsandbaubles.dragon_flight_toggle",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_L, // 使用G键作为默认键
+            "key.categories.trinketsandbaubles"
+    );
 }

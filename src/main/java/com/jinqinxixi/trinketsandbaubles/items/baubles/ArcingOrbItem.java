@@ -1181,7 +1181,7 @@ public class ArcingOrbItem extends ModifiableBaubleItem  {
 
         // 闪避消耗魔力信息
         tooltip.add(Component.translatable("item.trinketsandbaubles.arcing_orb.dash_cost",
-                        String.format("%.0f", ModConfig.DASH_MANA_COST.get()))
+                        String.format("%.1f", ModConfig.DASH_MANA_COST.get()))
                 .withStyle(ChatFormatting.AQUA));
 
         // 充能状态信息

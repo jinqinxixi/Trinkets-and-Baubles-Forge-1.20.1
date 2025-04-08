@@ -13,7 +13,9 @@ public class ClientManaNetworkHandler {
     public static void handleManaSync(ManaSyncMessage message) {
         Player player = Minecraft.getInstance().player;
         if (player != null) {
-            System.out.println("收到魔力同步数据：" + message.getMana() + "/" + message.getMaxMana());
+            System.out.println("收到魔力同步数据：" +
+                    String.format("%.1f/%.1f", message.getMana(), message.getMaxMana()));
+
             ManaData.setMana(player, message.getMana());
             ManaData.setMaxMana(player, message.getMaxMana());
             ManaHudOverlay.getInstance().updateManaData(message.getMana(), message.getMaxMana());

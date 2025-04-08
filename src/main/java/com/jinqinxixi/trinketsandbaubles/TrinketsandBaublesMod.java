@@ -2,6 +2,8 @@ package com.jinqinxixi.trinketsandbaubles;
 
 import com.jinqinxixi.trinketsandbaubles.block.ModBlocks;
 import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
+import com.jinqinxixi.trinketsandbaubles.items.baubles.DragonsEyeItem;
+import com.jinqinxixi.trinketsandbaubles.items.baubles.DragonsRingItem;
 import com.jinqinxixi.trinketsandbaubles.items.baubles.PolarizedStoneItem;
 import com.jinqinxixi.trinketsandbaubles.items.baubles.ShieldofHonorItem;
 import com.jinqinxixi.trinketsandbaubles.client.renderer.DragonsEyeRenderer;
@@ -36,6 +38,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -74,6 +77,9 @@ public class TrinketsandBaublesMod
                 "trinketsandbaubles-common.toml"
         );
 
+        // 添加配置加载事件监听器
+        modEventBus.addListener(this::onConfigLoad);
+
         // 客户端专属内容集中处理
         if (FMLEnvironment.dist == Dist.CLIENT) {
             modEventBus.addListener(this::clientSetup);
@@ -84,16 +90,22 @@ public class TrinketsandBaublesMod
                     DragonsEyeRenderer::onRenderWorld
             );
         }
-        //First aid mod Compatibility
-        if (FMLLoader.getLoadingModList().getModFileById("firstaid") != null) { //we basically check if the mod is loaded
-            MinecraftForge.EVENT_BUS.register(new Object() { // in case the mod is loaded we anonymously register the event
+        // First aid mod 兼容性
+        if (FMLLoader.getLoadingModList().getModFileById("firstaid") != null) {
+            MinecraftForge.EVENT_BUS.register(new Object() {
                 @SubscribeEvent
                 public void onDamage(FirstAidLivingDamageEvent event) {
+                    // 检查是否启用了功能
+                    if (!ModConfig.ENABLE_DAMAGE_SHIELD_EFFECT.get()) {
+                        return;
+                    }
+
                     Player player = event.getEntity();
                     if (CuriosApi.getCuriosHelper().findEquippedCurio(ModItem.DAMAGE_SHIELD.get(), player).isPresent()) {
                         AbstractPlayerDamageModel after = event.getAfterDamage();
-                        if (after.HEAD.currentHealth < 1 || (after.BODY.currentHealth < 1)) {  // we check of the attack was lethal
-                            if (player.getRandom().nextInt(10) == 0) { //10% chance you can make this configurable
+                        if (after.HEAD.currentHealth < 1 || (after.BODY.currentHealth < 1)) {
+                            // 使用配置的触发概率
+                            if (player.getRandom().nextDouble() < ModConfig.DAMAGE_SHIELD_TRIGGER_CHANCE.get()) {
                                 event.setCanceled(true);
                             }
                         }
@@ -103,6 +115,12 @@ public class TrinketsandBaublesMod
         }
     }
 
+    private void onConfigLoad(final ModConfigEvent.Loading event) {
+        if (event.getConfig().getType() == net.minecraftforge.fml.config.ModConfig.Type.COMMON) {
+            DragonsEyeItem.initializeOreGroups();
+            DragonsRingItem.initializeOreGroups();
+        }
+    }
 
 
 

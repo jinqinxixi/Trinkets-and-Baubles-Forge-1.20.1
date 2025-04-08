@@ -16,7 +16,7 @@ import java.util.List;
 
 public class ManaCrystalPotion extends Item {
     static final int USE_DURATION = 32;    // 长按时间
-    static final int MANA_RESTORE = 10000;   // 恢复的魔力值
+    static final float MANA_RESTORE = 10000.0f;   // 恢复的魔力值
 
     public ManaCrystalPotion() {
         super(new Properties()
@@ -38,16 +38,17 @@ public class ManaCrystalPotion extends Item {
             CompoundTag data = player.getPersistentData();
 
             // 获取当前的永久减少值
-            int permanentDecrease = data.getInt("PermanentManaDecrease");
+            float permanentDecrease = data.getFloat("PermanentManaDecrease");
 
             // 记录水晶增加的魔力值
-            int crystalBonus = data.getInt("CrystalManaBonus");
-            crystalBonus += ModConfig.MANA_CRYSTAL_MAX_INCREASE.get();  // 使用配置值
-            data.putInt("CrystalManaBonus", crystalBonus);
+            float crystalBonus = data.getFloat("CrystalManaBonus");
+            crystalBonus += ModConfig.MANA_CRYSTAL_MAX_INCREASE.get().floatValue();  // 使用配置浮点值
+            data.putFloat("CrystalManaBonus", crystalBonus);
 
             // 增加最大魔力值 (考虑永久减少值)
-            int currentMaxMana = ManaData.getMaxMana(player);
-            ManaData.setMaxMana(player, currentMaxMana + ModConfig.MANA_CRYSTAL_MAX_INCREASE.get());  // 使用配置值
+            float currentMaxMana = ManaData.getMaxMana(player);
+            ManaData.setMaxMana(player, currentMaxMana +
+                    ModConfig.MANA_CRYSTAL_MAX_INCREASE.get().floatValue());  // 使用配置浮点值
 
             // 恢复魔力值
             ManaData.addMana(player, MANA_RESTORE);
@@ -64,7 +65,6 @@ public class ManaCrystalPotion extends Item {
         return USE_DURATION;
     }
 
-    // 始终显示附魔光效
     @Override
     public boolean isFoil(ItemStack stack) {
         return true;
@@ -75,13 +75,11 @@ public class ManaCrystalPotion extends Item {
         return UseAnim.DRINK;
     }
 
-    // 附魔等级为0
     @Override
     public int getEnchantmentValue() {
         return 0;
     }
 
-    // 禁止任何形式的附魔（包括铁砧）
     @Override
     public boolean isEnchantable(ItemStack stack) {
         return false;
@@ -91,7 +89,7 @@ public class ManaCrystalPotion extends Item {
     public void appendHoverText(ItemStack stack, @Nullable Level level,
                                 List<Component> tooltip, TooltipFlag flag) {
         tooltip.add(Component.translatable("item.trinketsandbaubles.mana_crystal.tooltip",
-                        ModConfig.MANA_CRYSTAL_MAX_INCREASE.get())
+                        String.format("%.1f", ModConfig.MANA_CRYSTAL_MAX_INCREASE.get().floatValue()))
                 .withStyle(ChatFormatting.AQUA));
     }
 }

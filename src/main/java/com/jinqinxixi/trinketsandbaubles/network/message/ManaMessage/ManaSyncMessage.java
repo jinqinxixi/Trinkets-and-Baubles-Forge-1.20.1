@@ -9,23 +9,26 @@ import net.minecraftforge.network.NetworkEvent;
 import java.util.function.Supplier;
 
 public class ManaSyncMessage {
-    private final int mana;
-    private final int maxMana;
+    private final float mana;
+    private final float maxMana;
 
-    public ManaSyncMessage(int mana, int maxMana) {
+    public ManaSyncMessage(float mana, float maxMana) {
         this.mana = mana;
         this.maxMana = maxMana;
     }
 
     // 编码消息数据
     public void encode(FriendlyByteBuf buf) {
-        buf.writeInt(mana);
-        buf.writeInt(maxMana);
+        buf.writeFloat(mana);
+        buf.writeFloat(maxMana);
     }
 
     // 解码消息数据
     public static ManaSyncMessage decode(FriendlyByteBuf buf) {
-        return new ManaSyncMessage(buf.readInt(), buf.readInt());
+        return new ManaSyncMessage(
+                buf.readFloat(),
+                buf.readFloat()
+        );
     }
 
     // 消息处理
@@ -39,6 +42,6 @@ public class ManaSyncMessage {
         ctx.get().setPacketHandled(true);
     }
 
-    public int getMana() { return mana; }
-    public int getMaxMana() { return maxMana; }
+    public float getMana() { return mana; }
+    public float getMaxMana() { return maxMana; }
 }

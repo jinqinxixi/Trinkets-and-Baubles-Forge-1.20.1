@@ -1,5 +1,6 @@
 package com.jinqinxixi.trinketsandbaubles.client.renderer;
 
+import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import com.jinqinxixi.trinketsandbaubles.items.baubles.DragonsEyeItem;
 import com.jinqinxixi.trinketsandbaubles.items.baubles.DragonsRingItem;
 import com.mojang.blaze3d.platform.GlStateManager;
@@ -26,14 +27,14 @@ import org.joml.Matrix4f;
 import top.theillusivec4.curios.api.CuriosApi;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @OnlyIn(Dist.CLIENT)
 public class DragonsEyeRenderer {
-    private static final int MAX_RENDER = 200;
-    private static final int RANGE_SQR = 32 * 32;
+
 
     // 自定义渲染类型，实现透视效果
     private static final RenderType XRAY_LINES = RenderType.create(
@@ -112,13 +113,17 @@ public class DragonsEyeRenderer {
 
         Matrix4f pose = poseStack.last().pose();
 
+        int maxRender = ModConfig.MAX_RENDER_BLOCKS.get();
+        int rangeSqr = ModConfig.RENDER_RANGE.get() * ModConfig.RENDER_RANGE.get();
+
         positions.stream()
-                .filter(pos -> player.blockPosition().distSqr(pos) <= RANGE_SQR)
-                .limit(MAX_RENDER)
+                .filter(pos -> player.blockPosition().distSqr(pos) <= rangeSqr)
+                .sorted(Comparator.comparingDouble(pos -> player.blockPosition().distSqr(pos)))
+                .limit(maxRender)
                 .forEach(pos -> {
                     AABB box = new AABB(pos).inflate(0.001);
                     double distance = Math.sqrt(player.blockPosition().distSqr(pos));
-                    int adjustedAlpha = Math.max(96, (int)(255 * (1.0 - distance / Math.sqrt(RANGE_SQR))));
+                    int adjustedAlpha = Math.max(96, (int)(255 * (1.0 - distance / Math.sqrt(rangeSqr))));
                     renderBox(lines, pose, box, pos, adjustedAlpha);
                 });
 

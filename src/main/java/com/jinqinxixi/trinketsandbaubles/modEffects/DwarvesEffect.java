@@ -49,7 +49,7 @@ public class DwarvesEffect extends MobEffect {
         // 使用工具类设置体型缩放
         if (pLivingEntity != null) {
             RaceScaleHelper.setSmoothModelScale(pLivingEntity,
-                    ModConfig.DWARVES_SCALE_FACTOR.get().floatValue(),20);
+                    ModConfig.DWARVES_SCALE_FACTOR.get().floatValue(), 20);
         }
         // 攻击速度
         this.addAttributeModifier(
@@ -98,7 +98,6 @@ public class DwarvesEffect extends MobEffect {
                 ModConfig.DWARVES_MOVEMENT_SPEED.get(),
                 AttributeModifier.Operation.MULTIPLY_TOTAL
         );
-
 
 
         super.addAttributeModifiers(pLivingEntity, pAttributeMap, pAmplifier);
@@ -154,19 +153,18 @@ public class DwarvesEffect extends MobEffect {
         if (entity instanceof Player player) {
             if (!player.level().isClientSide) {
                 CompoundTag data = player.getPersistentData();
-                // 获取当前最大魔力值和修正值
-                int currentMaxMana = ManaData.getMaxMana(player);
-                int crystalBonus = data.getInt("CrystalManaBonus");
-                int permanentDecrease = data.getInt("PermanentManaDecrease");
+                // 获取当前最大魔力值和修正值，使用 float
+                float currentMaxMana = ManaData.getMaxMana(player);
+                float crystalBonus = data.getInt("CrystalManaBonus"); // 从 int 转换为 float
+                float permanentDecrease = data.getInt("PermanentManaDecrease"); // 从 int 转换为 float
 
                 // 确保魔力值正确反映水晶加成和永久减少
-                int baseMaxMana = currentMaxMana - crystalBonus + permanentDecrease;
-                int newMaxMana = baseMaxMana - permanentDecrease + crystalBonus;
+                float baseMaxMana = currentMaxMana - crystalBonus + permanentDecrease;
+                float newMaxMana = baseMaxMana - permanentDecrease + crystalBonus;
                 if (currentMaxMana != newMaxMana) {
                     ManaData.setMaxMana(player, newMaxMana);
                 }
             }
-
 
             // 原有的幸运效果检查代码
             if (entity.tickCount % 10 == 0) {
@@ -184,33 +182,26 @@ public class DwarvesEffect extends MobEffect {
 
     @Override
     public void removeAttributeModifiers(LivingEntity pLivingEntity, AttributeMap pAttributeMap, int pAmplifier) {
-
         // 使用工具类重置体型
         if (pLivingEntity != null) {
-            RaceScaleHelper.setSmoothModelScale(pLivingEntity, 1.0f, 20); // 1秒过渡时间
+            RaceScaleHelper.setSmoothModelScale(pLivingEntity, 1.0f, 20);
         }
         super.removeAttributeModifiers(pLivingEntity, pAttributeMap, pAmplifier);
 
         if (pLivingEntity instanceof Player player) {
             // 处理魔力值调整
             CompoundTag data = player.getPersistentData();
-            // 获取当前最大魔力值
-            int currentMaxMana = ManaData.getMaxMana(player);
-            int crystalBonus = data.getInt("CrystalManaBonus");
-            int permanentDecrease = data.getInt("PermanentManaDecrease");
+            // 获取当前最大魔力值，使用 float
+            float currentMaxMana = ManaData.getMaxMana(player);
+            float crystalBonus = data.getInt("CrystalManaBonus"); // 从 int 转换为 float
+            float permanentDecrease = data.getInt("PermanentManaDecrease"); // 从 int 转换为 float
 
             // 重新应用水晶加成和永久减少
-            int baseMaxMana = currentMaxMana - crystalBonus + permanentDecrease;
-            int newMaxMana = baseMaxMana - permanentDecrease + crystalBonus;
+            float baseMaxMana = currentMaxMana - crystalBonus + permanentDecrease;
+            float newMaxMana = baseMaxMana - permanentDecrease + crystalBonus;
             ManaData.setMaxMana(player, newMaxMana);
 
             // 强制同步玩家生命值
-            player.setHealth(player.getHealth());
-        }
-
-        // 强制同步玩家属性
-        if (pLivingEntity instanceof Player player) {
-            // 强制同步生命值
             player.setHealth(player.getHealth());
         }
     }
@@ -282,16 +273,15 @@ public class DwarvesEffect extends MobEffect {
         if (event.getEntity() instanceof Player player) {
             MobEffectInstance effect = player.getEffect(ModEffects.DWARVES.get());
             if (effect != null) {
-                // 将效果数据存储到玩家的 NBT 中
                 CompoundTag playerData = player.getPersistentData();
                 CompoundTag effectData = new CompoundTag();
                 effectData.putInt("Duration", effect.getDuration());
                 effectData.putInt("Amplifier", effect.getAmplifier());
 
-                // 保存永久魔力减少值
+                // 保存魔力相关数据为浮点数
                 if (playerData.contains("PermanentManaDecrease")) {
-                    effectData.putInt("PermanentManaDecrease",
-                            playerData.getInt("PermanentManaDecrease"));
+                    effectData.putFloat("PermanentManaDecrease",
+                            playerData.getFloat("PermanentManaDecrease"));
                 }
 
                 playerData.put("DwarvesEffect", effectData);
@@ -312,14 +302,11 @@ public class DwarvesEffect extends MobEffect {
             int duration = effectData.getInt("Duration");
             int amplifier = effectData.getInt("Amplifier");
 
-            // 获取服务器实例以延迟应用效果
             net.minecraft.server.MinecraftServer server = player.level().getServer();
             if (server != null) {
-                // 延迟1tick (50ms) 后应用效果
                 server.tell(new net.minecraft.server.TickTask(
                         server.getTickCount() + 1,
                         () -> {
-                            // 在新玩家实体上重新应用效果
                             player.addEffect(new MobEffectInstance(
                                     ModEffects.DWARVES.get(),
                                     duration,
@@ -329,10 +316,10 @@ public class DwarvesEffect extends MobEffect {
                                     false
                             ));
 
-                            // 恢复永久魔力减少值
+                            // 恢复永久魔力减少值，使用 float
                             if (effectData.contains("PermanentManaDecrease")) {
-                                player.getPersistentData().putInt("PermanentManaDecrease",
-                                        effectData.getInt("PermanentManaDecrease"));
+                                player.getPersistentData().putFloat("PermanentManaDecrease",
+                                        effectData.getFloat("PermanentManaDecrease"));
                             }
                         }
                 ));

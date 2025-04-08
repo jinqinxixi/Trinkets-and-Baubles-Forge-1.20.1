@@ -141,10 +141,9 @@ public class FairyDewEffect extends MobEffect {
     @Override
     public void applyEffectTick(LivingEntity livingEntity, int amplifier) {
         if (livingEntity instanceof Player player) {
-            // 只在需要时设置飞行能力，避免频繁更新
+            // 飞行能力代码
             if (!player.isCreative() && !player.getAbilities().mayfly) {
                 player.getAbilities().mayfly = true;
-                // 只在首次设置飞行能力时设置速度
                 player.getAbilities().setFlyingSpeed(0.05f * ModConfig.FAIRY_DEW_FLIGHT_SPEED.get().floatValue());
                 player.onUpdateAbilities();
             }
@@ -152,19 +151,20 @@ public class FairyDewEffect extends MobEffect {
             // 处理魔力值
             CompoundTag data = player.getPersistentData();
             if (!data.contains(BONUS_TAG)) {
-                int currentMaxMana = ManaData.getMaxMana(player);
-                int crystalBonus = data.getInt(CRYSTAL_BONUS_TAG);
-                int permanentDecrease = data.getInt("PermanentManaDecrease");
+                float currentMaxMana = ManaData.getMaxMana(player);
+                float crystalBonus = data.getInt(CRYSTAL_BONUS_TAG);
+                float permanentDecrease = data.getInt("PermanentManaDecrease");
 
-                int baseMaxMana = currentMaxMana - crystalBonus + permanentDecrease;
-                data.putInt(ORIGINAL_MANA_TAG, baseMaxMana);
+                float baseMaxMana = currentMaxMana - crystalBonus + permanentDecrease;
+                data.putFloat(ORIGINAL_MANA_TAG, baseMaxMana);
 
-                int newMaxMana = baseMaxMana - permanentDecrease + crystalBonus + ModConfig.FAIRY_DEW_MANA_BONUS.get();
+                float newMaxMana = baseMaxMana - permanentDecrease + crystalBonus +
+                        ModConfig.FAIRY_DEW_MANA_BONUS.get().floatValue();
                 ManaData.setMaxMana(player, newMaxMana);
                 data.putBoolean(BONUS_TAG, true);
             }
 
-            // 如果配置允许，处理爬墙
+            // 爬墙代码
             if (ModConfig.FAIRY_DEW_WALL_CLIMB.get()) {
                 handleWallClimb(player);
             }
@@ -283,7 +283,7 @@ public class FairyDewEffect extends MobEffect {
 
         // 如果是玩家实体
         if (pLivingEntity instanceof Player player) {
-            // 移除飞行能力
+            // 飞行能力代码保持不变
             if (!player.isCreative()) {
                 player.getAbilities().mayfly = false;
                 player.getAbilities().flying = false;
@@ -291,15 +291,15 @@ public class FairyDewEffect extends MobEffect {
                 player.onUpdateAbilities();
             }
 
-            // 处理魔力值恢复
+            // 处理魔力值恢复，使用浮点数
             CompoundTag data = player.getPersistentData();
             if (data.contains(BONUS_TAG)) {
                 if (data.contains(ORIGINAL_MANA_TAG)) {
-                    int baseMaxMana = data.getInt(ORIGINAL_MANA_TAG);
-                    int crystalBonus = data.getInt(CRYSTAL_BONUS_TAG);
-                    int permanentDecrease = data.getInt("PermanentManaDecrease");
+                    float baseMaxMana = data.getFloat(ORIGINAL_MANA_TAG);
+                    float crystalBonus = data.getInt(CRYSTAL_BONUS_TAG);
+                    float permanentDecrease = data.getInt("PermanentManaDecrease");
 
-                    int restoredMana = baseMaxMana - permanentDecrease + crystalBonus;
+                    float restoredMana = baseMaxMana - permanentDecrease + crystalBonus;
                     ManaData.setMaxMana(player, restoredMana);
                 }
                 data.remove(BONUS_TAG);
@@ -323,18 +323,20 @@ public class FairyDewEffect extends MobEffect {
             if (effect != null) {
                 CompoundTag playerData = player.getPersistentData();
                 CompoundTag effectData = new CompoundTag();
-                // 只记录有效果的标记，不再保存效果的具体参数
                 effectData.putBoolean("HadEffect", true);
 
-                // 保存魔力相关数据（保持不变）
+                // 保存魔力相关数据为浮点数
                 if (playerData.contains(ORIGINAL_MANA_TAG)) {
-                    effectData.putInt(ORIGINAL_MANA_TAG, playerData.getInt(ORIGINAL_MANA_TAG));
+                    effectData.putFloat(ORIGINAL_MANA_TAG,
+                            playerData.getFloat(ORIGINAL_MANA_TAG));
                 }
                 if (playerData.contains(CRYSTAL_BONUS_TAG)) {
-                    effectData.putInt(CRYSTAL_BONUS_TAG, playerData.getInt(CRYSTAL_BONUS_TAG));
+                    effectData.putInt(CRYSTAL_BONUS_TAG,
+                            playerData.getInt(CRYSTAL_BONUS_TAG));
                 }
                 if (playerData.contains("PermanentManaDecrease")) {
-                    effectData.putInt("PermanentManaDecrease", playerData.getInt("PermanentManaDecrease"));
+                    effectData.putInt("PermanentManaDecrease",
+                            playerData.getInt("PermanentManaDecrease"));
                 }
 
                 playerData.put("FairyDewEffect", effectData);
@@ -374,29 +376,29 @@ public class FairyDewEffect extends MobEffect {
 
                                 // 魔力值相关数据处理
                                 if (effectData.contains(ORIGINAL_MANA_TAG)) {
-                                    int originalMana = effectData.getInt(ORIGINAL_MANA_TAG);
-                                    int crystalBonus = effectData.contains(CRYSTAL_BONUS_TAG) ?
+                                    float originalMana = effectData.getFloat(ORIGINAL_MANA_TAG);
+                                    float crystalBonus = effectData.contains(CRYSTAL_BONUS_TAG) ?
                                             effectData.getInt(CRYSTAL_BONUS_TAG) : 0;
-                                    int permanentDecrease = effectData.contains("PermanentManaDecrease") ?
+                                    float permanentDecrease = effectData.contains("PermanentManaDecrease") ?
                                             effectData.getInt("PermanentManaDecrease") : 0;
 
                                     // 保存原始值
-                                    player.getPersistentData().putInt(ORIGINAL_MANA_TAG, originalMana);
+                                    player.getPersistentData().putFloat(ORIGINAL_MANA_TAG, originalMana);
 
                                     // 计算并设置正确的魔力值
-                                    int correctMana = originalMana - permanentDecrease + crystalBonus +
-                                            ModConfig.FAIRY_DEW_MANA_BONUS.get();
+                                    float correctMana = originalMana - permanentDecrease + crystalBonus +
+                                            ModConfig.FAIRY_DEW_MANA_BONUS.get().floatValue();
                                     ManaData.setMaxMana(player, correctMana);
 
                                     // 标记魔力加成已应用
                                     player.getPersistentData().putBoolean(BONUS_TAG, true);
 
-                                    // 保存其他相关数据
+                                    // 保存其他相关数据，转换为整数
                                     if (effectData.contains(CRYSTAL_BONUS_TAG)) {
-                                        player.getPersistentData().putInt(CRYSTAL_BONUS_TAG, crystalBonus);
+                                        player.getPersistentData().putInt(CRYSTAL_BONUS_TAG, (int)crystalBonus);
                                     }
                                     if (effectData.contains("PermanentManaDecrease")) {
-                                        player.getPersistentData().putInt("PermanentManaDecrease", permanentDecrease);
+                                        player.getPersistentData().putInt("PermanentManaDecrease", (int)permanentDecrease);
                                     }
                                 }
                             }

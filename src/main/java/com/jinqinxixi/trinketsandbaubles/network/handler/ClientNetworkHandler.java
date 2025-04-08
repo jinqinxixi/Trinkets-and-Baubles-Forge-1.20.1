@@ -1,6 +1,7 @@
 package com.jinqinxixi.trinketsandbaubles.network.handler;
 
 import com.jinqinxixi.trinketsandbaubles.network.message.DragonRingMessage.DragonBreathMessage;
+import com.jinqinxixi.trinketsandbaubles.network.message.DragonRingMessage.DragonFlightToggleMessage;
 import com.jinqinxixi.trinketsandbaubles.network.message.DragonRingMessage.DragonNightVisionMessage;
 import com.jinqinxixi.trinketsandbaubles.network.message.DragonRingMessage.StopDragonBreathMessage;
 import com.jinqinxixi.trinketsandbaubles.network.message.DragonsEyeMessage.DragonsEyeToggleMessage;
@@ -16,7 +17,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
  * 所有从客户端发送到服务器的网络消息都应该通过这个类来处理
  */
 @OnlyIn(Dist.CLIENT)
-public class ClientNetworkHandler {
+public class  ClientNetworkHandler {
 
     // 龙息相关消息
     public static void sendDragonBreath() {
@@ -53,5 +54,8 @@ public class ClientNetworkHandler {
     // 偏振石相关消息
     public static void sendPolarizedStoneToggle(boolean isDeflection) {
         NetworkHandler.sendToServer(new PolarizedStoneToggleMessage(isDeflection));
+    }
+    public static void sendDragonFlightToggle() {
+        NetworkHandler.sendToServer(new DragonFlightToggleMessage());
     }
 }

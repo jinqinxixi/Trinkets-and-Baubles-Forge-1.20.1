@@ -47,10 +47,12 @@ public class DragonEffectServerEvents {
 
                 // 检查玩家是否有龙效果且正在使用龙息
                 if (hasEffect && isBreathing) {
+                    float tickCost = ModConfig.DRAGON_BREATH_MANA_COST.get().floatValue() / 20f;
+
                     // 检查魔力值
-                    if (ManaData.getMana(player) >= 0.5f) {
-                        // 消耗魔力
-                        ManaData.consumeMana(player, 0.5f);
+                    if (ManaData.getMana(player) >= tickCost) {
+                        // 每tick消耗少量魔力
+                        ManaData.consumeMana(player, tickCost);
 
                         // 定期同步状态（每秒一次）
                         if (event.getServer().getTickCount() % 20 == 0) {

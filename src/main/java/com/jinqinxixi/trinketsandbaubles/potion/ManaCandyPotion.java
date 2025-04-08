@@ -34,7 +34,7 @@ public class ManaCandyPotion extends Item {
     public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity livingEntity) {
         if (!level.isClientSide && livingEntity instanceof Player player) {
             // 使用配置值来恢复魔力
-            ManaData.addMana(player, ModConfig.MANA_CANDY_RESTORE.get());
+            ManaData.addMana(player, ModConfig.MANA_CANDY_RESTORE.get().floatValue());
 
             // 如果不在创造模式，消耗一个物品
             if (!player.getAbilities().instabuild) {
@@ -75,7 +75,7 @@ public class ManaCandyPotion extends Item {
     public void appendHoverText(ItemStack stack, @Nullable Level level,
                                 List<Component> tooltip, TooltipFlag flag) {
         tooltip.add(Component.translatable("item.trinketsandbaubles.mana_candy.tooltip",
-                        ModConfig.MANA_CANDY_RESTORE.get())
+                        String.format("%.1f",ModConfig.MANA_CANDY_RESTORE.get().floatValue()))
                 .withStyle(ChatFormatting.AQUA));
     }
 }

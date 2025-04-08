@@ -277,19 +277,19 @@ public class FaelesEffect extends MobEffect {
     @Override
     public void applyEffectTick(LivingEntity livingEntity, int amplifier) {
         if (livingEntity instanceof Player player) {
-
             // 检查并设置最大魔力值
             CompoundTag data = player.getPersistentData();
             if (!data.contains(MANA_BONUS_TAG)) {
-                int currentMaxMana = ManaData.getMaxMana(player);
-                int crystalBonus = data.getInt(CRYSTAL_BONUS_TAG);
-                int permanentDecrease = data.getInt("PermanentManaDecrease");
+                float currentMaxMana = ManaData.getMaxMana(player);
+                float crystalBonus = data.getInt(CRYSTAL_BONUS_TAG); // 从 int 转换为 float
+                float permanentDecrease = data.getInt("PermanentManaDecrease"); // 从 int 转换为 float
 
-                int baseMaxMana = currentMaxMana - crystalBonus + permanentDecrease;
-                data.putInt(ORIGINAL_MANA_TAG, baseMaxMana);
+                float baseMaxMana = currentMaxMana - crystalBonus + permanentDecrease;
+                data.putFloat(ORIGINAL_MANA_TAG, baseMaxMana);
 
                 // 使用配置的魔力加成值
-                int newMaxMana = baseMaxMana - permanentDecrease + crystalBonus + ModConfig.FAELES_MANA_BONUS.get();
+                float newMaxMana = baseMaxMana - permanentDecrease + crystalBonus +
+                        ModConfig.FAELES_MANA_BONUS.get().floatValue();
                 ManaData.setMaxMana(player, newMaxMana);
                 data.putBoolean(MANA_BONUS_TAG, true);
             }
@@ -351,12 +351,12 @@ public class FaelesEffect extends MobEffect {
             CompoundTag data = player.getPersistentData();
             if (data.contains(MANA_BONUS_TAG)) {
                 if (data.contains(ORIGINAL_MANA_TAG)) {
-                    int baseMaxMana = data.getInt(ORIGINAL_MANA_TAG);
-                    int crystalBonus = data.getInt(CRYSTAL_BONUS_TAG);
-                    int permanentDecrease = data.getInt("PermanentManaDecrease");
+                    float baseMaxMana = data.getFloat(ORIGINAL_MANA_TAG);
+                    float crystalBonus = data.getInt(CRYSTAL_BONUS_TAG);
+                    float permanentDecrease = data.getInt("PermanentManaDecrease");
 
                     // 恢复到基础值，考虑永久减少和水晶加成
-                    int restoredMana = baseMaxMana - permanentDecrease + crystalBonus;
+                    float restoredMana = baseMaxMana - permanentDecrease + crystalBonus;
                     ManaData.setMaxMana(player, restoredMana);
                 }
                 // 清理标记
@@ -390,15 +390,16 @@ public class FaelesEffect extends MobEffect {
             if (effect != null) {
                 CompoundTag playerData = player.getPersistentData();
                 CompoundTag effectData = new CompoundTag();
-                // 只保存一个标记表示玩家死亡时有效果
                 effectData.putBoolean("HadEffect", true);
 
-                // 保存所有魔力相关数据
+                // 保存所有魔力相关数据为浮点数
                 if (playerData.contains(ORIGINAL_MANA_TAG)) {
-                    effectData.putInt(ORIGINAL_MANA_TAG, playerData.getInt(ORIGINAL_MANA_TAG));
+                    effectData.putFloat(ORIGINAL_MANA_TAG,
+                            playerData.getFloat(ORIGINAL_MANA_TAG));
                 }
                 if (playerData.contains(CRYSTAL_BONUS_TAG)) {
-                    effectData.putInt(CRYSTAL_BONUS_TAG, playerData.getInt(CRYSTAL_BONUS_TAG));
+                    effectData.putInt(CRYSTAL_BONUS_TAG,
+                            playerData.getInt(CRYSTAL_BONUS_TAG));
                 }
                 if (playerData.contains("PermanentManaDecrease")) {
                     effectData.putInt("PermanentManaDecrease",
@@ -421,53 +422,44 @@ public class FaelesEffect extends MobEffect {
         if (originalData.contains("FaelesEffect")) {
             CompoundTag effectData = originalData.getCompound("FaelesEffect");
 
-            // 检查是否有效果标记
             if (effectData.getBoolean("HadEffect")) {
-                // 获取服务器实例
                 net.minecraft.server.MinecraftServer server = player.level().getServer();
                 if (server != null) {
-                    // 延迟1tick后应用效果
                     server.tell(new net.minecraft.server.TickTask(
                             server.getTickCount() + 1,
                             () -> {
-                                // 重新应用永久效果
                                 player.addEffect(new MobEffectInstance(
                                         ModEffects.FAELES.get(),
-                                        -1,    // 永久持续
-                                        0,     // 0级效果
-                                        false, // ambient
-                                        false,  // visible
-                                        false   // showIcon
+                                        -1,
+                                        0,
+                                        false,
+                                        false,
+                                        false
                                 ));
 
-                                // 复制所有数据到新玩家
                                 CompoundTag newData = player.getPersistentData();
 
-                                // 处理魔力值相关数据
                                 if (effectData.contains(ORIGINAL_MANA_TAG)) {
-                                    int originalMana = effectData.getInt(ORIGINAL_MANA_TAG);
-                                    int crystalBonus = effectData.contains(CRYSTAL_BONUS_TAG) ?
+                                    float originalMana = effectData.getFloat(ORIGINAL_MANA_TAG);
+                                    float crystalBonus = effectData.contains(CRYSTAL_BONUS_TAG) ?
                                             effectData.getInt(CRYSTAL_BONUS_TAG) : 0;
-                                    int permanentDecrease = effectData.contains("PermanentManaDecrease") ?
+                                    float permanentDecrease = effectData.contains("PermanentManaDecrease") ?
                                             effectData.getInt("PermanentManaDecrease") : 0;
 
-                                    // 保存原始值
-                                    newData.putInt(ORIGINAL_MANA_TAG, originalMana);
+                                    newData.putFloat(ORIGINAL_MANA_TAG, originalMana);
 
-                                    // 计算并设置正确的魔力值
-                                    int correctMana = originalMana - permanentDecrease + crystalBonus +
-                                            ModConfig.FAELES_MANA_BONUS.get();
+                                    float correctMana = originalMana - permanentDecrease + crystalBonus +
+                                            ModConfig.FAELES_MANA_BONUS.get().floatValue();
                                     ManaData.setMaxMana(player, correctMana);
 
-                                    // 标记魔力加成已应用
                                     newData.putBoolean(MANA_BONUS_TAG, true);
 
-                                    // 保存其他相关数据
+                                    // 将 float 转换为 int 保存
                                     if (effectData.contains(CRYSTAL_BONUS_TAG)) {
-                                        newData.putInt(CRYSTAL_BONUS_TAG, crystalBonus);
+                                        newData.putInt(CRYSTAL_BONUS_TAG, (int)crystalBonus);
                                     }
                                     if (effectData.contains("PermanentManaDecrease")) {
-                                        newData.putInt("PermanentManaDecrease", permanentDecrease);
+                                        newData.putInt("PermanentManaDecrease", (int)permanentDecrease);
                                     }
                                 }
                             }

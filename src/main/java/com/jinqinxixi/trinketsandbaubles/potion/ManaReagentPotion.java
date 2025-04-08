@@ -38,18 +38,18 @@ public class ManaReagentPotion extends Item {
             if (!level.isClientSide) {
                 CompoundTag data = player.getPersistentData();
 
-                // 记录永久性减少
-                int permanentDecrease = data.getInt("PermanentManaDecrease");
-                data.putInt("PermanentManaDecrease",
-                        permanentDecrease + ModConfig.MANA_REAGENT_MAX_DECREASE.get());
+                // 记录永久性减少，使用浮点数
+                float permanentDecrease = data.getFloat(PERMANENT_MANA_DECREASE);
+                data.putFloat(PERMANENT_MANA_DECREASE,
+                        permanentDecrease + ModConfig.MANA_REAGENT_MAX_DECREASE.get().floatValue());
 
                 // 获取当前的水晶加成
-                int crystalBonus = data.getInt("CrystalManaBonus");
+                float crystalBonus = data.getFloat("CrystalManaBonus");
 
                 // 更新当前魔力值 (保持水晶加成不变)
-                int currentMaxMana = ManaData.getMaxMana(player);
+                float currentMaxMana = ManaData.getMaxMana(player);
                 ManaData.setMaxMana(player,
-                        currentMaxMana - ModConfig.MANA_REAGENT_MAX_DECREASE.get());
+                        currentMaxMana - ModConfig.MANA_REAGENT_MAX_DECREASE.get().floatValue());
             }
 
             if (!player.getAbilities().instabuild) {
@@ -64,7 +64,6 @@ public class ManaReagentPotion extends Item {
         return USE_DURATION;
     }
 
-    // 始终显示附魔光效
     @Override
     public boolean isFoil(ItemStack stack) {
         return true;
@@ -75,13 +74,11 @@ public class ManaReagentPotion extends Item {
         return UseAnim.DRINK;
     }
 
-    // 附魔等级为0
     @Override
     public int getEnchantmentValue() {
         return 0;
     }
 
-    // 禁止任何形式的附魔（包括铁砧）
     @Override
     public boolean isEnchantable(ItemStack stack) {
         return false;
@@ -90,8 +87,9 @@ public class ManaReagentPotion extends Item {
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level,
                                 List<Component> tooltip, TooltipFlag flag) {
+        // 使用 String.format 格式化显示浮点数值
         tooltip.add(Component.translatable("item.trinketsandbaubles.mana_reagent.tooltip",
-                        ModConfig.MANA_REAGENT_MAX_DECREASE.get())
+                        String.format("%.1f", ModConfig.MANA_REAGENT_MAX_DECREASE.get().floatValue()))
                 .withStyle(ChatFormatting.RED));
     }
 }

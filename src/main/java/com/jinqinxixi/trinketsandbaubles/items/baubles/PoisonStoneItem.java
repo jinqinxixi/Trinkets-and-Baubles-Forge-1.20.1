@@ -74,7 +74,7 @@ public class PoisonStoneItem extends ModifiableBaubleItem {
 
     @SubscribeEvent
     public static void onLivingHurt(LivingHurtEvent event) {
-        if (ModConfig.POISON_STONE_ACTIVATE_DAMAGE_EVENT.get()) {                // We add a boolean to control when this event fires or not
+        if (ModConfig.POISON_STONE_ACTIVATE_DAMAGE_EVENT.get()) {
             if (event.getSource().getEntity() instanceof LivingEntity attacker) {
                 LivingEntity target = event.getEntity();
 
@@ -89,6 +89,7 @@ public class PoisonStoneItem extends ModifiableBaubleItem {
             }
         }
     }
+
 
     @Override
     public void onEquip(SlotContext slotContext, ItemStack prevStack, ItemStack stack) {

@@ -25,8 +25,8 @@ public class ManaHudOverlay {
     private static final ResourceLocation GUI_ICONS_LOCATION = new ResourceLocation(TrinketsandBaublesMod.MOD_ID, "textures/gui/icons.png");
 
     private boolean initialSyncReceived = false;
-    private int cachedMana = -1;
-    private int cachedMaxMana = -1;
+    private float cachedMana = -1;
+    private float cachedMaxMana = -1;
     private static ManaHudOverlay instance;
 
     private boolean isVertical = false;
@@ -218,14 +218,10 @@ public class ManaHudOverlay {
 
     public void render(GuiGraphics guiGraphics) {
         Minecraft minecraft = Minecraft.getInstance();
-        if (minecraft.player == null || !initialSyncReceived) {
-            return;
-        }
+        if (minecraft.player == null || !initialSyncReceived) return;
 
         // 如果魔力是满的，并且不在拖动模式下，就不显示
-        if (cachedMana >= cachedMaxMana && !canDrag) {
-            return;
-        }
+        if (cachedMana >= cachedMaxMana && !canDrag) return;
 
         int screenWidth = minecraft.getWindow().getGuiScaledWidth();
         int screenHeight = minecraft.getWindow().getGuiScaledHeight();
@@ -289,7 +285,7 @@ public class ManaHudOverlay {
         }
 
         // 绘制文本
-        String manaText = cachedMana + "/" + cachedMaxMana;
+        String manaText = String.format("%.1f/%.1f", cachedMana, cachedMaxMana);
         float scale = 0.75f;
 
         guiGraphics.pose().pushPose();
@@ -347,7 +343,7 @@ public class ManaHudOverlay {
         RenderSystem.disableBlend();
     }
 
-    public void updateManaData(int mana, int maxMana) {
+    public void updateManaData(float mana, float maxMana) {
         this.cachedMana = mana;
         this.cachedMaxMana = maxMana;
         this.initialSyncReceived = true;

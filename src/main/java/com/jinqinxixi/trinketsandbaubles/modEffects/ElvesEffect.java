@@ -122,18 +122,18 @@ public class ElvesEffect extends MobEffect {
         if (livingEntity instanceof Player player) {
             CompoundTag data = player.getPersistentData();
 
-
             // 处理魔力加成
             if (!data.contains(MANA_BONUS_TAG)) {
-                int currentMaxMana = ManaData.getMaxMana(player);
-                int crystalBonus = data.getInt(CRYSTAL_BONUS_TAG);
-                int permanentDecrease = data.getInt("PermanentManaDecrease");
+                float currentMaxMana = ManaData.getMaxMana(player);
+                float crystalBonus = data.getInt(CRYSTAL_BONUS_TAG); // 从 int 转换为 float
+                float permanentDecrease = data.getInt("PermanentManaDecrease"); // 从 int 转换为 float
 
-                int baseMaxMana = currentMaxMana - crystalBonus + permanentDecrease;
-                data.putInt(ORIGINAL_MAX_MANA_KEY, baseMaxMana);
+                float baseMaxMana = currentMaxMana - crystalBonus + permanentDecrease;
+                data.putFloat(ORIGINAL_MAX_MANA_KEY, baseMaxMana);
 
                 // 使用配置的魔力加成值
-                int newMaxMana = baseMaxMana - permanentDecrease + crystalBonus + ModConfig.ELVES_MANA_BONUS.get();
+                float newMaxMana = baseMaxMana - permanentDecrease + crystalBonus +
+                        ModConfig.ELVES_MANA_BONUS.get().floatValue();
                 ManaData.setMaxMana(player, newMaxMana);
                 data.putBoolean(MANA_BONUS_TAG, true);
             }
@@ -206,12 +206,12 @@ public class ElvesEffect extends MobEffect {
             CompoundTag data = player.getPersistentData();
             if (data.contains(MANA_BONUS_TAG)) {
                 if (data.contains(ORIGINAL_MAX_MANA_KEY)) {
-                    int baseMaxMana = data.getInt(ORIGINAL_MAX_MANA_KEY);
-                    int crystalBonus = data.getInt(CRYSTAL_BONUS_TAG);
-                    int permanentDecrease = data.getInt("PermanentManaDecrease");
+                    float baseMaxMana = data.getFloat(ORIGINAL_MAX_MANA_KEY);
+                    float crystalBonus = data.getInt(CRYSTAL_BONUS_TAG);
+                    float permanentDecrease = data.getInt("PermanentManaDecrease");
 
                     // 恢复到基础值，考虑永久减少和水晶加成
-                    int restoredMana = baseMaxMana - permanentDecrease + crystalBonus;
+                    float restoredMana = baseMaxMana - permanentDecrease + crystalBonus;
                     ManaData.setMaxMana(player, restoredMana);
                 }
                 // 清理标记
@@ -248,13 +248,13 @@ public class ElvesEffect extends MobEffect {
                 effectData.putInt("Duration", effect.getDuration());
                 effectData.putInt("Amplifier", effect.getAmplifier());
 
-                // 保存当前实际的最大魔力值
-                effectData.putInt("CurrentMaxMana", ManaData.getMaxMana(player));
+                // 保存当前实际的最大魔力值为浮点数
+                effectData.putFloat("CurrentMaxMana", ManaData.getMaxMana(player));
 
                 // 保存所有魔力修改因素
                 if (playerData.contains(ORIGINAL_MAX_MANA_KEY)) {
-                    effectData.putInt(ORIGINAL_MAX_MANA_KEY,
-                            playerData.getInt(ORIGINAL_MAX_MANA_KEY));
+                    effectData.putFloat(ORIGINAL_MAX_MANA_KEY,
+                            playerData.getFloat(ORIGINAL_MAX_MANA_KEY));
                 }
                 if (playerData.contains(CRYSTAL_BONUS_TAG)) {
                     effectData.putInt(CRYSTAL_BONUS_TAG,
@@ -303,8 +303,8 @@ public class ElvesEffect extends MobEffect {
 
                             // 保存原始魔力值
                             if (effectData.contains(ORIGINAL_MAX_MANA_KEY)) {
-                                newData.putInt(ORIGINAL_MAX_MANA_KEY,
-                                        effectData.getInt(ORIGINAL_MAX_MANA_KEY));
+                                newData.putFloat(ORIGINAL_MAX_MANA_KEY,
+                                        effectData.getFloat(ORIGINAL_MAX_MANA_KEY));
                             }
 
                             // 保存水晶加成
@@ -321,7 +321,7 @@ public class ElvesEffect extends MobEffect {
 
                             // 直接设置为死亡时的实际魔力值
                             if (effectData.contains("CurrentMaxMana")) {
-                                ManaData.setMaxMana(player, effectData.getInt("CurrentMaxMana"));
+                                ManaData.setMaxMana(player, effectData.getFloat("CurrentMaxMana"));
                                 newData.putBoolean(MANA_BONUS_TAG, true);
                             }
                         }
