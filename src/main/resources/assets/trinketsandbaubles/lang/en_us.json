@@ -193,54 +193,26 @@
   "item.trinketsandbaubles.faelis_ring.tooltip13": "Bonuses when drinking milk",
   "item.trinketsandbaubles.faelis_ring.tooltip14": "Reduced movement speed in heavy armor",
   "item.trinketsandbaubles.faelis_ring.press_shift": "Hold §eSHIFT§7 for details",
-  "item.trinketsandbaubles.faelis_ring.tooltip1": "• %s%% Max Health",
-  "item.trinketsandbaubles.faelis_ring.tooltip2": "• +%s%% Speed",
-  "item.trinketsandbaubles.faelis_ring.tooltip3": "• %s%% Attack Damage",
-  "item.trinketsandbaubles.faelis_ring.tooltip4": "• +%s%% Attack Speed",
-  "item.trinketsandbaubles.faelis_ring.tooltip5": "• %s%% Armor Toughness",
-  "item.trinketsandbaubles.faelis_ring.tooltip6": "• +%s Luck",
-  "item.trinketsandbaubles.faelis_ring.tooltip7": "• %s%% Reach Distance",
-  "item.trinketsandbaubles.faelis_ring.tooltip8": "• +%s%% Swim Speed",
-  "item.trinketsandbaubles.faelis_ring.tooltip9": "• +%s%% Jump Height",
-  "item.trinketsandbaubles.faelis_ring.tooltip10": "• Step Assist",
+
 
   "item.trinketsandbaubles.fairies_ring.tooltip11": "25% normal size",
   "item.trinketsandbaubles.fairies_ring.tooltip12": "Creative flight",
   "item.trinketsandbaubles.fairies_ring.press_shift": "Hold §eSHIFT§7 for details",
-  "item.trinketsandbaubles.fairies_ring.tooltip1": "• %s%% Max Health",
-  "item.trinketsandbaubles.fairies_ring.tooltip2": "• %s%% Speed",
-  "item.trinketsandbaubles.fairies_ring.tooltip3": "• %s%% Attack Damage",
-  "item.trinketsandbaubles.fairies_ring.tooltip4": "• %s%% Armor",
-  "item.trinketsandbaubles.fairies_ring.tooltip5": "• %s%% Armor Toughness",
-  "item.trinketsandbaubles.fairies_ring.tooltip6": "• %s%% Reach Distance",
-  "item.trinketsandbaubles.fairies_ring.tooltip7": "• %s%% Swim Speed",
-  "item.trinketsandbaubles.fairies_ring.tooltip8": "• %s%% Jump Height",
-  "item.trinketsandbaubles.fairies_ring.tooltip9": "• Step Assist",
+
 
   "item.trinketsandbaubles.dwarves_ring.tooltip11": "75% normal size",
   "item.trinketsandbaubles.dwarves_ring.tooltip12": "Luck",
   "item.trinketsandbaubles.dwarves_ring.tooltip13": "Skilled Miner",
   "item.trinketsandbaubles.dwarves_ring.tooltip14": "Increased Mining Level",
   "item.trinketsandbaubles.dwarves_ring.press_shift": "Hold §eSHIFT§7 for details",
-  "item.trinketsandbaubles.dwarves_ring.tooltip1": "• %s%% Max Health",
-  "item.trinketsandbaubles.dwarves_ring.tooltip2": "• +%s%% Knockback Resistance",
-  "item.trinketsandbaubles.dwarves_ring.tooltip3": "• %s%% Speed",
-  "item.trinketsandbaubles.dwarves_ring.tooltip4": "• +%s%% Attack Damage",
-  "item.trinketsandbaubles.dwarves_ring.tooltip5": "• %s%% Attack Speed",
-  "item.trinketsandbaubles.dwarves_ring.tooltip6": "• +%s%% Armor Toughness",
+
 
   "item.trinketsandbaubles.titan_ring.tooltip11": "300% normal size",
   "item.trinketsandbaubles.titan_ring.tooltip12": "3x3x3 mining area",
   "item.trinketsandbaubles.titan_ring.tooltip13": "Sink in water",
   "item.trinketsandbaubles.titan_ring.tooltip14": "Tramples plants",
   "item.trinketsandbaubles.titan_ring.press_shift": "Hold §eSHIFT§7 for details",
-  "item.trinketsandbaubles.titan_ring.tooltip1": "• +%s%% Max Health",
-  "item.trinketsandbaubles.titan_ring.tooltip2": "• +%s%% Knockback Resistance",
-  "item.trinketsandbaubles.titan_ring.tooltip3": "• +%s%% Attack Damage",
-  "item.trinketsandbaubles.titan_ring.tooltip4": "• %s%% Attack Speed",
-  "item.trinketsandbaubles.titan_ring.tooltip5": "• +%s%% Reach Distance",
-  "item.trinketsandbaubles.titan_ring.tooltip6": "• +%s%% Jump Height",
-  "item.trinketsandbaubles.titan_ring.tooltip7": "• Step Assist",
+
 
   "item.trinketsandbaubles.goblins_ring.tooltip11": "50% normal size",
   "item.trinketsandbaubles.goblins_ring.tooltip12": "Can ride tamed wolves",
@@ -248,11 +220,7 @@
   "item.trinketsandbaubles.goblins_ring.tooltip14": "Gain minor Fire and Explosion Resistance",
   "item.trinketsandbaubles.goblins_ring.tooltip15": "Creepers will ignore you",
   "item.trinketsandbaubles.goblins_ring.press_shift": "Hold §eSHIFT§7 for details",
-  "item.trinketsandbaubles.goblins_ring.tooltip1": "• %s%% Max Health",
-  "item.trinketsandbaubles.goblins_ring.tooltip2": "• +%s%% Speed",
-  "item.trinketsandbaubles.goblins_ring.tooltip3": "• %s%% Attack Damage",
-  "item.trinketsandbaubles.goblins_ring.tooltip4": "• +%s Luck",
-  "item.trinketsandbaubles.goblins_ring.tooltip5": "• +%s%% Swim Speed",
+
 
   "item.trinketsandbaubles.elves_ring.tooltip11": "100% normal size",
   "item.trinketsandbaubles.elves_ring.tooltip12": "Increased bow damage while sneaking",
@@ -268,9 +236,7 @@
   "item.trinketsandbaubles.dragons_ring.tooltip15": "Press J to toggle Ore Detection",
   "item.trinketsandbaubles.dragons_ring.tooltip16": "Press L to toggle flight ability",
   "item.trinketsandbaubles.dragons_ring.press_shift": "Hold §eSHIFT§7 for details",
-  "item.trinketsandbaubles.dragons_ring.tooltip1": "• +%s%% Max Health",
-  "item.trinketsandbaubles.dragons_ring.tooltip2": "• +%s%% Attack Damage",
-  "item.trinketsandbaubles.dragons_ring.tooltip3": "• +%s%% Armor Toughness",
+
   "message.trinketsandbaubles.dragon.no_mana": "Lack of mana to fly",
 
   "item.trinketsandbaubles.moon_rose.tooltip": "Crafting Material",
@@ -307,5 +273,25 @@
 
   "message.trinketsandbaubles.dragon.flight.enabled": "Dragon Ring Flight Ability Enabled",
   "message.trinketsandbaubles.dragon.flight.disabled": "Dragon Ring Flight Ability Disabled",
-  "key.trinketsandbaubles.dragon_flight_toggle": "Toggle Dragon Ring Flight Ability"
+  "key.trinketsandbaubles.dragon_flight_toggle": "Toggle Dragon Ring Flight Ability",
+
+
+  "attribute.trinketsandbaubles.max_health": "Max Health",
+  "attribute.trinketsandbaubles.follow_range": "Follow Range",
+  "attribute.trinketsandbaubles.movement_speed": "Movement Speed",
+  "attribute.trinketsandbaubles.attack_speed": "Attack Speed",
+  "attribute.trinketsandbaubles.attack_damage": "Attack Damage",
+  "attribute.trinketsandbaubles.swim_speed": "Swim Speed",
+  "attribute.trinketsandbaubles.flying_speed": "Flying Speed",
+  "attribute.trinketsandbaubles.entity_gravity": "Gravity",
+  "attribute.trinketsandbaubles.block_reach": "Block Reach",
+  "attribute.trinketsandbaubles.entity_reach": "Entity Reach",
+  "attribute.trinketsandbaubles.nametag_distance": "Nametag Distance",
+  "attribute.trinketsandbaubles.armor": "Armor",
+  "attribute.trinketsandbaubles.armor_toughness": "Armor Toughness",
+  "attribute.trinketsandbaubles.knockback_resistance": "Knockback Resistance",
+  "attribute.trinketsandbaubles.attack_knockback": "Attack Knockback",
+  "attribute.trinketsandbaubles.luck": "Luck",
+  "attribute.trinketsandbaubles.step_height": "Step Height"
+
 }

@@ -1,5 +1,6 @@
 package com.jinqinxixi.trinketsandbaubles.network.message.DragonRingMessage;
 
+import com.jinqinxixi.trinketsandbaubles.capability.registry.ModCapabilities;
 import com.jinqinxixi.trinketsandbaubles.network.handler.NetworkHandler;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
@@ -20,12 +21,16 @@ public class StopDragonBreathMessage {
         context.enqueueWork(() -> {
             ServerPlayer sender = context.getSender();
             if (sender != null) {
-                sender.getPersistentData().putBoolean("DragonBreathActive", false);
-                // 直接同步到所有客户端，包括发送者
-                NetworkHandler.INSTANCE.send(
-                        PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> sender),
-                        new SyncDragonBreathMessage(false, sender.getId())
-                );
+                sender.getCapability(ModCapabilities.DRAGON_CAPABILITY).ifPresent(cap -> {
+                    if (cap.isActive() && cap.isDragonBreathActive()) {
+                        cap.toggleDragonBreath();
+                        // 同步到所有客户端
+                        NetworkHandler.INSTANCE.send(
+                                PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> sender),
+                                new SyncDragonBreathMessage(false, sender.getId())
+                        );
+                    }
+                });
             }
         });
         context.setPacketHandled(true);

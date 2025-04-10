@@ -1,4 +1,4 @@
-package com.jinqinxixi.trinketsandbaubles.modEffects;
+package com.jinqinxixi.trinketsandbaubles.modeffects;
 
 import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import com.jinqinxixi.trinketsandbaubles.items.ModItem;
@@ -45,7 +45,7 @@ public class TitanEffect extends MobEffect {
     public TitanEffect() {
         super(MobEffectCategory.BENEFICIAL, 0x808080); // 灰色
     }
-
+/*
     @Override
     public void addAttributeModifiers(LivingEntity pLivingEntity, AttributeMap pAttributeMap, int pAmplifier) {
         // 使用平滑过渡设置体型缩放
@@ -421,5 +421,5 @@ public class TitanEffect extends MobEffect {
                 }
             }
         }
-    }
+    }*/
 }

@@ -1,13 +1,12 @@
 package com.jinqinxixi.trinketsandbaubles.potion;
 
 
+import com.jinqinxixi.trinketsandbaubles.capability.base.AbstractRaceCapability;
+import com.jinqinxixi.trinketsandbaubles.capability.registry.ModCapabilities;
 import com.jinqinxixi.trinketsandbaubles.capability.mana.ManaData;
-import com.jinqinxixi.trinketsandbaubles.modEffects.ModEffects;
-import com.jinqinxixi.trinketsandbaubles.util.RaceEffectUtil;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.*;
@@ -35,16 +34,13 @@ public class DwarfStoutPotion extends Item {
     @Override
     public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity entity) {
         if (!level.isClientSide && entity instanceof ServerPlayer player) {
-            // 先清除所有现有的种族效果
-            RaceEffectUtil.clearAllRaceEffects(player);
-            player.addEffect(new MobEffectInstance(
-                    ModEffects.DWARVES.get(),
-                    -1,
-                    0,
-                    false,
-                    false,
-                    false
-            ));
+
+            AbstractRaceCapability.clearAllRaceAbilities(player);
+
+            // 给予矮人能力
+            player.getCapability(ModCapabilities.DWARVES_CAPABILITY).ifPresent(cap -> {
+                cap.setActive(true);
+            });
 
             // 立即恢复100点魔力
             ManaData.addMana(player, 100f);

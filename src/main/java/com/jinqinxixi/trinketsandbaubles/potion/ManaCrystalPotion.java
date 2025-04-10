@@ -1,5 +1,6 @@
 package com.jinqinxixi.trinketsandbaubles.potion;
 
+import com.jinqinxixi.trinketsandbaubles.capability.registry.ModCapabilities;
 import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import com.jinqinxixi.trinketsandbaubles.capability.mana.ManaData;
 import net.minecraft.ChatFormatting;
@@ -16,7 +17,6 @@ import java.util.List;
 
 public class ManaCrystalPotion extends Item {
     static final int USE_DURATION = 32;    // 长按时间
-    static final float MANA_RESTORE = 10000.0f;   // 恢复的魔力值
 
     public ManaCrystalPotion() {
         super(new Properties()
@@ -35,24 +35,16 @@ public class ManaCrystalPotion extends Item {
     @Override
     public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity livingEntity) {
         if (!level.isClientSide && livingEntity instanceof Player player) {
-            CompoundTag data = player.getPersistentData();
 
-            // 获取当前的永久减少值
-            float permanentDecrease = data.getFloat("PermanentManaDecrease");
-
-            // 记录水晶增加的魔力值
-            float crystalBonus = data.getFloat("CrystalManaBonus");
-            crystalBonus += ModConfig.MANA_CRYSTAL_MAX_INCREASE.get().floatValue();  // 使用配置浮点值
-            data.putFloat("CrystalManaBonus", crystalBonus);
-
-            // 增加最大魔力值 (考虑永久减少值)
+            // 直接修改全局魔力值
             float currentMaxMana = ManaData.getMaxMana(player);
-            ManaData.setMaxMana(player, currentMaxMana +
-                    ModConfig.MANA_CRYSTAL_MAX_INCREASE.get().floatValue());  // 使用配置浮点值
+            float increaseAmount = ModConfig.MANA_CRYSTAL_MAX_INCREASE.get().floatValue();
+            float newMaxMana = currentMaxMana + increaseAmount;
 
-            // 恢复魔力值
-            ManaData.addMana(player, MANA_RESTORE);
+            ManaData.setMaxMana(player, newMaxMana);
 
+
+            // 消耗物品
             if (!player.getAbilities().instabuild) {
                 stack.shrink(1);
             }

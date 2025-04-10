@@ -1,4 +1,4 @@
-package com.jinqinxixi.trinketsandbaubles.capability.mana;
+package com.jinqinxixi.trinketsandbaubles.capability.mana.hud;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

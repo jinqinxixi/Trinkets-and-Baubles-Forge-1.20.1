@@ -1,7 +1,10 @@
 package com.jinqinxixi.trinketsandbaubles;
 
 import com.jinqinxixi.trinketsandbaubles.block.ModBlocks;
+
+import com.jinqinxixi.trinketsandbaubles.capability.network.RaceCapabilityNetworking;
 import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
+import com.jinqinxixi.trinketsandbaubles.config.RaceAttributesConfig;
 import com.jinqinxixi.trinketsandbaubles.items.baubles.DragonsEyeItem;
 import com.jinqinxixi.trinketsandbaubles.items.baubles.DragonsRingItem;
 import com.jinqinxixi.trinketsandbaubles.items.baubles.PolarizedStoneItem;
@@ -12,7 +15,7 @@ import com.jinqinxixi.trinketsandbaubles.items.ModItem;
 
 import com.jinqinxixi.trinketsandbaubles.loot.LootTableHandler;
 import com.jinqinxixi.trinketsandbaubles.capability.mana.ManaData;
-import com.jinqinxixi.trinketsandbaubles.capability.mana.ManaHudOverlay;
+import com.jinqinxixi.trinketsandbaubles.capability.mana.hud.ManaHudOverlay;
 import com.jinqinxixi.trinketsandbaubles.modifier.CurioAttributeEvents;
 import com.jinqinxixi.trinketsandbaubles.network.handler.NetworkHandler;
 import com.jinqinxixi.trinketsandbaubles.recast.AnvilRecastRegistry;
@@ -35,7 +38,6 @@ import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
@@ -46,8 +48,11 @@ import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLLoader;
 import org.slf4j.Logger;
 import top.theillusivec4.curios.api.CuriosApi;
+import top.theillusivec4.curios.api.SlotResult;
 
-import static com.jinqinxixi.trinketsandbaubles.modEffects.ModEffects.EFFECTS;
+import java.util.Optional;
+
+import static com.jinqinxixi.trinketsandbaubles.modeffects.ModEffects.EFFECTS;
 
 @Mod(TrinketsandBaublesMod.MOD_ID)
 public class TrinketsandBaublesMod
@@ -69,12 +74,19 @@ public class TrinketsandBaublesMod
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(this::addCreative);
         MinecraftForge.EVENT_BUS.register(ManaData.class);
+        // 注册网络处理器
+        RaceCapabilityNetworking.init();
 
         // 配置注册
         ModLoadingContext.get().registerConfig(
                 net.minecraftforge.fml.config.ModConfig.Type.COMMON,
                 ModConfig.SPEC,
                 "trinketsandbaubles-common.toml"
+        );
+        ModLoadingContext.get().registerConfig(
+                net.minecraftforge.fml.config.ModConfig.Type.COMMON,
+                RaceAttributesConfig.SPEC,
+                "trinketsandbaubles-races.toml"
         );
 
         // 添加配置加载事件监听器
@@ -101,7 +113,13 @@ public class TrinketsandBaublesMod
                     }
 
                     Player player = event.getEntity();
-                    if (CuriosApi.getCuriosHelper().findEquippedCurio(ModItem.DAMAGE_SHIELD.get(), player).isPresent()) {
+
+                    // 使用新的API方法查找护盾饰品
+                    Optional<SlotResult> result = CuriosApi.getCuriosInventory(player)
+                            .resolve()
+                            .flatMap(handler -> handler.findFirstCurio(ModItem.DAMAGE_SHIELD.get()));
+
+                    if (result.isPresent()) {
                         AbstractPlayerDamageModel after = event.getAfterDamage();
                         if (after.HEAD.currentHealth < 1 || (after.BODY.currentHealth < 1)) {
                             // 使用配置的触发概率

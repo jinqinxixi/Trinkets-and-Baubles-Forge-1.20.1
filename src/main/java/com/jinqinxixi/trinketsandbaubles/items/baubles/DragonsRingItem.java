@@ -1,12 +1,13 @@
 package com.jinqinxixi.trinketsandbaubles.items.baubles;
 
 import com.jinqinxixi.trinketsandbaubles.TrinketsandBaublesMod;
+import com.jinqinxixi.trinketsandbaubles.capability.attribute.AttributeRegistry;
+import com.jinqinxixi.trinketsandbaubles.capability.base.AbstractRaceCapability;
+import com.jinqinxixi.trinketsandbaubles.capability.registry.ModCapabilities;
 import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
-import com.jinqinxixi.trinketsandbaubles.modEffects.ModEffects;
+import com.jinqinxixi.trinketsandbaubles.config.RaceAttributesConfig;
 import com.jinqinxixi.trinketsandbaubles.modifier.ModifiableBaubleItem;
-import com.jinqinxixi.trinketsandbaubles.network.handler.NetworkHandler;
-import com.jinqinxixi.trinketsandbaubles.network.message.DragonsEyeMessage.UpdateTargetsMessage;
-import com.jinqinxixi.trinketsandbaubles.util.RaceEffectUtil;
+import com.jinqinxixi.trinketsandbaubles.util.RaceRingUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -15,7 +16,6 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -67,27 +67,25 @@ public class DragonsRingItem extends ModifiableBaubleItem {
         // 只在服务器端处理
         if (entity instanceof ServerPlayer serverPlayer) {
             // 检查是否装备了多个种族戒指
-            if (RaceEffectUtil.hasMultipleRaceRings(serverPlayer)) {
-                // 如果有多个种族戒指，移除效果
-                serverPlayer.removeEffect(ModEffects.DRAGON.get());
+            if (RaceRingUtil.hasMultipleRaceRings(serverPlayer)) {
+                // 如果有多个种族戒指，停用龙族能力
+                serverPlayer.getCapability(ModCapabilities.DRAGON_CAPABILITY).ifPresent(cap -> {
+                    if (cap.isActive()) {
+                        cap.setActive(false);
+                    }
+                });
                 return;
             }
 
-            // 检查玩家是否已经有效果
-            if (!serverPlayer.hasEffect(ModEffects.DRAGON.get())) {
-                // 先清除所有种族效果
-                RaceEffectUtil.clearAllRaceEffects(serverPlayer);
-
-                // 然后应用新的效果
-                entity.addEffect(new MobEffectInstance(
-                        ModEffects.DRAGON.get(),
-                        Integer.MAX_VALUE,
-                        0,
-                        false,
-                        false,
-                        false
-                ));
-            }
+            // 激活龙族能力
+            serverPlayer.getCapability(ModCapabilities.DRAGON_CAPABILITY).ifPresent(cap -> {
+                if (!cap.isActive()) {
+                    // 先清除所有种族能力
+                    AbstractRaceCapability.clearAllRaceAbilities(serverPlayer);
+                    // 然后激活龙族能力
+                    cap.setActive(true);
+                }
+            });
         }
     }
 
@@ -97,9 +95,13 @@ public class DragonsRingItem extends ModifiableBaubleItem {
         LivingEntity entity = slotContext.entity();
 
         if (entity instanceof ServerPlayer serverPlayer) {
-            // 处理种族效果
-            if (RaceEffectUtil.hasMultipleRaceRings(serverPlayer)) {
-                serverPlayer.removeEffect(ModEffects.DRAGON.get());
+            // 处理种族能力
+            if (RaceRingUtil.hasMultipleRaceRings(serverPlayer)) {
+                serverPlayer.getCapability(ModCapabilities.DRAGON_CAPABILITY).ifPresent(cap -> {
+                    if (cap.isActive()) {
+                        cap.setActive(false);
+                    }
+                });
                 return;
             }
 
@@ -108,9 +110,13 @@ public class DragonsRingItem extends ModifiableBaubleItem {
                 updateTargets(serverPlayer, stack);
             }
 
-            // 应用种族效果
-            if (isEquipped(entity) && !serverPlayer.hasEffect(ModEffects.DRAGON.get())) {
-                applyFaelisBuff(entity);
+            // 应用种族能力
+            if (isEquipped(entity)) {
+                serverPlayer.getCapability(ModCapabilities.DRAGON_CAPABILITY).ifPresent(cap -> {
+                    if (!cap.isActive()) {
+                        applyFaelisBuff(entity);
+                    }
+                });
             }
         }
     }
@@ -126,7 +132,7 @@ public class DragonsRingItem extends ModifiableBaubleItem {
                 (prevStack.isEmpty() || !hasSameModifier(prevStack, stack))) {
 
             // 检查是否有多个种族戒指
-            if (!RaceEffectUtil.hasMultipleRaceRings(serverPlayer)) {
+            if (!RaceRingUtil.hasMultipleRaceRings(serverPlayer)) {
                 // 应用种族效果
                 if (isEquipped(entity)) {
                     applyFaelisBuff(entity);
@@ -139,13 +145,17 @@ public class DragonsRingItem extends ModifiableBaubleItem {
     public void onUnequip(SlotContext slotContext, ItemStack newStack, ItemStack stack) {
         LivingEntity entity = slotContext.entity();
 
-        // 先处理种族效果的移除
+        // 先处理种族能力的移除
         if (entity instanceof ServerPlayer serverPlayer &&
                 (newStack.isEmpty() || !hasSameModifier(newStack, stack))) {
 
-            // 只有当没有其他相同戒指装备时才移除效果
+            // 只有当没有其他相同戒指装备时才停用能力
             if (!isEquipped(entity)) {
-                serverPlayer.removeEffect(ModEffects.DRAGON.get());
+                serverPlayer.getCapability(ModCapabilities.DRAGON_CAPABILITY).ifPresent(cap -> {
+                    if (cap.isActive()) {
+                        cap.setActive(false);
+                    }
+                });
             }
         }
 
@@ -166,19 +176,93 @@ public class DragonsRingItem extends ModifiableBaubleItem {
     public void appendHoverText(ItemStack stack, @Nullable Level level,
                                 List<Component> tooltip, TooltipFlag flag) {
         if (net.minecraft.client.gui.screens.Screen.hasShiftDown()) {
-            // 详细信息
-            tooltip.add(Component.translatable("item.trinketsandbaubles.dragons_ring.tooltip1", ModConfig.DRAGON_MAX_HEALTH_BOOST.get() * 100)
-                    .withStyle(ChatFormatting.BLUE));
-            tooltip.add(Component.translatable("item.trinketsandbaubles.dragons_ring.tooltip2", ModConfig.DRAGON_ATTACK_DAMAGE_BOOST.get() * 100)
-                    .withStyle(ChatFormatting.BLUE));
-            tooltip.add(Component.translatable("item.trinketsandbaubles.dragons_ring.tooltip3", ModConfig.DRAGON_ARMOR_TOUGHNESS.get() * 100)
-                    .withStyle(ChatFormatting.BLUE));
+            // 遍历所有属性并显示非零值
+            for (Map.Entry<String, AttributeRegistry.AttributeEntry> entry : AttributeRegistry.getAll().entrySet()) {
+                try {
+                    String attributeName = entry.getKey();
+                    // 直接从DRAGON实例获取值
+                    double value = 0;
+                    switch (attributeName) {
+                        case "MAX_HEALTH":
+                            value = RaceAttributesConfig.DRAGON.MAX_HEALTH.get();
+                            break;
+                        case "FOLLOW_RANGE":
+                            value = RaceAttributesConfig.DRAGON.FOLLOW_RANGE.get();
+                            break;
+                        case "MOVEMENT_SPEED":
+                            value = RaceAttributesConfig.DRAGON.MOVEMENT_SPEED.get();
+                            break;
+                        case "ATTACK_SPEED":
+                            value = RaceAttributesConfig.DRAGON.ATTACK_SPEED.get();
+                            break;
+                        case "ATTACK_DAMAGE":
+                            value = RaceAttributesConfig.DRAGON.ATTACK_DAMAGE.get();
+                            break;
+                        case "SWIM_SPEED":
+                            value = RaceAttributesConfig.DRAGON.SWIM_SPEED.get();
+                            break;
+                        case "FLYING_SPEED":
+                            value = RaceAttributesConfig.DRAGON.FLYING_SPEED.get();
+                            break;
+                        case "ENTITY_GRAVITY":
+                            value = RaceAttributesConfig.DRAGON.ENTITY_GRAVITY.get();
+                            break;
+                        case "BLOCK_REACH":
+                            value = RaceAttributesConfig.DRAGON.BLOCK_REACH.get();
+                            break;
+                        case "ENTITY_REACH":
+                            value = RaceAttributesConfig.DRAGON.ENTITY_REACH.get();
+                            break;
+                        case "NAMETAG_DISTANCE":
+                            value = RaceAttributesConfig.DRAGON.NAMETAG_DISTANCE.get();
+                            break;
+                        case "ARMOR":
+                            value = RaceAttributesConfig.DRAGON.ARMOR.get();
+                            break;
+                        case "ARMOR_TOUGHNESS":
+                            value = RaceAttributesConfig.DRAGON.ARMOR_TOUGHNESS.get();
+                            break;
+                        case "KNOCKBACK_RESISTANCE":
+                            value = RaceAttributesConfig.DRAGON.KNOCKBACK_RESISTANCE.get();
+                            break;
+                        case "ATTACK_KNOCKBACK":
+                            value = RaceAttributesConfig.DRAGON.ATTACK_KNOCKBACK.get();
+                            break;
+                        case "LUCK":
+                            value = RaceAttributesConfig.DRAGON.LUCK.get();
+                            break;
+                        case "STEP_HEIGHT":
+                            value = RaceAttributesConfig.DRAGON.STEP_HEIGHT.get();
+                            break;
+                    }
 
+                    // 如果值不为0，添加到描述中
+                    if (value != 0) {
+                        AttributeRegistry.AttributeEntry attr = entry.getValue();
+                        String displayText;
+
+                        if (attr.isPercentage()) {
+                            // 百分比属性，保留2位小数
+                            displayText = String.format("%s %s%.2f%%",
+                                    Component.translatable(attr.getTranslationKey()).getString(),
+                                    value > 0 ? "+" : "",
+                                    value * 100);
+                        } else {
+                            // 固定值属性，保留2位小数
+                            displayText = String.format("%s %s%.2f",
+                                    Component.translatable(attr.getTranslationKey()).getString(),
+                                    value > 0 ? "+" : "",
+                                    value);
+                        }
+
+                        tooltip.add(Component.literal(displayText)
+                                .withStyle(value > 0 ? ChatFormatting.GREEN : ChatFormatting.RED));
+                    }
+                } catch (Exception e) {
+                }
+            }
         } else {
-            tooltip.add(Component.translatable("item.trinketsandbaubles.dragons_ring.tooltip11")
-                    .withStyle(ChatFormatting.GOLD));
-            tooltip.add(Component.translatable("item.trinketsandbaubles.dragons_ring.tooltip12")
-                    .withStyle(ChatFormatting.DARK_AQUA));
+            // 简短描述
             tooltip.add(Component.translatable("item.trinketsandbaubles.dragons_ring.tooltip13")
                     .withStyle(ChatFormatting.GOLD));
             tooltip.add(Component.translatable("item.trinketsandbaubles.dragons_ring.tooltip14")
@@ -192,6 +276,7 @@ public class DragonsRingItem extends ModifiableBaubleItem {
         }
         super.appendHoverText(stack, level, tooltip, flag);
     }
+
     @Override
     public int getEnchantmentValue() {
         return 0; // 附魔等级为0

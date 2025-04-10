@@ -1,4 +1,4 @@
-package com.jinqinxixi.trinketsandbaubles.modEffects;
+package com.jinqinxixi.trinketsandbaubles.modeffects;
 
 
 import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
@@ -48,7 +48,7 @@ public class FaelesEffect extends MobEffect {
     public FaelesEffect() {
         super(MobEffectCategory.NEUTRAL, 0xFFB6C1); // 浅粉色
     }
-
+/*
     @Override
     public void addAttributeModifiers(LivingEntity pLivingEntity, AttributeMap pAttributeMap, int pAmplifier) {
 
@@ -481,5 +481,5 @@ public class FaelesEffect extends MobEffect {
             player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 3600, 0)); // 3分钟力量
             player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 3600, 0)); // 3分钟速度
         }
-    }
+    }*/
 }

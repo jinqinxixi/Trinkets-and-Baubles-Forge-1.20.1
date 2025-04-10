@@ -1,4 +1,4 @@
-package com.jinqinxixi.trinketsandbaubles.modEffects;
+package com.jinqinxixi.trinketsandbaubles.modeffects;
 
 import net.minecraft.world.effect.MobEffect;
 import net.minecraftforge.registries.DeferredRegister;
@@ -19,8 +19,8 @@ public class ModEffects {
     public static final RegistryObject<MobEffect> TITAN =
             EFFECTS.register("titan", TitanEffect::new);
 
-    public static final RegistryObject<MobEffect> GOBLIN =
-            EFFECTS.register("goblin", GoblinsEffect::new);
+    public static final RegistryObject<MobEffect> GOBLINS =
+            EFFECTS.register("goblins", GoblinsEffect::new);
 
     public static final RegistryObject<MobEffect> ELVES =
             EFFECTS.register("elves", ElvesEffect::new);

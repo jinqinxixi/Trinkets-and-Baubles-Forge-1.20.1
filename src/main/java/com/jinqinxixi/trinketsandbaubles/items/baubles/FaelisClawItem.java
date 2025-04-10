@@ -1,7 +1,8 @@
 package com.jinqinxixi.trinketsandbaubles.items.baubles;
 
+import com.jinqinxixi.trinketsandbaubles.capability.registry.ModCapabilities;
 import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
-import com.jinqinxixi.trinketsandbaubles.modEffects.ModEffects;
+import com.jinqinxixi.trinketsandbaubles.modeffects.ModEffects;
 import com.jinqinxixi.trinketsandbaubles.modifier.ModifiableBaubleItem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -148,14 +149,19 @@ public class FaelisClawItem extends ModifiableBaubleItem {
             Player player = (Player) event.getSource().getEntity();
             if (isEquipped(player) && event.getEntity() instanceof LivingEntity) {
                 LivingEntity target = (LivingEntity) event.getEntity();
-                if (player.getRandom().nextFloat() < ModConfig.FAELIS_CLAW_BLEED_CHANCE.get()) {
-                    int baseDuration = ModConfig.FAELIS_CLAW_BLEED_DURATION.get();
-                    int duration = player.hasEffect(ModEffects.FAELES.get()) ?
-                            baseDuration :
-                            (int)(baseDuration * ModConfig.FAELIS_CLAW_NORMAL_DURATION_MULTIPLIER.get());
 
-                    target.addEffect(new MobEffectInstance(ModEffects.BLEEDING.get(), duration));
-                }
+                // 检查是否激活了猫妖能力
+                player.getCapability(ModCapabilities.FAELES_CAPABILITY).ifPresent(cap -> {
+                    if (player.getRandom().nextFloat() < ModConfig.FAELIS_CLAW_BLEED_CHANCE.get()) {
+                        int baseDuration = ModConfig.FAELIS_CLAW_BLEED_DURATION.get();
+                        // 使用猫妖能力状态来判断
+                        int duration = cap.isActive() ?
+                                baseDuration :
+                                (int)(baseDuration * ModConfig.FAELIS_CLAW_NORMAL_DURATION_MULTIPLIER.get());
+
+                        target.addEffect(new MobEffectInstance(ModEffects.BLEEDING.get(), duration));
+                    }
+                });
             }
         }
     }

@@ -1,4 +1,4 @@
-package com.jinqinxixi.trinketsandbaubles.modEffects;
+package com.jinqinxixi.trinketsandbaubles.modeffects;
 
 
 import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
@@ -47,7 +47,7 @@ public class GoblinsEffect extends MobEffect {
     public GoblinsEffect() {
         super(MobEffectCategory.NEUTRAL, 0x355E3B); // 深绿色
     }
-
+/*
     @Override
     public void addAttributeModifiers(LivingEntity pLivingEntity, AttributeMap pAttributeMap, int pAmplifier) {
 
@@ -112,19 +112,19 @@ public class GoblinsEffect extends MobEffect {
     @SubscribeEvent
     public static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
         Player player = event.getEntity();
-        MobEffectInstance effect = player.getEffect(ModEffects.GOBLIN.get());
+        MobEffectInstance effect = player.getEffect(ModEffects.GOBLINS.get());
 
         // 如果玩家有精灵露效果
         if (effect != null) {
             // 直接移除当前效果
-            player.removeEffect(ModEffects.GOBLIN.get());
+            player.removeEffect(ModEffects.GOBLINS.get());
 
             RaceScaleHelper.setModelScale(player,
                     ModConfig.GOBLIN_SCALE_FACTOR.get().floatValue());
 
             // 直接应用一个新的永久效果
             player.addEffect(new MobEffectInstance(
-                    ModEffects.GOBLIN.get(),
+                    ModEffects.GOBLINS.get(),
                     -1, // 永久持续
                     0,  // 0级效果
                     false,
@@ -172,7 +172,7 @@ public class GoblinsEffect extends MobEffect {
                 event.getEntityMounting() instanceof Player player &&
                 event.getEntityBeingMounted() instanceof AbstractHorse horse) {
 
-            if (player.hasEffect(ModEffects.GOBLIN.get()) && !horse.level().isClientSide) {
+            if (player.hasEffect(ModEffects.GOBLINS.get()) && !horse.level().isClientSide) {
                 // 使用官方方法装备鞍
                 horse.equipSaddle(SoundSource.NEUTRAL);
 
@@ -188,7 +188,7 @@ public class GoblinsEffect extends MobEffect {
     @SubscribeEvent
     public static void onLivingHurt(LivingDamageEvent event) {
         if (event.getEntity() instanceof Player player) {
-            if (player.hasEffect(ModEffects.GOBLIN.get())) {
+            if (player.hasEffect(ModEffects.GOBLINS.get())) {
                 DamageSource source = event.getSource();
                 if (source.is(net.minecraft.world.damagesource.DamageTypes.IN_FIRE) ||
                         source.is(net.minecraft.world.damagesource.DamageTypes.ON_FIRE) ||
@@ -207,7 +207,7 @@ public class GoblinsEffect extends MobEffect {
     public static void onCreeperTarget(LivingChangeTargetEvent event) {
         if (event.getNewTarget() instanceof Player player &&
                 event.getEntity() instanceof Creeper) {
-            if (player.hasEffect(ModEffects.GOBLIN.get())) {
+            if (player.hasEffect(ModEffects.GOBLINS.get())) {
                 event.setCanceled(true);
             }
         }
@@ -217,7 +217,7 @@ public class GoblinsEffect extends MobEffect {
     @SubscribeEvent
     public static void onPlayerDeath(LivingDeathEvent event) {
         if (event.getEntity() instanceof Player player) {
-            MobEffectInstance effect = player.getEffect(ModEffects.GOBLIN.get());
+            MobEffectInstance effect = player.getEffect(ModEffects.GOBLINS.get());
             if (effect != null) {
                 CompoundTag playerData = player.getPersistentData();
                 CompoundTag effectData = new CompoundTag();
@@ -277,7 +277,7 @@ public class GoblinsEffect extends MobEffect {
                         () -> {
                             // 应用效果
                             player.addEffect(new MobEffectInstance(
-                                    ModEffects.GOBLIN.get(),
+                                    ModEffects.GOBLINS.get(),
                                     effectData.getInt("Duration"),
                                     effectData.getInt("Amplifier"),
                                     false,
@@ -352,5 +352,5 @@ public class GoblinsEffect extends MobEffect {
             // 强制同步生命值
             player.setHealth(player.getHealth());
         }
-    }
+    }*/
 }

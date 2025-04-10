@@ -1,8 +1,11 @@
 package com.jinqinxixi.trinketsandbaubles.capability.mana;
 
+import com.jinqinxixi.trinketsandbaubles.capability.event.RaceEventHandler;
 import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import com.jinqinxixi.trinketsandbaubles.network.handler.ManaNetworkHandler;
+
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.event.TickEvent;
@@ -12,10 +15,11 @@ import net.minecraftforge.fml.common.Mod;
 
 @Mod.EventBusSubscriber(modid = "trinketsandbaubles")
 public class ManaData {
-    private static final String MANA_KEY = "mana";
-    private static final String MAX_MANA_KEY = "maxMana";
-    private static final String LAST_MANA_REGEN_TIME_KEY = "lastManaRegenTime";
-    private static final String LAST_MANA_CHANGE_TIME_KEY = "lastManaChangeTime";
+    private static final String MOD_ID = "trinketsandbaubles";
+    private static final String MANA_KEY = MOD_ID + "_mana";
+    private static final String MAX_MANA_KEY = MOD_ID + "_maxMana";
+    private static final String LAST_MANA_REGEN_TIME_KEY = MOD_ID + "_lastManaRegenTime";
+    private static final String LAST_MANA_CHANGE_TIME_KEY = MOD_ID + "_lastManaChangeTime";
 
     // 基础魔力操作
     public static float getMana(Player player) {
@@ -24,30 +28,57 @@ public class ManaData {
     }
 
     public static void setMana(Player player, float mana) {
+        if (player == null) return;
+
         CompoundTag data = player.getPersistentData();
         float maxMana = getMaxMana(player);
         float newMana = Math.max(0f, Math.min(mana, maxMana));
         data.putFloat(MANA_KEY, newMana);
 
-        if (player instanceof ServerPlayer serverPlayer) {
+        // 只在服务器端且玩家完全加载时同步
+        if (!player.level().isClientSide && player instanceof ServerPlayer serverPlayer
+                && serverPlayer.connection != null && !serverPlayer.isRemoved()) {
             syncManaToClient(serverPlayer);
         }
     }
 
     public static float getMaxMana(Player player) {
         CompoundTag data = player.getPersistentData();
-        return data.contains(MAX_MANA_KEY) ?
+        float mana = data.contains(MAX_MANA_KEY) ?
                 data.getFloat(MAX_MANA_KEY) :
                 ModConfig.DEFAULT_MAX_MANA.get().floatValue();
+        return mana;
     }
 
     public static void setMaxMana(Player player, float maxMana) {
+        if (player == null) return;
+
         CompoundTag data = player.getPersistentData();
-        maxMana = Math.max(10f, maxMana); // 最小值为10
+        maxMana = Math.max(0f, maxMana);
         data.putFloat(MAX_MANA_KEY, maxMana);
 
         validateMana(player);
-        if (player instanceof ServerPlayer serverPlayer) {
+
+        // 只在服务器端且玩家完全加载时同步
+        if (!player.level().isClientSide && player instanceof ServerPlayer serverPlayer
+                && serverPlayer.connection != null && !serverPlayer.isRemoved()) {
+            syncManaToClient(serverPlayer);
+        }
+    }
+
+    public static void modifyMaxMana(Player player, float amount) {
+        if (player == null) return;
+
+        float currentMaxMana = getMaxMana(player);
+        float newMaxMana = Math.max(0f, currentMaxMana + amount);
+
+        CompoundTag data = player.getPersistentData();
+        data.putFloat(MAX_MANA_KEY, newMaxMana);
+
+        validateMana(player);
+
+        if (!player.level().isClientSide && player instanceof ServerPlayer serverPlayer
+                && serverPlayer.connection != null && !serverPlayer.isRemoved()) {
             syncManaToClient(serverPlayer);
         }
     }
@@ -73,12 +104,17 @@ public class ManaData {
 
     // 同步和验证
     private static void syncManaToClient(ServerPlayer player) {
-        if (!player.level().isClientSide() && !player.isRemoved()) {
-            ManaNetworkHandler.syncManaToClient(
-                    player,
-                    getMana(player),
-                    getMaxMana(player)
-            );
+        if (player == null || player.connection == null || player.isRemoved()) return;
+
+        if (!player.level().isClientSide()) {
+            try {
+                ManaNetworkHandler.syncManaToClient(
+                        player,
+                        getMana(player),
+                        getMaxMana(player)
+                );
+            } catch (Exception e) {
+            }
         }
     }
 
@@ -92,27 +128,72 @@ public class ManaData {
         }
     }
 
-    // 事件处理
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
         Player player = event.getEntity();
+        if (player == null) return;
+
         CompoundTag data = player.getPersistentData();
 
-        // 初始化所有数据
+        // 获取新的配置文件值和处理配置变化
+        float newConfigValue = ModConfig.DEFAULT_MAX_MANA.get().floatValue();
         if (!data.contains(MAX_MANA_KEY)) {
-            data.putFloat(MAX_MANA_KEY, ModConfig.DEFAULT_MAX_MANA.get().floatValue());
-        }
-        if (!data.contains(MANA_KEY)) {
-            data.putFloat(MANA_KEY, getMaxMana(player));
-        }
-        if (!data.contains(LAST_MANA_REGEN_TIME_KEY)) {
-            data.putLong(LAST_MANA_REGEN_TIME_KEY, player.level().getGameTime());
-        }
-        if (!data.contains(LAST_MANA_CHANGE_TIME_KEY)) {
-            data.putLong(LAST_MANA_CHANGE_TIME_KEY, player.level().getGameTime());
+            // 新玩家：直接使用配置值
+            data.putFloat(MAX_MANA_KEY, newConfigValue);
+            data.putFloat(MANA_KEY, newConfigValue);
+        } else {
+            // 老玩家：计算道具加成并保持
+            float currentMaxMana = data.getFloat(MAX_MANA_KEY);
+            float oldConfigValue = data.contains("config_mana") ?
+                    data.getFloat("config_mana") : newConfigValue;
+
+            // 计算道具总加成 = 当前最大魔力 - 旧配置值
+            float itemBonus = currentMaxMana - oldConfigValue;
+
+            // 新的最大魔力 = 新配置值 + 道具加成
+            float newMaxMana = newConfigValue + itemBonus;
+            data.putFloat(MAX_MANA_KEY, newMaxMana);
         }
 
+        // 记录当前配置值，用于下次计算
+        data.putFloat("config_mana", newConfigValue);
+
         // 处理旧版本数据兼容性
+        handleLegacyData(data);
+
+        // 确保数据有效
+        validateMana(player);
+
+        // 使用更安全的延迟同步机制
+        if (!player.level().isClientSide && player instanceof ServerPlayer serverPlayer) {
+            serverPlayer.level().getServer().tell(new TickTask(
+                    serverPlayer.level().getServer().getTickCount() + 2,
+                    () -> {
+                        if (serverPlayer.connection != null && !serverPlayer.isRemoved()) {
+                            // 先同步魔力值
+                            syncManaToClient(serverPlayer);
+
+                            // 然后刷新种族能力
+                            RaceEventHandler.refreshRaceCapabilities(player);
+
+                            // 最后恢复魔力值
+                            restorePlayerMana(player);
+                        }
+                    }
+            ));
+        }
+    }
+
+    public static void restorePlayerMana(Player player) {
+        if (!player.level().isClientSide) {
+            // 直接获取全局容器中的最大魔力值
+            float maxMana = getMaxMana(player);
+            setMana(player, maxMana);
+        }
+    }
+
+
+    private static void handleLegacyData(CompoundTag data) {
         if (data.contains(MANA_KEY) && data.contains(MAX_MANA_KEY)) {
             if (data.contains(MANA_KEY, CompoundTag.TAG_INT)) {
                 float oldMana = data.getInt(MANA_KEY);
@@ -122,18 +203,6 @@ public class ManaData {
                 float oldMaxMana = data.getInt(MAX_MANA_KEY);
                 data.putFloat(MAX_MANA_KEY, oldMaxMana);
             }
-        }
-
-        // 确保服务器端数据有效
-        validateMana(player);
-
-        // 立即同步到客户端，使用延迟以确保客户端准备就绪
-        if (player instanceof ServerPlayer serverPlayer) {
-            // 延迟1tick后同步，确保客户端完全加载
-            serverPlayer.level().getServer().tell(new net.minecraft.server.TickTask(
-                    serverPlayer.level().getServer().getTickCount() + 1,
-                    () -> syncManaToClient(serverPlayer)
-            ));
         }
     }
 

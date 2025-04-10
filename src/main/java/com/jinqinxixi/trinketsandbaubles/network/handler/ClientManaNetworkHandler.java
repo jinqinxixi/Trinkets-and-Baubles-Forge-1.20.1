@@ -1,7 +1,7 @@
 package com.jinqinxixi.trinketsandbaubles.network.handler;
 
 import com.jinqinxixi.trinketsandbaubles.capability.mana.ManaData;
-import com.jinqinxixi.trinketsandbaubles.capability.mana.ManaHudOverlay;
+import com.jinqinxixi.trinketsandbaubles.capability.mana.hud.ManaHudOverlay;
 import com.jinqinxixi.trinketsandbaubles.network.message.ManaMessage.ManaSyncMessage;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;

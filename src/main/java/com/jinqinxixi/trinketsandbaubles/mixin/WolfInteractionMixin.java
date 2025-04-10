@@ -21,7 +21,7 @@
 //        Level level = wolf.level();
 //
 //        // 如果玩家有哥布林效果
-//        if (player.hasEffect(ModEffects.GOBLIN.get()) && wolf.isTame()) {
+//        if (player.hasEffect(ModEffects.GOBLINS.get()) && wolf.isTame()) {
 //            // 普通右键骑乘
 //            if (!player.isShiftKeyDown() && !wolf.isVehicle() && hand == InteractionHand.MAIN_HAND) {
 //                if (!level.isClientSide) {

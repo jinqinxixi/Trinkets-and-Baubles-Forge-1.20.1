@@ -1,4 +1,4 @@
-package com.jinqinxixi.trinketsandbaubles.modEffects;
+package com.jinqinxixi.trinketsandbaubles.modeffects;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;

@@ -1,13 +1,14 @@
 package com.jinqinxixi.trinketsandbaubles.items.baubles;
 
-import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
-import com.jinqinxixi.trinketsandbaubles.modEffects.ModEffects;
+import com.jinqinxixi.trinketsandbaubles.capability.attribute.AttributeRegistry;
+import com.jinqinxixi.trinketsandbaubles.capability.base.AbstractRaceCapability;
+import com.jinqinxixi.trinketsandbaubles.capability.registry.ModCapabilities;
+import com.jinqinxixi.trinketsandbaubles.config.RaceAttributesConfig;
 import com.jinqinxixi.trinketsandbaubles.modifier.ModifiableBaubleItem;
-import com.jinqinxixi.trinketsandbaubles.util.RaceEffectUtil;
+import com.jinqinxixi.trinketsandbaubles.util.RaceRingUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -18,6 +19,7 @@ import top.theillusivec4.curios.api.type.capability.ICurio;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Map;
 
 public class FairiesRingItem extends ModifiableBaubleItem {
 
@@ -42,46 +44,51 @@ public class FairiesRingItem extends ModifiableBaubleItem {
         // 只在服务器端处理
         if (entity instanceof ServerPlayer serverPlayer) {
             // 检查是否装备了多个种族戒指
-            if (RaceEffectUtil.hasMultipleRaceRings(serverPlayer)) {
-                // 如果有多个种族戒指，移除效果
-                serverPlayer.removeEffect(ModEffects.FAIRY_DEW.get());
+            if (RaceRingUtil.hasMultipleRaceRings(serverPlayer)) {
+                // 如果有多个种族戒指，停用精灵能力
+                serverPlayer.getCapability(ModCapabilities.FAIRY_CAPABILITY).ifPresent(cap -> {
+                    if (cap.isActive()) {
+                        cap.setActive(false);
+                    }
+                });
                 return;
             }
 
-            // 检查玩家是否已经有效果
-            if (!serverPlayer.hasEffect(ModEffects.FAIRY_DEW.get())) {
-                // 先清除所有种族效果
-                RaceEffectUtil.clearAllRaceEffects(serverPlayer);
-
-                // 然后应用新的效果
-                entity.addEffect(new MobEffectInstance(
-                        ModEffects.FAIRY_DEW.get(),
-                        Integer.MAX_VALUE,
-                        0,
-                        false,
-                        false,
-                        false
-                ));
-            }
+            // 激活精灵能力
+            serverPlayer.getCapability(ModCapabilities.FAIRY_CAPABILITY).ifPresent(cap -> {
+                if (!cap.isActive()) {
+                    // 先清除所有种族能力
+                    AbstractRaceCapability.clearAllRaceAbilities(serverPlayer);
+                    // 然后激活精灵能力
+                    cap.setActive(true);
+                }
+            });
         }
     }
 
     @Override
     public void curioTick(SlotContext slotContext, ItemStack stack) {
         super.curioTick(slotContext, stack);
-
         LivingEntity entity = slotContext.entity();
 
         if (entity instanceof ServerPlayer serverPlayer) {
-            if (RaceEffectUtil.hasMultipleRaceRings(serverPlayer)) {
-                // 如果检测到多个种族戒指，移除效果
-                serverPlayer.removeEffect(ModEffects.FAIRY_DEW.get());
+            if (RaceRingUtil.hasMultipleRaceRings(serverPlayer)) {
+                // 如果检测到多个种族戒指，停用能力
+                serverPlayer.getCapability(ModCapabilities.FAIRY_CAPABILITY).ifPresent(cap -> {
+                    if (cap.isActive()) {
+                        cap.setActive(false);
+                    }
+                });
                 return;
             }
 
-            // 只在装备且没有效果时给予效果
-            if (isEquipped(entity) && !serverPlayer.hasEffect(ModEffects.FAIRY_DEW.get())) {
-                applyFaelisBuff(entity);
+            // 只在装备且能力未激活时激活能力
+            if (isEquipped(entity)) {
+                serverPlayer.getCapability(ModCapabilities.FAIRY_CAPABILITY).ifPresent(cap -> {
+                    if (!cap.isActive()) {
+                        applyFaelisBuff(entity);
+                    }
+                });
             }
         }
     }
@@ -92,7 +99,7 @@ public class FairiesRingItem extends ModifiableBaubleItem {
         LivingEntity entity = slotContext.entity();
 
         if (entity instanceof ServerPlayer serverPlayer) {
-            if (RaceEffectUtil.hasMultipleRaceRings(serverPlayer)) {
+            if (RaceRingUtil.hasMultipleRaceRings(serverPlayer)) {
                 return;
             }
 
@@ -107,9 +114,13 @@ public class FairiesRingItem extends ModifiableBaubleItem {
         super.onUnequip(slotContext, newStack, stack);
         LivingEntity entity = slotContext.entity();
 
-        // 只有当没有其他相同戒指装备时才移除效果
+        // 只有当没有其他相同戒指装备时才停用能力
         if (!isEquipped(entity) && entity instanceof ServerPlayer serverPlayer) {
-            serverPlayer.removeEffect(ModEffects.FAIRY_DEW.get());
+            serverPlayer.getCapability(ModCapabilities.FAIRY_CAPABILITY).ifPresent(cap -> {
+                if (cap.isActive()) {
+                    cap.setActive(false);
+                }
+            });
         }
     }
 
@@ -126,26 +137,93 @@ public class FairiesRingItem extends ModifiableBaubleItem {
     public void appendHoverText(ItemStack stack, @Nullable Level level,
                                 List<Component> tooltip, TooltipFlag flag) {
         if (net.minecraft.client.gui.screens.Screen.hasShiftDown()) {
-            // 详细信息
-            tooltip.add(Component.translatable("item.trinketsandbaubles.fairies_ring.tooltip1", ModConfig.FAIRY_DEW_MAX_HEALTH.get() * 100)
-                    .withStyle(ChatFormatting.RED));
-            tooltip.add(Component.translatable("item.trinketsandbaubles.fairies_ring.tooltip2", ModConfig.FAIRY_DEW_MOVEMENT_SPEED.get() * 100)
-                    .withStyle(ChatFormatting.RED));
-            tooltip.add(Component.translatable("item.trinketsandbaubles.fairies_ring.tooltip3", ModConfig.FAIRY_DEW_ATTACK_DAMAGE.get() * 100)
-                    .withStyle(ChatFormatting.RED));
-            tooltip.add(Component.translatable("item.trinketsandbaubles.fairies_ring.tooltip4", ModConfig.FAIRY_DEW_ARMOR.get() * 100)
-                    .withStyle(ChatFormatting.RED));
-            tooltip.add(Component.translatable("item.trinketsandbaubles.fairies_ring.tooltip5", ModConfig.FAIRY_DEW_ARMOR_TOUGHNESS.get() * 100)
-                    .withStyle(ChatFormatting.RED));
-            tooltip.add(Component.translatable("item.trinketsandbaubles.fairies_ring.tooltip6", ModConfig.FAIRY_DEW_REACH.get() * 100)
-                    .withStyle(ChatFormatting.RED));
-            tooltip.add(Component.translatable("item.trinketsandbaubles.fairies_ring.tooltip7", ModConfig.FAIRY_DEW_SWIM_SPEED.get() * 100)
-                    .withStyle(ChatFormatting.RED));
-            tooltip.add(Component.translatable("item.trinketsandbaubles.fairies_ring.tooltip8", ModConfig.FAIRY_DEW_JUMP_BOOST.get() * 100)
-                    .withStyle(ChatFormatting.RED));
-            tooltip.add(Component.translatable("item.trinketsandbaubles.fairies_ring.tooltip9")
-                    .withStyle(ChatFormatting.GREEN));
+            // 遍历所有属性并显示非零值
+            for (Map.Entry<String, AttributeRegistry.AttributeEntry> entry : AttributeRegistry.getAll().entrySet()) {
+                try {
+                    String attributeName = entry.getKey();
+                    // 直接从FAIRY实例获取值
+                    double value = 0;
+                    switch (attributeName) {
+                        case "MAX_HEALTH":
+                            value = RaceAttributesConfig.FAIRY.MAX_HEALTH.get();
+                            break;
+                        case "FOLLOW_RANGE":
+                            value = RaceAttributesConfig.FAIRY.FOLLOW_RANGE.get();
+                            break;
+                        case "MOVEMENT_SPEED":
+                            value = RaceAttributesConfig.FAIRY.MOVEMENT_SPEED.get();
+                            break;
+                        case "ATTACK_SPEED":
+                            value = RaceAttributesConfig.FAIRY.ATTACK_SPEED.get();
+                            break;
+                        case "ATTACK_DAMAGE":
+                            value = RaceAttributesConfig.FAIRY.ATTACK_DAMAGE.get();
+                            break;
+                        case "SWIM_SPEED":
+                            value = RaceAttributesConfig.FAIRY.SWIM_SPEED.get();
+                            break;
+                        case "FLYING_SPEED":
+                            value = RaceAttributesConfig.FAIRY.FLYING_SPEED.get();
+                            break;
+                        case "ENTITY_GRAVITY":
+                            value = RaceAttributesConfig.FAIRY.ENTITY_GRAVITY.get();
+                            break;
+                        case "BLOCK_REACH":
+                            value = RaceAttributesConfig.FAIRY.BLOCK_REACH.get();
+                            break;
+                        case "ENTITY_REACH":
+                            value = RaceAttributesConfig.FAIRY.ENTITY_REACH.get();
+                            break;
+                        case "NAMETAG_DISTANCE":
+                            value = RaceAttributesConfig.FAIRY.NAMETAG_DISTANCE.get();
+                            break;
+                        case "ARMOR":
+                            value = RaceAttributesConfig.FAIRY.ARMOR.get();
+                            break;
+                        case "ARMOR_TOUGHNESS":
+                            value = RaceAttributesConfig.FAIRY.ARMOR_TOUGHNESS.get();
+                            break;
+                        case "KNOCKBACK_RESISTANCE":
+                            value = RaceAttributesConfig.FAIRY.KNOCKBACK_RESISTANCE.get();
+                            break;
+                        case "ATTACK_KNOCKBACK":
+                            value = RaceAttributesConfig.FAIRY.ATTACK_KNOCKBACK.get();
+                            break;
+                        case "LUCK":
+                            value = RaceAttributesConfig.FAIRY.LUCK.get();
+                            break;
+                        case "STEP_HEIGHT":
+                            value = RaceAttributesConfig.FAIRY.STEP_HEIGHT.get();
+                            break;
+                    }
+
+                    // 如果值不为0，添加到描述中
+                    if (value != 0) {
+                        AttributeRegistry.AttributeEntry attr = entry.getValue();
+                        String displayText;
+
+                        if (attr.isPercentage()) {
+                            // 百分比属性，保留2位小数
+                            displayText = String.format("%s %s%.2f%%",
+                                    Component.translatable(attr.getTranslationKey()).getString(),
+                                    value > 0 ? "+" : "",
+                                    value * 100);
+                        } else {
+                            // 固定值属性，保留2位小数
+                            displayText = String.format("%s %s%.2f",
+                                    Component.translatable(attr.getTranslationKey()).getString(),
+                                    value > 0 ? "+" : "",
+                                    value);
+                        }
+
+                        tooltip.add(Component.literal(displayText)
+                                .withStyle(value > 0 ? ChatFormatting.GREEN : ChatFormatting.RED));
+                    }
+                } catch (Exception e) {
+                }
+            }
         } else {
+            // 简短描述
             tooltip.add(Component.translatable("item.trinketsandbaubles.fairies_ring.tooltip11")
                     .withStyle(ChatFormatting.GOLD));
             tooltip.add(Component.translatable("item.trinketsandbaubles.fairies_ring.tooltip12")

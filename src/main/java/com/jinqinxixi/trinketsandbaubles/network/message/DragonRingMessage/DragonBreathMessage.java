@@ -1,11 +1,9 @@
 package com.jinqinxixi.trinketsandbaubles.network.message.DragonRingMessage;
 
-import com.jinqinxixi.trinketsandbaubles.modEffects.ModEffects;
-import com.jinqinxixi.trinketsandbaubles.network.handler.NetworkHandler;
+import com.jinqinxixi.trinketsandbaubles.capability.registry.ModCapabilities;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.PacketDistributor;
 
 import java.util.function.Supplier;
 
@@ -20,13 +18,12 @@ public class DragonBreathMessage {
         NetworkEvent.Context context = contextSupplier.get();
         context.enqueueWork(() -> {
             ServerPlayer sender = context.getSender();
-            if (sender != null && sender.hasEffect(ModEffects.DRAGON.get())) {
-                sender.getPersistentData().putBoolean("DragonBreathActive", true);
-                // 直接同步到所有客户端，包括发送者
-                NetworkHandler.INSTANCE.send(
-                        PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> sender),
-                        new SyncDragonBreathMessage(true, sender.getId())
-                );
+            if (sender != null) {
+                sender.getCapability(ModCapabilities.DRAGON_CAPABILITY).ifPresent(cap -> {
+                    if (cap.isActive()) {
+                        cap.toggleDragonBreath();
+                    }
+                });
             }
         });
         context.setPacketHandled(true);

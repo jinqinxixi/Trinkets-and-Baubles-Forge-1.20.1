@@ -1,4 +1,4 @@
-package com.jinqinxixi.trinketsandbaubles.modEffects;
+package com.jinqinxixi.trinketsandbaubles.modeffects;
 
 
 import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
@@ -44,7 +44,7 @@ public class FairyDewEffect extends MobEffect {
     public FairyDewEffect() {
         super(MobEffectCategory.NEUTRAL, 0x00FFFFFF);
     }
-
+/*
     @Override
     public void addAttributeModifiers(LivingEntity pLivingEntity, AttributeMap pAttributeMap, int pAmplifier) {
         // 使用工具类设置体型缩放
@@ -406,5 +406,5 @@ public class FairyDewEffect extends MobEffect {
                 }
             }
         }
-    }
+    }*/
 }

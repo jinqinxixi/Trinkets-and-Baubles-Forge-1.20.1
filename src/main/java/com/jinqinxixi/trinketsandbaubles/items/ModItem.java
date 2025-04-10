@@ -157,7 +157,7 @@ public class ModItem {
 
     public static final RegistryObject<Item> FAELIS_RING = registerCurio(
             "faelis_ring",
-            FaelisRingItem::new
+            FaelesRingItem::new
     );
 
     public static final RegistryObject<Item> FAIRIES_RING = registerCurio(

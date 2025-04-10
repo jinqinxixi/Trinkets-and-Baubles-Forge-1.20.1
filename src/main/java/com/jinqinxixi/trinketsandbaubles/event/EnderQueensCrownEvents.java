@@ -1,4 +1,4 @@
-package com.jinqinxixi.trinketsandbaubles.events;
+package com.jinqinxixi.trinketsandbaubles.event;
 
 import com.jinqinxixi.trinketsandbaubles.items.baubles.EnderQueensCrownItem;
 import com.jinqinxixi.trinketsandbaubles.TrinketsandBaublesMod;

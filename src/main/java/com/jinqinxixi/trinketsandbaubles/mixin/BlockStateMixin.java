@@ -1,6 +1,6 @@
 package com.jinqinxixi.trinketsandbaubles.mixin;
 
-import com.jinqinxixi.trinketsandbaubles.modEffects.ModEffects;
+import com.jinqinxixi.trinketsandbaubles.capability.registry.ModCapabilities;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DiggerItem;
@@ -17,7 +17,12 @@ public abstract class BlockStateMixin {
     @Inject(method = "hasCorrectToolForDrops", at = @At("HEAD"), cancellable = true)
     private void onHasCorrectToolForDrops(BlockState state, CallbackInfoReturnable<Boolean> cir) {
         Player player = (Player) (Object) this;
-        if (player.hasEffect(ModEffects.DWARVES.get())) {
+        // 只检查矮人能力是否激活
+        boolean hasDwarvesCapability = player.getCapability(ModCapabilities.DWARVES_CAPABILITY)
+                .map(cap -> cap.isActive())
+                .orElse(false);
+
+        if (hasDwarvesCapability) {
             int requiredTier = getRequiredTier(state);
             if (requiredTier > 0) {
                 int adjustedTier = requiredTier - 1;
@@ -50,7 +55,6 @@ public abstract class BlockStateMixin {
     }
 
     private int getTierLevel(net.minecraft.world.item.Tier tier) {
-        // 根据工具材质返回对应的等级
         if (tier == net.minecraft.world.item.Tiers.NETHERITE) {
             return 5;
         } else if (tier == net.minecraft.world.item.Tiers.DIAMOND) {

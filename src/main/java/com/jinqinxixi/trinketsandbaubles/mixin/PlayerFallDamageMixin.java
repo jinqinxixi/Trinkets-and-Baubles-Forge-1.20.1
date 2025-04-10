@@ -20,7 +20,7 @@
 //        // 检查是否是摔落伤害，玩家是否骑在狼上，以及是否有哥布林效果
 //        if (source.is(DamageTypes.FALL) &&
 //                player.getVehicle() instanceof Wolf &&
-//                player.hasEffect(ModEffects.GOBLIN.get())) {
+//                player.hasEffect(ModEffects.GOBLINS.get())) {
 //            // 取消摔落伤害
 //            cir.setReturnValue(false);
 //        }

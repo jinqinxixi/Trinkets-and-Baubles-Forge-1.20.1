@@ -1,4 +1,4 @@
-package com.jinqinxixi.trinketsandbaubles.modEffects;
+package com.jinqinxixi.trinketsandbaubles.modeffects;
 
 
 import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
@@ -43,7 +43,7 @@ public class ElvesEffect extends MobEffect {
     public ElvesEffect() {
         super(MobEffectCategory.BENEFICIAL, 0x98FB98); // 淡绿色
     }
-
+/*
     @Override
     public void addAttributeModifiers(LivingEntity pLivingEntity, AttributeMap pAttributeMap, int pAmplifier) {
         // 使用工具类设置体型缩放
@@ -346,5 +346,5 @@ public class ElvesEffect extends MobEffect {
                 }
             }
         }
-    }
+    }*/
 }

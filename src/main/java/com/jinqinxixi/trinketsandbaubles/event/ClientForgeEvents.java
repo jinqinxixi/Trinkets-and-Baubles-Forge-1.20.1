@@ -1,16 +1,14 @@
-package com.jinqinxixi.trinketsandbaubles.events;
+package com.jinqinxixi.trinketsandbaubles.event;
 
+import com.jinqinxixi.trinketsandbaubles.capability.impl.DragonCapability;
+import com.jinqinxixi.trinketsandbaubles.capability.registry.ModCapabilities;
 import com.jinqinxixi.trinketsandbaubles.client.keybind.KeyBindings;
 import com.jinqinxixi.trinketsandbaubles.items.baubles.DragonsEyeItem;
 import com.jinqinxixi.trinketsandbaubles.items.baubles.DragonsRingItem;
-import com.jinqinxixi.trinketsandbaubles.capability.mana.ManaHudOverlay;
-import com.jinqinxixi.trinketsandbaubles.modEffects.ModEffects;
+import com.jinqinxixi.trinketsandbaubles.capability.mana.hud.ManaHudOverlay;
 import com.jinqinxixi.trinketsandbaubles.network.handler.ClientNetworkHandler;
 import com.jinqinxixi.trinketsandbaubles.TrinketsandBaublesMod;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -25,7 +23,6 @@ import top.theillusivec4.curios.api.CuriosApi;
 public class ClientForgeEvents {
     private static boolean wasCharging = false;
     private static boolean wasBreathing = false;
-    private static boolean nightVisionEnabled = false;
 
     @SubscribeEvent
     public static void onKeyInput(InputEvent.Key event) {
@@ -38,7 +35,7 @@ public class ClientForgeEvents {
 
         handleEscapeAndManaHUD(event, minecraft);
         handleMovementKeys(player);
-        handleDragonEffects(event, minecraft, player);
+        handleDragonCapability(event, minecraft, player);
         handleItemToggles(player);
     }
 
@@ -72,52 +69,31 @@ public class ClientForgeEvents {
         }
     }
 
-    private static void handleDragonEffects(InputEvent.Key event, Minecraft minecraft, Player player) {
-        if (!player.hasEffect(ModEffects.DRAGON.get())) {
-            return;
-        }
-        // 飞行能力切换
-        if (KeyBindings.DRAGON_FLIGHT_TOGGLE_KEY.consumeClick()) {
-            ClientNetworkHandler.sendDragonFlightToggle();
-        }
+    private static void handleDragonCapability(InputEvent.Key event, Minecraft minecraft, Player player) {
+        player.getCapability(ModCapabilities.DRAGON_CAPABILITY).ifPresent(cap -> {
+            if (cap instanceof DragonCapability dragonCap && dragonCap.isActive()) {
+                // 飞行能力切换
+                if (KeyBindings.DRAGON_FLIGHT_TOGGLE_KEY.consumeClick()) {
+                    ClientNetworkHandler.sendDragonFlightToggle();
+                }
 
-        // 夜视切换
-        if (event.getKey() == GLFW.GLFW_KEY_I &&
-                event.getAction() == GLFW.GLFW_PRESS &&
-                minecraft.screen == null) {
+                // 夜视切换
+                if (KeyBindings.DRAGON_NIGHT_VISION_KEY.consumeClick()) {
+                    ClientNetworkHandler.sendDragonNightVision(!dragonCap.isNightVisionEnabled());
+                }
 
-            toggleNightVision(player);
-        }
-
-        // 龙息处理
-        boolean isBreathing = KeyBindings.DRAGON_BREATH_KEY.isDown();
-        if (isBreathing != wasBreathing) {
-            if (isBreathing) {
-                ClientNetworkHandler.sendDragonBreath();
-            } else {
-                ClientNetworkHandler.sendStopDragonBreath();
+                // 龙息处理
+                boolean isBreathing = KeyBindings.DRAGON_BREATH_KEY.isDown();
+                if (isBreathing != wasBreathing) {
+                    if (isBreathing) {
+                        ClientNetworkHandler.sendDragonBreath();
+                    } else {
+                        ClientNetworkHandler.sendStopDragonBreath();
+                    }
+                    wasBreathing = isBreathing;
+                }
             }
-            wasBreathing = isBreathing;
-        }
-    }
-
-    private static void toggleNightVision(Player player) {
-        nightVisionEnabled = !nightVisionEnabled;
-        ClientNetworkHandler.sendDragonNightVision(nightVisionEnabled);
-
-        // 显示状态消息
-        Component message = Component.translatable(
-                nightVisionEnabled ?
-                        "message.trinketsandbaubles.dragon.night_vision.enabled" :
-                        "message.trinketsandbaubles.dragon.night_vision.disabled"
-        ).withStyle(nightVisionEnabled ? ChatFormatting.GREEN : ChatFormatting.GRAY);
-
-        player.displayClientMessage(message, true);
-
-        // 立即更新客户端效果
-        if (!nightVisionEnabled) {
-            player.removeEffect(MobEffects.NIGHT_VISION);
-        }
+        });
     }
 
     private static void handleItemToggles(Player player) {

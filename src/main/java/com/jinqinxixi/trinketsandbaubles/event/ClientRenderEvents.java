@@ -1,7 +1,7 @@
-package com.jinqinxixi.trinketsandbaubles.events;
+package com.jinqinxixi.trinketsandbaubles.event;
 
 
-import com.jinqinxixi.trinketsandbaubles.capability.mana.ManaHudOverlay;
+import com.jinqinxixi.trinketsandbaubles.capability.mana.hud.ManaHudOverlay;
 import com.jinqinxixi.trinketsandbaubles.TrinketsandBaublesMod;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderGuiEvent;

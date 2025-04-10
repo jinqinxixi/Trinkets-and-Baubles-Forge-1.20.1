@@ -1,5 +1,6 @@
 package com.jinqinxixi.trinketsandbaubles.mixin;
 
+import com.jinqinxixi.trinketsandbaubles.capability.registry.ModCapabilities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.entity.player.Player;
@@ -7,7 +8,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import com.jinqinxixi.trinketsandbaubles.modEffects.ModEffects;
 import net.minecraft.world.item.PickaxeItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +30,12 @@ public class PlayerMixin {
 
         if (player.level() == null) return;
 
-        if (player.hasEffect(ModEffects.DWARVES.get())) {
+        // 检查玩家是否有激活的矮人能力
+        boolean hasDwarvesCapability = player.getCapability(ModCapabilities.DWARVES_CAPABILITY)
+                .map(cap -> cap.isActive())
+                .orElse(false);
+
+        if (hasDwarvesCapability) {
             float originalSpeed = cir.getReturnValue();
             float hardnessMultiplier = 1.0f;
 
@@ -40,7 +45,7 @@ public class PlayerMixin {
 
                 long currentTime = System.currentTimeMillis();
                 if (currentTime - lastLogTime > 1000) {
-                    LOGGER.info("矮人效果触发 - 方块: {}, 基础速度: {}, 硬度: {}, 最终乘数: {}, 最终速度: {}",
+                    LOGGER.info("矮人能力触发 - 方块: {}, 基础速度: {}, 硬度: {}, 最终乘数: {}, 最终速度: {}",
                             state.getBlock().getDescriptionId(),
                             originalSpeed,
                             blockHardness,
@@ -58,7 +63,14 @@ public class PlayerMixin {
     @Inject(method = "isSwimming", at = @At("HEAD"), cancellable = true)
     private void onIsSwimming(CallbackInfoReturnable<Boolean> cir) {
         Player player = (Player) (Object) this;
-        if (player.hasEffect(ModEffects.TITAN.get())) {
+
+        // 修改为检查泰坦能力而不是效果
+        boolean hasTitanCapability = player.getCapability(ModCapabilities.TITAN_CAPABILITY)
+                .map(cap -> cap.isActive())
+                .orElse(false);
+
+        if (hasTitanCapability) {
+            System.out.println("[2025-04-09 23:29:45] [asdad21] [泰坦] 禁用游泳状态");
             cir.setReturnValue(false);
         }
     }

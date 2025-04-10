@@ -1,4 +1,4 @@
-package com.jinqinxixi.trinketsandbaubles.modEffects;
+package com.jinqinxixi.trinketsandbaubles.modeffects;
 
 
 import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
@@ -42,7 +42,7 @@ public class DwarvesEffect extends MobEffect {
     public DwarvesEffect() {
         super(MobEffectCategory.NEUTRAL, 0x7E6339); // 褐色
     }
-
+/*
     @Override
     public void addAttributeModifiers(LivingEntity pLivingEntity, AttributeMap pAttributeMap, int pAmplifier) {
 
@@ -288,7 +288,6 @@ public class DwarvesEffect extends MobEffect {
             }
         }
     }
-
     @SubscribeEvent
     public static void onPlayerClone(PlayerEvent.Clone event) {
         if (!event.isWasDeath()) return;
@@ -325,5 +324,5 @@ public class DwarvesEffect extends MobEffect {
                 ));
             }
         }
-    }
+    }*/
 }

@@ -1,7 +1,7 @@
 package com.jinqinxixi.trinketsandbaubles.potion;
 
 
-import com.jinqinxixi.trinketsandbaubles.util.RaceEffectUtil;
+import com.jinqinxixi.trinketsandbaubles.capability.base.AbstractRaceCapability;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -35,8 +35,8 @@ public class RestorationSerumPotion extends Item {
     @Override
     public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity entity) {
         if (!level.isClientSide && entity instanceof ServerPlayer player) {
-            // 移除所有种族效果
-            RaceEffectUtil.clearAllRaceEffects(player);
+            // 使用通用的清除方法移除所有种族能力
+            AbstractRaceCapability.clearAllRaceAbilities(player);
 
             // 添加药水效果
             player.addEffect(new MobEffectInstance(

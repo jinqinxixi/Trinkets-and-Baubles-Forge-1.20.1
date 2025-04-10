@@ -85,7 +85,6 @@
   "item.trinketsandbaubles.arcing_orb.regenerating": "魔法球能量：%s%%",
 
   "key.trinketsandbaubles.mana_hud_position": "切换 HUD 位置",
-  "key.categories.trinketsandbaubles": "饰品与小物件",
   "key.trinketsandbaubles.attraction_toggle": "吸引模式",
   "key.trinketsandbaubles.deflection_toggle": "偏转模式",
   "key.categories.trinketsandbaubles": "饰品与小玩意",
@@ -203,54 +202,26 @@
   "item.trinketsandbaubles.faelis_ring.tooltip13": "饮用牛奶时获得加成",
   "item.trinketsandbaubles.faelis_ring.tooltip14": "装备重甲时降低移动速度",
   "item.trinketsandbaubles.faelis_ring.press_shift": "按住 §eSHIFT§7 查看详细信息",
-  "item.trinketsandbaubles.faelis_ring.tooltip1": "• %s%% 最大生命值",
-  "item.trinketsandbaubles.faelis_ring.tooltip2": "• +%s%% 速度",
-  "item.trinketsandbaubles.faelis_ring.tooltip3": "• %s%% 攻击伤害",
-  "item.trinketsandbaubles.faelis_ring.tooltip4": "• +%s%% 攻击速度",
-  "item.trinketsandbaubles.faelis_ring.tooltip5": "• %s%% 盔甲韧性",
-  "item.trinketsandbaubles.faelis_ring.tooltip6": "• +%s 幸运",
-  "item.trinketsandbaubles.faelis_ring.tooltip7": "• %s%% 触及距离",
-  "item.trinketsandbaubles.faelis_ring.tooltip8": "• +%s%% 游泳速度",
-  "item.trinketsandbaubles.faelis_ring.tooltip9": "• +%s%% 跳跃高度",
-  "item.trinketsandbaubles.faelis_ring.tooltip10": "• 自动上坡",
+
 
   "item.trinketsandbaubles.fairies_ring.tooltip11": "25%正常体型",
   "item.trinketsandbaubles.fairies_ring.tooltip12": "创造模式飞行",
   "item.trinketsandbaubles.fairies_ring.press_shift": "按住 §eSHIFT§7 查看详细信息",
-  "item.trinketsandbaubles.fairies_ring.tooltip1": "• %s%% 最大生命值",
-  "item.trinketsandbaubles.fairies_ring.tooltip2": "• %s%% 速度",
-  "item.trinketsandbaubles.fairies_ring.tooltip3": "• %s%% 攻击伤害",
-  "item.trinketsandbaubles.fairies_ring.tooltip4": "• %s%% 盔甲",
-  "item.trinketsandbaubles.fairies_ring.tooltip5": "• %s%% 盔甲韧性",
-  "item.trinketsandbaubles.fairies_ring.tooltip6": "• %s%% 触及距离",
-  "item.trinketsandbaubles.fairies_ring.tooltip7": "• %s%% 游泳速度",
-  "item.trinketsandbaubles.fairies_ring.tooltip8": "• %s%% 跳跃高度",
-  "item.trinketsandbaubles.fairies_ring.tooltip9": "• 自动上坡",
+
 
   "item.trinketsandbaubles.dwarves_ring.tooltip11": "75%正常体型",
   "item.trinketsandbaubles.dwarves_ring.tooltip12": "幸运",
   "item.trinketsandbaubles.dwarves_ring.tooltip13": "熟练矿工",
   "item.trinketsandbaubles.dwarves_ring.tooltip14": "挖掘等级提升",
   "item.trinketsandbaubles.dwarves_ring.press_shift": "按住 §eSHIFT§7 查看详细信息",
-  "item.trinketsandbaubles.dwarves_ring.tooltip1": "• %s%% 最大生命值",
-  "item.trinketsandbaubles.dwarves_ring.tooltip2": "• +%s%% 击退抗性",
-  "item.trinketsandbaubles.dwarves_ring.tooltip3": "• %s%% 速度",
-  "item.trinketsandbaubles.dwarves_ring.tooltip4": "• +%s%% 攻击伤害",
-  "item.trinketsandbaubles.dwarves_ring.tooltip5": "• %s%% 攻击速度",
-  "item.trinketsandbaubles.dwarves_ring.tooltip6": "• +%s%% 盔甲韧性",
+
 
   "item.trinketsandbaubles.titan_ring.tooltip11": "300%正常体型",
   "item.trinketsandbaubles.titan_ring.tooltip12": "3*3*3挖掘范围",
   "item.trinketsandbaubles.titan_ring.tooltip13": "水中下沉",
   "item.trinketsandbaubles.titan_ring.tooltip14": "践踏植物",
   "item.trinketsandbaubles.titan_ring.press_shift": "按住 §eSHIFT§7 查看详细信息",
-  "item.trinketsandbaubles.titan_ring.tooltip1": "• +%s%% 最大生命值",
-  "item.trinketsandbaubles.titan_ring.tooltip2": "• +%s%% 击退抗性",
-  "item.trinketsandbaubles.titan_ring.tooltip3": "• +%s%% 攻击伤害",
-  "item.trinketsandbaubles.titan_ring.tooltip4": "• %s%% 攻击速度",
-  "item.trinketsandbaubles.titan_ring.tooltip5": "• +%s%% 触及距离",
-  "item.trinketsandbaubles.titan_ring.tooltip6": "• +%s%% 跳跃高度",
-  "item.trinketsandbaubles.titan_ring.tooltip7": "• 自动上坡",
+
 
   "item.trinketsandbaubles.goblins_ring.tooltip11": "50%正常体型",
   "item.trinketsandbaubles.goblins_ring.tooltip12": "可以骑乘被驯服的狼",
@@ -258,19 +229,13 @@
   "item.trinketsandbaubles.goblins_ring.tooltip14": "获得少量火焰抗性和爆炸抗性",
   "item.trinketsandbaubles.goblins_ring.tooltip15": "苦力怕会忽视你",
   "item.trinketsandbaubles.goblins_ring.press_shift": "按住 §eSHIFT§7 查看详细信息",
-  "item.trinketsandbaubles.goblins_ring.tooltip1": "• %s%% 最大生命值",
-  "item.trinketsandbaubles.goblins_ring.tooltip2": "• +%s%% 速度",
-  "item.trinketsandbaubles.goblins_ring.tooltip3": "• %s%% 攻击伤害",
-  "item.trinketsandbaubles.goblins_ring.tooltip4": "• +%s 幸运",
-  "item.trinketsandbaubles.goblins_ring.tooltip5": "• +%s%% 游泳速度",
+
 
   "item.trinketsandbaubles.elves_ring.tooltip11": "100%正常体型",
   "item.trinketsandbaubles.elves_ring.tooltip12": "潜行时增加弓箭伤害",
   "item.trinketsandbaubles.elves_ring.tooltip13": "在森林群系获得移动速度和攻击速度加成",
   "item.trinketsandbaubles.elves_ring.press_shift": "按住 §eSHIFT§7 查看详细信息",
-  "item.trinketsandbaubles.elves_ring.tooltip1": "• +%s%% 速度",
-  "item.trinketsandbaubles.elves_ring.tooltip2": "• +%s%% 攻击速度",
-  "item.trinketsandbaubles.elves_ring.tooltip3": "• %s%% 攻击伤害",
+
 
   "item.trinketsandbaubles.dragons_ring.tooltip11": "120%正常体型",
   "item.trinketsandbaubles.dragons_ring.tooltip12": "按住 V 喷出龙息",
@@ -279,9 +244,7 @@
   "item.trinketsandbaubles.dragons_ring.tooltip15": "按 J 切换矿物探测功能",
   "item.trinketsandbaubles.dragons_ring.tooltip16": "按 L 开关飞行能力",
   "item.trinketsandbaubles.dragons_ring.press_shift": "按住 §eSHIFT§7 查看详细信息",
-  "item.trinketsandbaubles.dragons_ring.tooltip1": "• +%s%% 最大生命值",
-  "item.trinketsandbaubles.dragons_ring.tooltip2": "• +%s%% 攻击伤害",
-  "item.trinketsandbaubles.dragons_ring.tooltip3": "• +%s%% 盔甲韧性",
+
   "message.trinketsandbaubles.dragon.no_mana": "魔力不足，无法飞行",
 
   "item.trinketsandbaubles.glowing_powder.tooltip": "合成材料",
@@ -317,6 +280,26 @@
 
   "message.trinketsandbaubles.dragon.flight.enabled": "龙戒飞行能力已启用",
   "message.trinketsandbaubles.dragon.flight.disabled": "龙戒飞行能力已禁用",
-  "key.trinketsandbaubles.dragon_flight_toggle": "（开/关）龙戒飞行能力"
+  "key.trinketsandbaubles.dragon_flight_toggle": "（开/关）龙戒飞行能力",
+
+
+
+  "attribute.trinketsandbaubles.max_health": "生命值",
+  "attribute.trinketsandbaubles.follow_range": "跟随范围",
+  "attribute.trinketsandbaubles.movement_speed": "移动速度",
+  "attribute.trinketsandbaubles.attack_speed": "攻击速度",
+  "attribute.trinketsandbaubles.attack_damage": "攻击伤害",
+  "attribute.trinketsandbaubles.swim_speed": "游泳速度",
+  "attribute.trinketsandbaubles.flying_speed": "飞行速度",
+  "attribute.trinketsandbaubles.entity_gravity": "重力",
+  "attribute.trinketsandbaubles.block_reach": "方块交互距离",
+  "attribute.trinketsandbaubles.entity_reach": "实体交互距离",
+  "attribute.trinketsandbaubles.nametag_distance": "名称标签显示距离",
+  "attribute.trinketsandbaubles.armor": "护甲值",
+  "attribute.trinketsandbaubles.armor_toughness": "护甲韧性",
+  "attribute.trinketsandbaubles.knockback_resistance": "击退抗性",
+  "attribute.trinketsandbaubles.attack_knockback": "击退力度",
+  "attribute.trinketsandbaubles.luck": "幸运值",
+  "attribute.trinketsandbaubles.step_height": "步行高度"
 
 }

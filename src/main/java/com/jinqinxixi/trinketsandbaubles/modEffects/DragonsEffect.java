@@ -1,4 +1,4 @@
-package com.jinqinxixi.trinketsandbaubles.modEffects;
+package com.jinqinxixi.trinketsandbaubles.modeffects;
 
 import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import com.jinqinxixi.trinketsandbaubles.items.ModItem;
@@ -44,7 +44,7 @@ public class DragonsEffect extends MobEffect {
     public DragonsEffect() {
         super(MobEffectCategory.BENEFICIAL, 0xFF4500);
     }
-
+/*
     @Override
     public void addAttributeModifiers(LivingEntity pLivingEntity, AttributeMap pAttributeMap, int pAmplifier) {
         if (pLivingEntity != null) {
@@ -108,9 +108,31 @@ public class DragonsEffect extends MobEffect {
     private static void initializeFlightEnabled(Player player) {
         CompoundTag data = player.getPersistentData();
         if (!data.contains("DragonFlightEnabled")) {
-            data.putBoolean("DragonFlightEnabled", true);
-            if (!player.isCreative()) {
-                player.getAbilities().mayfly = true;
+            // 添加检查：只有拥有龙效果的玩家才能获得飞行能力
+            if (player.hasEffect(ModEffects.DRAGON.get())) {
+                data.putBoolean("DragonFlightEnabled", true);
+                if (!player.isCreative()) {
+                    player.getAbilities().mayfly = true;
+                    player.onUpdateAbilities();
+                }
+            } else {
+                // 如果没有龙效果，确保飞行被禁用
+                data.putBoolean("DragonFlightEnabled", false);
+                if (!player.isCreative()) {
+                    player.getAbilities().mayfly = false;
+                    player.getAbilities().flying = false;
+                    player.getAbilities().setFlyingSpeed(0.05f);
+                    player.onUpdateAbilities();
+                }
+            }
+        } else {
+            // 即使已经有标记，也要检查是否应该有飞行能力
+            boolean shouldHaveFlight = player.hasEffect(ModEffects.DRAGON.get());
+            if (!shouldHaveFlight && !player.isCreative()) {
+                data.putBoolean("DragonFlightEnabled", false);
+                player.getAbilities().mayfly = false;
+                player.getAbilities().flying = false;
+                player.getAbilities().setFlyingSpeed(0.05f);
                 player.onUpdateAbilities();
             }
         }
@@ -424,4 +446,5 @@ public class DragonsEffect extends MobEffect {
             }
         }
     }
+    */
 }

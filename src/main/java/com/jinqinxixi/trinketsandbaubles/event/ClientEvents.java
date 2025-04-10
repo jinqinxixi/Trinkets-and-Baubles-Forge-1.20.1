@@ -1,4 +1,4 @@
-package com.jinqinxixi.trinketsandbaubles.events;
+package com.jinqinxixi.trinketsandbaubles.event;
 
 import com.jinqinxixi.trinketsandbaubles.client.keybind.KeyBindings;
 import com.jinqinxixi.trinketsandbaubles.TrinketsandBaublesMod;

@@ -47,7 +47,7 @@
 //
 //        if (wolf.isVehicle() && wolf.getFirstPassenger() instanceof Player rider) {
 //            // 检查玩家是否还有哥布林效果
-//            if (!rider.hasEffect(ModEffects.GOBLIN.get())) {
+//            if (!rider.hasEffect(ModEffects.GOBLINS.get())) {
 //                // 如果玩家失去了效果，强制下马
 //                rider.stopRiding();
 //                return;

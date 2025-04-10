@@ -1,10 +1,9 @@
 package com.jinqinxixi.trinketsandbaubles.network.message.DragonRingMessage;
 
-import com.jinqinxixi.trinketsandbaubles.modEffects.ModEffects;
+import com.jinqinxixi.trinketsandbaubles.capability.registry.ModCapabilities;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
@@ -29,14 +28,12 @@ public class DragonNightVisionMessage {
         NetworkEvent.Context context = contextSupplier.get();
         context.enqueueWork(() -> {
             ServerPlayer player = context.getSender();
-            if (player != null && player.hasEffect(ModEffects.DRAGON.get())) {
-                // 更新服务器端的状态
-                player.getPersistentData().putBoolean("DragonNightVisionEnabled", message.enabled);
-
-                if (!message.enabled) {
-                    // 如果关闭夜视，立即移除效果
-                    player.removeEffect(MobEffects.NIGHT_VISION);
-                }
+            if (player != null) {
+                player.getCapability(ModCapabilities.DRAGON_CAPABILITY).ifPresent(cap -> {
+                    if (cap.isActive()) {
+                        cap.toggleNightVision();
+                    }
+                });
             }
         });
         context.setPacketHandled(true);

@@ -1,5 +1,6 @@
 package com.jinqinxixi.trinketsandbaubles.potion;
 
+import com.jinqinxixi.trinketsandbaubles.capability.registry.ModCapabilities;
 import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import com.jinqinxixi.trinketsandbaubles.capability.mana.ManaData;
 import net.minecraft.ChatFormatting;
@@ -16,7 +17,6 @@ import java.util.List;
 
 public class ManaReagentPotion extends Item {
     static final int USE_DURATION = 32;    // 长按时间
-    static final String PERMANENT_MANA_DECREASE = "PermanentManaDecrease";
 
     public ManaReagentPotion() {
         super(new Properties()
@@ -34,24 +34,18 @@ public class ManaReagentPotion extends Item {
 
     @Override
     public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity livingEntity) {
-        if (livingEntity instanceof Player player) {
-            if (!level.isClientSide) {
-                CompoundTag data = player.getPersistentData();
+        if (livingEntity instanceof Player player && !level.isClientSide) {
 
-                // 记录永久性减少，使用浮点数
-                float permanentDecrease = data.getFloat(PERMANENT_MANA_DECREASE);
-                data.putFloat(PERMANENT_MANA_DECREASE,
-                        permanentDecrease + ModConfig.MANA_REAGENT_MAX_DECREASE.get().floatValue());
 
-                // 获取当前的水晶加成
-                float crystalBonus = data.getFloat("CrystalManaBonus");
+            // 直接修改全局魔力值
+            float currentMaxMana = ManaData.getMaxMana(player);
+            float decreaseAmount = ModConfig.MANA_REAGENT_MAX_DECREASE.get().floatValue();
+            float newMaxMana = Math.max(10f, currentMaxMana - decreaseAmount); // 确保不低于10
 
-                // 更新当前魔力值 (保持水晶加成不变)
-                float currentMaxMana = ManaData.getMaxMana(player);
-                ManaData.setMaxMana(player,
-                        currentMaxMana - ModConfig.MANA_REAGENT_MAX_DECREASE.get().floatValue());
-            }
 
+            ManaData.setMaxMana(player, newMaxMana);
+
+            // 消耗物品
             if (!player.getAbilities().instabuild) {
                 stack.shrink(1);
             }
@@ -87,7 +81,6 @@ public class ManaReagentPotion extends Item {
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level,
                                 List<Component> tooltip, TooltipFlag flag) {
-        // 使用 String.format 格式化显示浮点数值
         tooltip.add(Component.translatable("item.trinketsandbaubles.mana_reagent.tooltip",
                         String.format("%.1f", ModConfig.MANA_REAGENT_MAX_DECREASE.get().floatValue()))
                 .withStyle(ChatFormatting.RED));

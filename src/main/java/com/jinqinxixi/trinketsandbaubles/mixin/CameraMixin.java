@@ -1,11 +1,11 @@
 package com.jinqinxixi.trinketsandbaubles.mixin;
 
+import com.jinqinxixi.trinketsandbaubles.capability.registry.ModCapabilities;
 import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
-import com.jinqinxixi.trinketsandbaubles.modEffects.ModEffects;
+import com.jinqinxixi.trinketsandbaubles.config.RaceAttributesConfig;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.CameraType;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.loading.FMLEnvironment;
@@ -31,57 +31,61 @@ public class CameraMixin {
                     Player player = minecraft.player;
                     double cameraScale = startingDistance;
 
-                    // 检查各个种族效果
-                    MobEffectInstance effect;
-
-                    // 泰坦效果特殊处理 - 300% - 100% = 200%
-                    effect = player.getEffect(ModEffects.TITAN.get());
-                    if (effect != null) {
+                    // 泰坦能力特殊处理 - 300% - 100% = 200%
+                    if (player.getCapability(ModCapabilities.TITAN_CAPABILITY)
+                            .map(cap -> cap.isActive())
+                            .orElse(false)) {
                         // 先按配置放大到300%
-                        double scaleUp = startingDistance * ModConfig.TITAN_SCALE_FACTOR.get(); // 比如3.0倍
+                        double scaleUp = startingDistance * RaceAttributesConfig.TITAN.TITAN_SCALE_FACTOR.get();
                         // 然后减少100%
                         return scaleUp - startingDistance; // 最终效果是200%的距离
                     }
 
-                    // 龙族效果
-                    effect = player.getEffect(ModEffects.DRAGON.get());
-                    if (effect != null) {
-                        double scale = ModConfig.DRAGON_SCALE_FACTOR.get();
+                    // 龙族能力
+                    if (player.getCapability(ModCapabilities.DRAGON_CAPABILITY)
+                            .map(cap -> cap.isActive())
+                            .orElse(false)) {
+                        double scale = RaceAttributesConfig.DRAGON.DRAGON_SCALE_FACTOR.get();
                         cameraScale = startingDistance * scale;
                     }
 
-                    // 矮人族效果
-                    effect = player.getEffect(ModEffects.DWARVES.get());
-                    if (effect != null) {
-                        double scale = ModConfig.DWARVES_SCALE_FACTOR.get();
+                    // 矮人族能力
+                    if (player.getCapability(ModCapabilities.DWARVES_CAPABILITY)
+                            .map(cap -> cap.isActive())
+                            .orElse(false)) {
+                        double scale = RaceAttributesConfig.DWARVES.DWARVES_SCALE_FACTOR.get();
                         cameraScale = startingDistance * Math.max(0.5, scale);
                     }
 
-                    // 精灵族效果
-                    effect = player.getEffect(ModEffects.ELVES.get());
-                    if (effect != null) {
-                        double scale = ModConfig.ELVES_SCALE_FACTOR.get();
+                    // 精灵族能力
+                    if (player.getCapability(ModCapabilities.ELVES_CAPABILITY)
+                            .map(cap -> cap.isActive())
+                            .orElse(false)) {
+                        double scale = RaceAttributesConfig.ELVES.ELVES_SCALE_FACTOR.get();
                         cameraScale = startingDistance * Math.max(0.5, scale);
                     }
 
-                    // 猫妖族效果
-                    effect = player.getEffect(ModEffects.FAELES.get());
-                    if (effect != null) {
-                        double scale = ModConfig.FAELES_SCALE_FACTOR.get();
+                    // 猫妖族能力
+                    if (player.getCapability(ModCapabilities.FAELES_CAPABILITY)
+                            .map(cap -> cap.isActive())
+                            .orElse(false)) {
+                        double scale = RaceAttributesConfig.FAELES.FAELES_SCALE_FACTOR.get();
                         cameraScale = startingDistance * Math.max(0.6, scale);
                     }
 
-                    // 精灵露族效果
-                    effect = player.getEffect(ModEffects.FAIRY_DEW.get());
-                    if (effect != null) {
-                        double scale = ModConfig.FAIRY_DEW_SCALE_FACTOR.get();
+                    // 精灵露族能力
+                    if (player.getCapability(ModCapabilities.FAIRY_CAPABILITY)
+                            .map(cap -> cap.isActive())
+                            .orElse(false)) {
+                        double scale = RaceAttributesConfig.FAIRY.FAIRY_DEW_SCALE_FACTOR.get();
                         cameraScale = startingDistance * Math.max(0.3, scale);
                     }
 
-                    // 哥布林族效果
-                    effect = player.getEffect(ModEffects.GOBLIN.get());
-                    if (effect != null) {
-                        double scale = ModConfig.GOBLIN_SCALE_FACTOR.get();
+                    // 哥布林族能力
+                    if (player.getCapability(ModCapabilities.GOBLINS_CAPABILITY)
+                            .map(cap -> cap.isActive())
+                            .orElse(false)) {
+                        double scale = RaceAttributesConfig.GOBLINS.GOBLIN_SCALE_FACTOR.get();
                         cameraScale = startingDistance * Math.max(0.5, scale);
                     }
 

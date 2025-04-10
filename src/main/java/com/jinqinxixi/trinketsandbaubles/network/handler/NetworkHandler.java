@@ -76,6 +76,12 @@ public class NetworkHandler {
                 .consumerMainThread(DragonFlightToggleMessage::handle)
                 .add();
 
+        INSTANCE.messageBuilder(SyncAllDragonStatesMessage.class, nextId())
+                .encoder(SyncAllDragonStatesMessage::encode)
+                .decoder(SyncAllDragonStatesMessage::decode)
+                .consumerMainThread(SyncAllDragonStatesMessage::handle)
+                .add();
+
     }
 
     private static void registerServerBoundMessages() {
