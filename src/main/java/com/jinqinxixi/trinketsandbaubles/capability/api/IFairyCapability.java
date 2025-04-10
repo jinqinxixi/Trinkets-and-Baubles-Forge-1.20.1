@@ -16,4 +16,15 @@ public interface IFairyCapability extends IBaseRaceCapability {
      * 更新飞行能力
      */
     void updateFlightAbility();
+
+    /**
+     * 检查飞行能力是否启用
+     * @return 是否启用飞行
+     */
+    boolean isFlightEnabled();
+
+    /**
+     * 切换飞行能力的状态
+     */
+    void toggleFlight();
 }

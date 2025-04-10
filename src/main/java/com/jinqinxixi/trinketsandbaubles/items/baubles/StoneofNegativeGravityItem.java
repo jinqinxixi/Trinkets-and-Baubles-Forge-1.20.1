@@ -78,12 +78,15 @@ public class StoneofNegativeGravityItem extends ModifiableBaubleItem {
     public void onUnequip(SlotContext slotContext, ItemStack newStack, ItemStack stack) {
         super.onUnequip(slotContext, newStack, stack);
         if (slotContext.entity() instanceof Player player) {
-            // 取下饰品时关闭飞行
-            player.getAbilities().mayfly = false;
-            player.getAbilities().flying = false;
-            // 恢复原版飞行速度
-            player.getAbilities().setFlyingSpeed(0.05f);
-            player.onUpdateAbilities();
+            // 检查玩家是否处于非创造模式
+            if (!player.isCreative()) {
+                // 取下饰品时关闭飞行
+                player.getAbilities().mayfly = false;
+                player.getAbilities().flying = false;
+                // 恢复原版飞行速度
+                player.getAbilities().setFlyingSpeed(0.05f);
+                player.onUpdateAbilities();
+            }
         }
     }
 

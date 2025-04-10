@@ -9,7 +9,6 @@ import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
-
 public class SyncAllDragonStatesMessage {
     private final boolean flightEnabled;
     private final boolean nightVisionEnabled;
@@ -47,15 +46,23 @@ public class SyncAllDragonStatesMessage {
             if (minecraft.level != null) {
                 Entity entity = minecraft.level.getEntity(message.playerId);
                 if (entity instanceof Player player) {
-                    player.getCapability(ModCapabilities.DRAGON_CAPABILITY).ifPresent(cap -> {
-                        if (message.flightEnabled != cap.isFlightEnabled()) {
-                            cap.toggleFlight();
+                    // 优先处理龙族能力
+                    player.getCapability(ModCapabilities.DRAGON_CAPABILITY).ifPresent(dragonCap -> {
+                        if (message.flightEnabled != dragonCap.isFlightEnabled()) {
+                            dragonCap.toggleFlight();
                         }
-                        if (message.nightVisionEnabled != cap.isNightVisionEnabled()) {
-                            cap.toggleNightVision();
+                        if (message.nightVisionEnabled != dragonCap.isNightVisionEnabled()) {
+                            dragonCap.toggleNightVision();
                         }
-                        if (message.dragonBreathActive != cap.isDragonBreathActive()) {
-                            cap.toggleDragonBreath();
+                        if (message.dragonBreathActive != dragonCap.isDragonBreathActive()) {
+                            dragonCap.toggleDragonBreath();
+                        }
+                    });
+
+                    // 如果玩家是仙女，则处理仙女能力
+                    player.getCapability(ModCapabilities.FAIRY_CAPABILITY).ifPresent(fairyCap -> {
+                        if (message.flightEnabled != fairyCap.isFlightEnabled()) {
+                            fairyCap.toggleFlight();
                         }
                     });
                 }

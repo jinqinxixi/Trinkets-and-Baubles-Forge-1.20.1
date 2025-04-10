@@ -56,7 +56,7 @@
 
   "item.trinketsandbaubles.goblin_soup.tooltip": "§b食用后使你的物种永久变为哥布林，会被种族戒指覆盖",
   "item.trinketsandbaubles.goblin_soup.tooltip1": "§9可以通过饮用 恢复血清 恢复",
-  "effect.trinketsandbaubles.goblin": "哥布林",
+  "effect.trinketsandbaubles.goblins": "哥布林",
 
   "item.trinketsandbaubles.titan_spirit.tooltip": "§b食用后使你的物种永久变为泰坦，会被种族戒指覆盖",
   "item.trinketsandbaubles.titan_spirit.tooltip1": "§9可以通过饮用 恢复血清 恢复",
@@ -168,7 +168,7 @@
 
 
   "item.trinketsandbaubles.greater_inertia_stone.tooltip": "装备时：",
-  "item.trinketsandbaubles.greater_inertia_stone.tooltip.knockback": "+%s 击退抗性",
+  "item.trinketsandbaubles.greater_inertia_stone.tooltip.knockback": "+%s%% 击退抗性",
   "item.trinketsandbaubles.greater_inertia_stone.tooltip.speed": "+%s%% 移动速度",
   "item.trinketsandbaubles.greater_inertia_stone.tooltip.jump": "+%s%% 跳跃高度",
   "item.trinketsandbaubles.greater_inertia_stone.tooltip4": "自动上坡",
@@ -206,6 +206,7 @@
 
   "item.trinketsandbaubles.fairies_ring.tooltip11": "25%正常体型",
   "item.trinketsandbaubles.fairies_ring.tooltip12": "创造模式飞行",
+  "item.trinketsandbaubles.fairies_ring.tooltip13": "按 L 开关飞行能力",
   "item.trinketsandbaubles.fairies_ring.press_shift": "按住 §eSHIFT§7 查看详细信息",
 
 
@@ -278,9 +279,9 @@
   "modifier.trinketsandbaubles.violent": "暴力：攻击速度",
   "tooltip.trinketsandbaubles.unidentified": "◆ 未鉴定",
 
-  "message.trinketsandbaubles.dragon.flight.enabled": "龙戒飞行能力已启用",
-  "message.trinketsandbaubles.dragon.flight.disabled": "龙戒飞行能力已禁用",
-  "key.trinketsandbaubles.dragon_flight_toggle": "（开/关）龙戒飞行能力",
+  "message.trinketsandbaubles.dragon.flight.enabled": "飞行能力已启用",
+  "message.trinketsandbaubles.dragon.flight.disabled": "飞行能力已禁用",
+  "key.trinketsandbaubles.dragon_flight_toggle": "（开/关）飞行能力",
 
 
 

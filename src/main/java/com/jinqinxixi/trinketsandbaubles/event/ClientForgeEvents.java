@@ -1,6 +1,7 @@
 package com.jinqinxixi.trinketsandbaubles.event;
 
 import com.jinqinxixi.trinketsandbaubles.capability.impl.DragonCapability;
+import com.jinqinxixi.trinketsandbaubles.capability.impl.FairyCapability;
 import com.jinqinxixi.trinketsandbaubles.capability.registry.ModCapabilities;
 import com.jinqinxixi.trinketsandbaubles.client.keybind.KeyBindings;
 import com.jinqinxixi.trinketsandbaubles.items.baubles.DragonsEyeItem;
@@ -36,6 +37,7 @@ public class ClientForgeEvents {
         handleEscapeAndManaHUD(event, minecraft);
         handleMovementKeys(player);
         handleDragonCapability(event, minecraft, player);
+        handleFairyCapability(player);
         handleItemToggles(player);
     }
 
@@ -91,6 +93,17 @@ public class ClientForgeEvents {
                         ClientNetworkHandler.sendStopDragonBreath();
                     }
                     wasBreathing = isBreathing;
+                }
+            }
+        });
+    }
+
+    private static void handleFairyCapability(Player player) {
+        player.getCapability(ModCapabilities.FAIRY_CAPABILITY).ifPresent(cap -> {
+            if (cap instanceof FairyCapability fairyCap && fairyCap.isActive()) {
+                // 飞行能力切换
+                if (KeyBindings.DRAGON_FLIGHT_TOGGLE_KEY.consumeClick()) {
+                    ClientNetworkHandler.sendDragonFlightToggle();
                 }
             }
         });

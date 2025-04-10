@@ -13,12 +13,10 @@
 	],
 	"key": {
 		"D": {
-			"type": "forge:nbt",
 			"item": "iceandfire:dragon_skull_fire",
-			"nbt": {
+			"data": {
 				"Stage": 5
-			},
-			"strict": true
+			}
 		},
 		"S": {
 			"item": "minecraft:diamond_sword"

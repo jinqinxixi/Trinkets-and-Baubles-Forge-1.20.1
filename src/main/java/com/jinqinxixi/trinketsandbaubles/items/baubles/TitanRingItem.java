@@ -206,7 +206,7 @@ public class TitanRingItem extends ModifiableBaubleItem {
 
                         if (attr.isPercentage()) {
                             // 百分比属性，保留2位小数
-                            displayText = String.format("%s %s%.2f%%",
+                            displayText = String.format("%s %s%.1f%%",
                                     Component.translatable(attr.getTranslationKey()).getString(),
                                     value > 0 ? "+" : "",
                                     value * 100);
@@ -222,13 +222,8 @@ public class TitanRingItem extends ModifiableBaubleItem {
                                 .withStyle(value > 0 ? ChatFormatting.GREEN : ChatFormatting.RED));
                     }
                 } catch (Exception e) {
-                    // Silently skip invalid attributes
                 }
             }
-
-            // 添加特殊能力说明
-            tooltip.add(Component.translatable("item.trinketsandbaubles.titan_ring.tooltip7")
-                    .withStyle(ChatFormatting.BLUE));
         } else {
             // 简短描述
             tooltip.add(Component.translatable("item.trinketsandbaubles.titan_ring.tooltip11")

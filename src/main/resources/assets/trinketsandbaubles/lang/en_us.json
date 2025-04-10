@@ -63,7 +63,7 @@
 
   "item.trinketsandbaubles.goblin_soup.tooltip": "§bPermanently changes your race to Goblin when consumed, can be overridden by race rings",
   "item.trinketsandbaubles.goblin_soup.tooltip1": "§9Can be reversed by drinking Restoration Serum",
-  "effect.trinketsandbaubles.goblin": "Goblin",
+  "effect.trinketsandbaubles.goblins": "Goblins",
 
   "item.trinketsandbaubles.titan_spirit.tooltip": "§bPermanently changes your race to Titan when consumed, can be overridden by race rings",
   "item.trinketsandbaubles.titan_spirit.tooltip1": "§9Can be reversed by drinking Restoration Serum",
@@ -163,7 +163,7 @@
   "message.trinketsandbaubles.dragon.night_vision.disabled": "Dragon Night Vision: Disabled",
 
   "item.trinketsandbaubles.greater_inertia_stone.tooltip": "When equipped:",
-  "item.trinketsandbaubles.greater_inertia_stone.tooltip.knockback": "+%s Knockback Resistance",
+  "item.trinketsandbaubles.greater_inertia_stone.tooltip.knockback": "+%s%% Knockback Resistance",
   "item.trinketsandbaubles.greater_inertia_stone.tooltip.speed": "+%s%% Movement Speed",
   "item.trinketsandbaubles.greater_inertia_stone.tooltip.jump": "+%s%% Jump Height",
   "item.trinketsandbaubles.greater_inertia_stone.tooltip4": "Auto Step-up",
@@ -196,7 +196,8 @@
 
 
   "item.trinketsandbaubles.fairies_ring.tooltip11": "25% normal size",
-  "item.trinketsandbaubles.fairies_ring.tooltip12": "Creative flight",
+  "item.trinketsandbaubles.fairies_ring.tooltip12": "Creative mode flying",
+  "item.trinketsandbaubles.fairies_ring.tooltip13": "Press L to toggle flight ability",
   "item.trinketsandbaubles.fairies_ring.press_shift": "Hold §eSHIFT§7 for details",
 
 
@@ -271,9 +272,9 @@
   "modifier.trinketsandbaubles.violent": "Violent: Attack Speed",
   "tooltip.trinketsandbaubles.unidentified": "◆ Unidentified",
 
-  "message.trinketsandbaubles.dragon.flight.enabled": "Dragon Ring Flight Ability Enabled",
-  "message.trinketsandbaubles.dragon.flight.disabled": "Dragon Ring Flight Ability Disabled",
-  "key.trinketsandbaubles.dragon_flight_toggle": "Toggle Dragon Ring Flight Ability",
+  "message.trinketsandbaubles.dragon.flight.enabled": " Flight Ability Enabled",
+  "message.trinketsandbaubles.dragon.flight.disabled": " Flight Ability Disabled",
+  "key.trinketsandbaubles.dragon_flight_toggle": "Toggle  Flight Ability",
 
 
   "attribute.trinketsandbaubles.max_health": "Max Health",

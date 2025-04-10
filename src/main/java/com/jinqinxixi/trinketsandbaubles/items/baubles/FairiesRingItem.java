@@ -204,7 +204,7 @@ public class FairiesRingItem extends ModifiableBaubleItem {
 
                         if (attr.isPercentage()) {
                             // 百分比属性，保留2位小数
-                            displayText = String.format("%s %s%.2f%%",
+                            displayText = String.format("%s %s%.1f%%",
                                     Component.translatable(attr.getTranslationKey()).getString(),
                                     value > 0 ? "+" : "",
                                     value * 100);
@@ -228,6 +228,8 @@ public class FairiesRingItem extends ModifiableBaubleItem {
                     .withStyle(ChatFormatting.GOLD));
             tooltip.add(Component.translatable("item.trinketsandbaubles.fairies_ring.tooltip12")
                     .withStyle(ChatFormatting.DARK_GREEN));
+            tooltip.add(Component.translatable("item.trinketsandbaubles.fairies_ring.tooltip13")
+                    .withStyle(ChatFormatting.GREEN));
             tooltip.add(Component.translatable("item.trinketsandbaubles.fairies_ring.press_shift")
                     .withStyle(ChatFormatting.GRAY));
         }

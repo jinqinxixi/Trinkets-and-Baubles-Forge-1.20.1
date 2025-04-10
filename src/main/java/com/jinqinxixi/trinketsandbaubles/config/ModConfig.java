@@ -344,7 +344,7 @@ public class ModConfig {
 
         POISON_STONE_ACTIVATE_DAMAGE_EVENT = BUILDER
                 .comment("是否启用毒石的伤害加成效果")
-                .define("activateDamageEvent", true);
+                .define("poisonStone.activateDamageEvent", true);
 
         // 极化之石
         POLARIZED_STONE_ATTRACTION_RANGE = BUILDER

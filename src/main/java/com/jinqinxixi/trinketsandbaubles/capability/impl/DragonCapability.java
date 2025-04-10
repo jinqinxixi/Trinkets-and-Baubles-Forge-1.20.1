@@ -83,6 +83,8 @@ public class DragonCapability extends AbstractRaceCapability implements IDragonC
     protected void onTick() {
         if (!isActive) return;
 
+        updateFlightAbility();
+
         player.addEffect(new MobEffectInstance(
                 ModEffects.DRAGON.get(),
                 30,
@@ -92,13 +94,10 @@ public class DragonCapability extends AbstractRaceCapability implements IDragonC
                 false
         ));
 
-        // 确保飞行状态正确
-        if (tickCounter % 20 == 0) { // 每秒检查一次
-            updateFlightAbility();
-        }
+
 
         // 处理飞行魔力消耗
-        if (flightEnabled && !player.isCreative() && player.getAbilities().flying) {
+        if (flightEnabled && !player.isCreative() && !player.isSpectator() && player.getAbilities().flying) {
             if (tickCounter % RaceAttributesConfig.DRAGON.DRAGON_MANA_CHECK_INTERVAL.get() == 0) {
                 float manaCost = RaceAttributesConfig.DRAGON.DRAGON_FLIGHT_MANA_COST.get().floatValue();
                 if (ManaData.hasMana(player, manaCost)) {
@@ -166,7 +165,8 @@ public class DragonCapability extends AbstractRaceCapability implements IDragonC
     }
 
     public void handleGameModeChange(GameType newGameMode) {
-        if (!player.isCreative()) {
+        // 只处理生存模式玩家的飞行速度
+        if (!player.isCreative() && !player.isSpectator()) {
             if (newGameMode != GameType.SURVIVAL) {
                 player.getAbilities().setFlyingSpeed(0.05f);
             } else {
@@ -176,14 +176,30 @@ public class DragonCapability extends AbstractRaceCapability implements IDragonC
         }
     }
 
+    private void disableDragonFlight() {
+        // 确保只禁用龙族赋予的飞行能力，不干扰其他模组的飞行，且只对非创造模式玩家生效
+        if (!player.isCreative() && (player.getAbilities().mayfly || player.getAbilities().flying)) {
+            player.getAbilities().mayfly = false; // 禁用飞行权限
+            player.getAbilities().flying = false; // 禁用飞行状态
+            player.getAbilities().setFlyingSpeed(0.05f); // 恢复默认飞行速度
+            player.onUpdateAbilities(); // 更新玩家能力状态
+        }
+    }
+
     @Override
     public void toggleFlight() {
         if (!isActive) return; // 如果能力未激活，直接返回
 
+        // 切换飞行状态
         flightEnabled = !flightEnabled;
-        updateFlightAbility();
 
-        // 发送反馈消息
+        if (!flightEnabled) {
+            // 如果禁用飞行，只对非创造模式玩家执行飞行关闭逻辑
+            if (!player.isCreative()) {
+                disableDragonFlight();
+            }
+        }
+        // 发送飞行状态反馈消息
         if (player instanceof ServerPlayer serverPlayer) {
             Component message = Component.translatable(
                     flightEnabled ?
@@ -192,7 +208,9 @@ public class DragonCapability extends AbstractRaceCapability implements IDragonC
             ).withStyle(flightEnabled ? ChatFormatting.GREEN : ChatFormatting.GRAY);
             serverPlayer.displayClientMessage(message, true);
         }
-        sync(); // 确保同步状态
+
+        // 确保同步状态
+        sync();
     }
 
     @Override
@@ -278,26 +296,21 @@ public class DragonCapability extends AbstractRaceCapability implements IDragonC
 
     @Override
     public void updateFlightAbility() {
-        // 首先检查能力是否激活
+        // 检查能力是否激活
         if (!isActive) {
-            if (!player.isCreative()) {
-                player.getAbilities().mayfly = false;
-                player.getAbilities().flying = false;
-                player.getAbilities().setFlyingSpeed(0.05f);
-                player.onUpdateAbilities();
-            }
-            return;
+            return; // 如果未激活，直接跳过
         }
 
-        if (!player.isCreative()) {
-            // 根据飞行开关状态设置飞行能力
-            player.getAbilities().mayfly = flightEnabled;
-            if (!flightEnabled) {
-                player.getAbilities().flying = false;
-                player.getAbilities().setFlyingSpeed(0.05f);
-            } else {
-                player.getAbilities().setFlyingSpeed(0.05f * RaceAttributesConfig.DRAGON.DRAGON_FLIGHT_SPEED.get().floatValue());
-            }
+        // 如果飞行功能被禁用，跳过我们的飞行逻辑
+        if (!flightEnabled) {
+            return; // 如果飞行被禁用，直接跳过
+        }
+
+        // 只有生存模式玩家才需要设置我们自定义的飞行速度
+        if (!player.isCreative() && !player.isSpectator()) {
+            // 启用飞行能力，只设置我们自己的飞行速度
+            player.getAbilities().mayfly = true;
+            player.getAbilities().setFlyingSpeed(0.05f * RaceAttributesConfig.DRAGON.DRAGON_FLIGHT_SPEED.get().floatValue());
             player.onUpdateAbilities();
         }
     }

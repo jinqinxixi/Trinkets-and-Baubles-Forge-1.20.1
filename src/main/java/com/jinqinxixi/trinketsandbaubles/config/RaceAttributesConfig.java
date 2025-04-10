@@ -63,7 +63,7 @@ public class RaceAttributesConfig {
                     .defineInRange("armor_toughness", 0.25, -10.0, 50.0);
 
             LUCK = builder.comment("幸运值加成")
-                    .defineInRange("luck", 0.0, -10.0, 10.0);
+                    .defineInRange("luck", 1.0, -10.0, 10.0);
 
             SWIM_SPEED = builder.comment("游泳速度倍率")
                     .defineInRange("swim_speed", 0.0, -10.0, 10.0);
@@ -84,10 +84,10 @@ public class RaceAttributesConfig {
                     .defineInRange("entity_reach", 0.0, -10.0, 10.0);
 
             DWARVES_SCALE_FACTOR = BUILDER.comment("矮人族体型缩放 1 为正常体型")
-                    .defineInRange("dwarves.scale", 0.75D, 0.1D, 10.0D);
+                    .defineInRange("scale", 0.75D, 0.1D, 10.0D);
 
             DWARVES_MANA_BONUS = BUILDER.comment("矮人效果魔力值增加量")
-                    .defineInRange("dwarves.manaBonus", 0.0, 0, 10000);
+                    .defineInRange("manaBonus", 0.0, 0, 10000);
 
             builder.pop();
         }
@@ -178,31 +178,31 @@ public class RaceAttributesConfig {
                     .defineInRange("entity_reach", 0.0, -10.0, 10.0);
 
             DRAGON_FLIGHT_SPEED = BUILDER.comment("飞行速度倍率")
-                    .defineInRange("dragon.flightSpeed", 0.3D, -1.0D, 2.0D);
+                    .defineInRange("flightSpeed", 0.3D, -1.0D, 2.0D);
 
             DRAGON_MANA_BONUS = BUILDER.comment("魔力值加成")
-                    .defineInRange("dragon.manaBonus", 100.0, 0, 10000);
+                    .defineInRange("manaBonus", 300.0, 0, 10000);
 
             DRAGON_FLIGHT_MANA_COST = BUILDER.comment("每秒飞行消耗魔力值")
-                    .defineInRange("dragon.flightManaCost", 5.0D, 0.0D, 1000.0D);
+                    .defineInRange("flightManaCost", 5.0D, 0.0D, 1000.0D);
 
             DRAGON_MANA_CHECK_INTERVAL = BUILDER.comment("魔力检查间隔(tick)")
-                    .defineInRange("dragon.manaCheckInterval", 20.0D, 1.0D, 200.0D);
+                    .defineInRange("manaCheckInterval", 20.0D, 1.0D, 200.0D);
 
             DRAGON_BREATH_MANA_COST = BUILDER.comment("每秒龙息消耗魔力")
-                    .defineInRange("dragon.breathManaCost", 5.0D, 0.0D, 5000.0D);
+                    .defineInRange("breathManaCost", 5.0D, 0.0D, 5000.0D);
 
             DRAGON_BREATH_BASE_DAMAGE = BUILDER.comment("龙息基础伤害")
-                    .defineInRange("dragon.BreathBaseDamage", 4.0, 0.0, 100.0);
+                    .defineInRange("BreathBaseDamage", 4.0, 0.0, 100.0);
 
             DRAGON_BREATH_MIN_DAMAGE = BUILDER.comment("龙息最小伤害")
-                    .defineInRange("dragon.BreathMinDamage", 2.0, 0.0, 100.0);
+                    .defineInRange("BreathMinDamage", 2.0, 0.0, 100.0);
 
             DRAGON_BREATH_DECAY_RATE = BUILDER.comment("龙息伤害衰减率")
-                    .defineInRange("dragon.BreathDecayRate", 0.7, 0.0, 1.0);
+                    .defineInRange("BreathDecayRate", 0.7, 0.0, 1.0);
 
             DRAGON_SCALE_FACTOR = BUILDER.comment("龙族体型缩放 1 为正常体型")
-                    .defineInRange("dragon.scale", 1.2, 0.1, 10.0);
+                    .defineInRange("scale", 1.2, 0.1, 10.0);
 
             builder.pop();
         }
@@ -289,19 +289,19 @@ public class RaceAttributesConfig {
                     .defineInRange("entity_reach", 0.0, -10.0, 10.0);
 
             ELVES_FOREST_ATTACK_SPEED = BUILDER.comment("森林中额外攻击速度加成")
-                    .defineInRange("elves.forestAttackSpeed", 0.15D, -1.0D, 10.0D);
+                    .defineInRange("forestAttackSpeed", 0.15D, -1.0D, 10.0D);
 
             ELVES_FOREST_MOVEMENT_SPEED = BUILDER.comment("森林中额外移动速度加成")
-                    .defineInRange("elves.forestMovementSpeed", 0.15D, -1.0D, 10.0D);
+                    .defineInRange("forestMovementSpeed", 0.15D, -1.0D, 10.0D);
 
             ELVES_MANA_BONUS = BUILDER.comment("精灵效果魔力值增加量")
-                    .defineInRange("elves.manaBonus", 100.0, 0, 10000);
+                    .defineInRange("manaBonus", 100.0, 0, 10000);
 
             ELVES_BOW_DAMAGE_BOOST = BUILDER.comment("潜行时弓箭伤害增加倍率")
-                    .defineInRange("elves.bowDamageBoost", 1.5D, 1.0D, 50.0D);
+                    .defineInRange("bowDamageBoost", 1.5D, 1.0D, 50.0D);
 
             ELVES_SCALE_FACTOR = BUILDER.comment("精灵族体型缩放 1 为正常体型")
-                    .defineInRange("elves.scale", 1.0D, 0.1D, 10.0D);
+                    .defineInRange("scale", 1.0D, 0.1D, 10.0D);
 
             builder.pop();
         }
@@ -391,29 +391,28 @@ public class RaceAttributesConfig {
                     .defineInRange("entity_reach", 0.0, -10.0, 10.0);
 
             FAELES_UNARMED_DAMAGE = BUILDER.comment("空手伤害增加值")
-                    .defineInRange("faeles.unarmedDamage", 6.0D, -100.0D, 2000.0D);
+                    .defineInRange("unarmedDamage", 6.0D, -100.0D, 2000.0D);
 
             FAELES_ARMOR_SPEED_PENALTY = BUILDER.comment("每件非皮革护甲的速度惩罚")
-                    .defineInRange("faeles.armorSpeedPenalty", -0.04D, -1D, 0.0D);
+                    .defineInRange("armorSpeedPenalty", -0.04D, -1D, 0.0D);
 
             FAELES_MANA_BONUS = BUILDER.comment("魔力值增加量")
-                    .defineInRange("faeles.manaBonus", 25.0, 0, 10000);
+                    .defineInRange("manaBonus", 25.0, 0, 10000);
 
             FAELES_JUMP_BOOST = BUILDER.comment("跳跃高度修改值")
-                    .defineInRange("faeles.jumpStrength", 0.60D, -1.0D, 200.0D);
-
+                    .defineInRange("jumpStrength", 0.60D, -1.0D, 200.0D);
 
             FAELES_WALL_CLIMB = BUILDER.comment("猫猫效果是否允许攀爬墙壁")
-                    .define("faeles.wallClimb", true);
+                    .define("fwallClimb", true);
 
             FAELES_CLIMB_SPEED = BUILDER.comment("猫猫效果爬墙速度（原版梯子速度约为0.11）")
-                    .defineInRange("faeles.climbSpeed", 0.11D, 0.05D, 0.3D);
+                    .defineInRange("climbSpeed", 0.11D, 0.05D, 0.3D);
 
             FAELES_CLIMB_HORIZONTAL_DRAG = BUILDER.comment("猫猫效果爬墙时的水平移动阻力")
-                    .defineInRange("faeles.climbHorizontalDrag", 0.7D, 0.5D, 1.0D);
+                    .defineInRange("climbHorizontalDrag", 0.7D, 0.5D, 1.0D);
 
             FAELES_SCALE_FACTOR = BUILDER.comment("猫族体型缩放 1 为正常体型")
-                    .defineInRange("faeles.scale", 0.85D, 0.1D, 10.0D);
+                    .defineInRange("scale", 0.85D, 0.1D, 10.0D);
 
 
             builder.pop();
@@ -503,25 +502,25 @@ public class RaceAttributesConfig {
 
             FAIRY_DEW_FLIGHT_SPEED = BUILDER
                     .comment("飞行速度倍率")
-                    .defineInRange("fairyDew.flightSpeed", 0.3D, -1.0D, 2.0D);
+                    .defineInRange("flightSpeed", 0.3D, -1.0D, 2.0D);
 
             FAIRY_DEW_MANA_BONUS = BUILDER.comment("魔力值增加量")
-                    .defineInRange("fairyDew.manaBonus", 400.0, 0, 20000);
+                    .defineInRange("manaBonus", 400.0, 0, 20000);
 
             FAIRY_DEW_JUMP_BOOST = BUILDER.comment("跳跃重力修改值")
-                    .defineInRange("fairyDew.jumpStrength", -0.25D, -1.0D, 200.0D);
+                    .defineInRange("jumpStrength", -0.25D, -1.0D, 200.0D);
 
             FAIRY_DEW_WALL_CLIMB = BUILDER.comment("仙女效果是否允许攀爬墙壁")
-                    .define("fairyDew.wallClimb", true);
+                    .define("wallClimb", true);
 
             FAIRY_DEW_CLIMB_SPEED = BUILDER.comment("仙女效果爬墙速度（原版梯子速度约为0.11）")
-                    .defineInRange("fairyDew.climbSpeed", 0.11D, 0.05D, 0.3D);
+                    .defineInRange("climbSpeed", 0.11D, 0.05D, 0.3D);
 
             FAIRY_DEW_CLIMB_HORIZONTAL_DRAG = BUILDER.comment("仙女效果爬墙时的水平移动阻力")
-                    .defineInRange("fairyDew.climbHorizontalDrag", 0.7D, 0.5D, 1.0D);
+                    .defineInRange("climbHorizontalDrag", 0.7D, 0.5D, 1.0D);
 
             FAIRY_DEW_SCALE_FACTOR = BUILDER.comment("仙女族体型缩放 1 为正常体型")
-                    .defineInRange("fairyDew.scale", 0.25D, 0.1D, 10.0D);
+                    .defineInRange("scale", 0.25D, 0.1D, 10.0D);
 
 
             builder.pop();
@@ -606,15 +605,14 @@ public class RaceAttributesConfig {
             ENTITY_REACH = builder.comment("实体交互距离倍率")
                     .defineInRange("entity_reach", 0.0, -10.0, 10.0);
 
-
             GOBLIN_MANA_PENALTY = BUILDER.comment("魔力值修改量")
-                    .defineInRange("goblin.manaPenalty", -25.0, -10000, 10000);
+                    .defineInRange("manaPenalty", -25.0, -10000, 10000);
 
             GOBLIN_DAMAGE_REDUCTION = BUILDER.comment("火焰和爆炸伤害减免比例")
-                    .defineInRange("goblin.damageReduction", 0.75D, 0.0D, 1.0D);
+                    .defineInRange("damageReduction", 0.75D, 0.0D, 1.0D);
 
             GOBLIN_SCALE_FACTOR = BUILDER.comment("哥布林族体型缩放 1 为正常体型")
-                    .defineInRange("goblin.scale", 0.5D, 0.1D, 10.0D);
+                    .defineInRange("scale", 0.5D, 0.1D, 10.0D);
 
 
             builder.pop();
@@ -701,16 +699,16 @@ public class RaceAttributesConfig {
                     .defineInRange("entity_reach", 0.0, -10.0, 10.0);
 
             TITAN_JUMP_BOOST = BUILDER.comment("跳跃力量修改值")
-                    .defineInRange("titan.jumpStrength", 0.75D, -1.0D, 2.0D);
+                    .defineInRange("jumpStrength", 0.75D, -1.0D, 2.0D);
 
             TITAN_MANA_MODIFIER = BUILDER.comment("魔力值修改量")
-                    .defineInRange("titan.manaModifier", -50.0, -10000, 10000);
+                    .defineInRange("manaModifier", -50.0, -10000, 10000);
 
             TITAN_WATER_SINK_SPEED = BUILDER.comment("水中下沉速度")
-                    .defineInRange("titan.waterSinkSpeed", 0.1D, 0.0D, 1.0D);
+                    .defineInRange("waterSinkSpeed", 0.1D, 0.0D, 1.0D);
 
             TITAN_SCALE_FACTOR = BUILDER.comment("泰坦族体型缩放 1 为正常体型")
-                    .defineInRange("titan.scale", 3.0D, 0.1D, 10.0D);
+                    .defineInRange("scale", 3.0D, 0.1D, 10.0D);
 
             builder.pop();
         }

@@ -204,7 +204,7 @@ public class FaelesRingItem extends ModifiableBaubleItem {
 
                         if (attr.isPercentage()) {
                             // 百分比属性，保留2位小数
-                            displayText = String.format("%s %s%.2f%%",
+                            displayText = String.format("%s %s%.1f%%",
                                     Component.translatable(attr.getTranslationKey()).getString(),
                                     value > 0 ? "+" : "",
                                     value * 100);

@@ -2,16 +2,24 @@ package com.jinqinxixi.trinketsandbaubles.capability.impl;
 
 import com.jinqinxixi.trinketsandbaubles.capability.api.IFairyCapability;
 import com.jinqinxixi.trinketsandbaubles.capability.base.AbstractRaceCapability;
-import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import com.jinqinxixi.trinketsandbaubles.config.RaceAttributesConfig;
 import com.jinqinxixi.trinketsandbaubles.modeffects.ModEffects;
+import com.jinqinxixi.trinketsandbaubles.network.handler.NetworkHandler;
+import com.jinqinxixi.trinketsandbaubles.network.message.DragonRingMessage.SyncAllDragonStatesMessage;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Block;
+import net.minecraftforge.network.PacketDistributor;
 
 public class FairyCapability extends AbstractRaceCapability implements IFairyCapability {
+
+    private boolean flightEnabled = true;
 
     public FairyCapability(Player player) {
         super(player);
@@ -76,10 +84,7 @@ public class FairyCapability extends AbstractRaceCapability implements IFairyCap
                 false  // 不显示环境效果
         ));
 
-        // 每5个tick执行一次飞行能力更新
-        if (tickCounter % 5 == 0) {
-            updateFlightAbility();
-        }
+        updateFlightAbility();
     }
 
     @Override
@@ -87,18 +92,17 @@ public class FairyCapability extends AbstractRaceCapability implements IFairyCap
         if (this.isActive == active) return;
 
         if (!active) {
-            if (!player.isCreative()) {
-                // 禁用飞行
-                player.getAbilities().mayfly = false;
-                player.getAbilities().flying = false;
-                player.getAbilities().setFlyingSpeed(0.05f);
-                player.onUpdateAbilities();
+            // 只对生存模式玩家禁用飞行
+            if (!player.isCreative() && !player.isSpectator()) {
+                disableFairyFlight();
             }
+        } else {
+            updateFlightAbility();
         }
 
-        // 调用父类的 setActive
         super.setActive(active);
     }
+
 
     @Override
     public void handleWallClimb() {
@@ -112,15 +116,96 @@ public class FairyCapability extends AbstractRaceCapability implements IFairyCap
 
     @Override
     public void updateFlightAbility() {
-        if (!player.isCreative() && !player.getAbilities().mayfly) {
+        if (!isActive || !flightEnabled) {
+            return; // 如果能力未激活或飞行被禁用，直接跳过
+        }
+
+        // 只有生存模式玩家需要我们的飞行逻辑
+        if (!player.isCreative() && !player.isSpectator()) {
             player.getAbilities().mayfly = true;
+            // 只对生存模式玩家修改飞行速度
             player.getAbilities().setFlyingSpeed(0.05f * RaceAttributesConfig.FAIRY.FAIRY_DEW_FLIGHT_SPEED.get().floatValue());
+            player.onUpdateAbilities();
+        } else if (flightEnabled) {
+            // 对于创造和旁观模式，只给予飞行权限，不修改速度
+            player.getAbilities().mayfly = true;
+            // 保持原版速度
+            player.getAbilities().setFlyingSpeed(0.05f);
             player.onUpdateAbilities();
         }
     }
 
     @Override
+    public boolean isFlightEnabled() {
+        return flightEnabled;
+    }
+
+    @Override
+    public void toggleFlight() {
+        if (!isActive) return;
+
+        flightEnabled = !flightEnabled;
+
+        if (!flightEnabled) {
+            // 如果禁用飞行，只对生存模式玩家执行飞行关闭逻辑
+            if (!player.isCreative() && !player.isSpectator()) {
+                disableFairyFlight();
+            }
+        } else {
+            // 启用飞行时，根据游戏模式更新飞行能力
+            updateFlightAbility();
+        }
+
+        // 发送飞行状态反馈消息
+        if (player instanceof ServerPlayer serverPlayer) {
+            Component message = Component.translatable(
+                    flightEnabled ?
+                            "message.trinketsandbaubles.dragon.flight.enabled" :
+                            "message.trinketsandbaubles.dragon.flight.disabled"
+            ).withStyle(flightEnabled ? ChatFormatting.GREEN : ChatFormatting.GRAY);
+            serverPlayer.displayClientMessage(message, true);
+        }
+
+        sync();
+    }
+
+
+    private void disableFairyFlight() {
+        // 只对生存模式玩家禁用飞行
+        if (!player.isCreative() && !player.isSpectator() && (player.getAbilities().mayfly || player.getAbilities().flying)) {
+            player.getAbilities().mayfly = false;
+            player.getAbilities().flying = false;
+            player.getAbilities().setFlyingSpeed(0.05f); // 恢复默认飞行速度
+            player.onUpdateAbilities();
+        }
+    }
+
+
+    @Override
     public void onBreakBlock(BlockPos pos, Block block, ServerLevel level) {
         // 精灵族不需要特殊的破坏方块逻辑
+    }
+
+    @Override
+    public void sync() {
+        if (!player.level().isClientSide && player instanceof ServerPlayer serverPlayer) {
+            NetworkHandler.INSTANCE.send(
+                    PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> serverPlayer),
+                    new SyncAllDragonStatesMessage(flightEnabled, false, false, serverPlayer.getId())
+            );
+        }
+        super.sync();
+    }
+
+    @Override
+    protected void saveAdditional(CompoundTag tag) {
+        super.saveAdditional(tag);
+        tag.putBoolean("FlightEnabled", flightEnabled);
+    }
+
+    @Override
+    protected void loadAdditional(CompoundTag tag) {
+        super.loadAdditional(tag);
+        flightEnabled = tag.contains("FlightEnabled") ? tag.getBoolean("FlightEnabled") : true;
     }
 }
