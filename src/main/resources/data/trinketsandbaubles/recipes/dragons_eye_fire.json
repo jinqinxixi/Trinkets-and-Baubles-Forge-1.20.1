@@ -18,7 +18,7 @@
 			"nbt": {
 				"Stage": 5
 			},
-			"strict": true
+			"strict": false
 		},
 		"S": {
 			"item": "minecraft:diamond_sword"
