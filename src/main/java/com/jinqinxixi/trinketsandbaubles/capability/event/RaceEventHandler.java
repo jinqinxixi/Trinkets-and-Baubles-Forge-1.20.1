@@ -439,6 +439,17 @@ public class RaceEventHandler {
 
         // 统一处理爬墙逻辑
         handleRaceWallClimb(player);
+
+        // 处理泰坦种族水中下沉
+        handleTitanWaterMovement(player);
+    }
+
+    private static void handleTitanWaterMovement(Player player) {
+        player.getCapability(ModCapabilities.TITAN_CAPABILITY).ifPresent(cap -> {
+            if (cap.isActive()) {
+                ((TitanCapability) cap).handleWaterMovement();
+            }
+        });
     }
 
     private static void handleRaceWallClimb(Player player) {

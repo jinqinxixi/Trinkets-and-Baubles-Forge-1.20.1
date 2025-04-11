@@ -83,7 +83,6 @@ public class TitanCapability extends AbstractRaceCapability implements ITitanCap
         ));
 
         if (!player.level().isClientSide) {
-            handleWaterMovement();
             handlePlantBreaking();
         }
     }
