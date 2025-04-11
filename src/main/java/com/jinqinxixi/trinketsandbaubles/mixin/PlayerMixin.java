@@ -70,7 +70,6 @@ public class PlayerMixin {
                 .orElse(false);
 
         if (hasTitanCapability) {
-            System.out.println("[2025-04-09 23:29:45] [asdad21] [泰坦] 禁用游泳状态");
             cir.setReturnValue(false);
         }
     }

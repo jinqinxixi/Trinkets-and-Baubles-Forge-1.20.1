@@ -198,7 +198,6 @@ public abstract class AbstractRaceCapability implements IBaseRaceCapability {
     public CompoundTag serializeNBT() {
         CompoundTag tag = new CompoundTag();
         tag.putBoolean("active", isActive);
-        tag.putFloat("scale", scaleFactor);
         tag.putFloat("permanentManaDecrease", permanentManaDecrease);
         saveAdditional(tag);
         return tag;
@@ -207,7 +206,6 @@ public abstract class AbstractRaceCapability implements IBaseRaceCapability {
     @Override
     public void deserializeNBT(CompoundTag tag) {
         this.isActive = tag.getBoolean("active");
-        this.scaleFactor = tag.getFloat("scale");
         this.permanentManaDecrease = tag.getFloat("permanentManaDecrease");
         if (tag.contains("CurrentMaxMana")) {
             ManaData.setMaxMana(player, tag.getFloat("CurrentMaxMana"));
@@ -337,6 +335,11 @@ public abstract class AbstractRaceCapability implements IBaseRaceCapability {
 
     protected void resetScaleFactor() {
         RaceScaleHelper.setSmoothModelScale(player, 1.0f, 20);
+        float currentScale = RaceScaleHelper.getCurrentModelScale(player);
+        if (Math.abs(currentScale - 1.0f) > 0.01f) {
+            // 如果没有正确恢复，强制设置
+            RaceScaleHelper.setModelScale(player, 1.0f);
+        }
     }
 
     protected void handleWallClimbInternal(double climbSpeed, double horizontalDrag) {

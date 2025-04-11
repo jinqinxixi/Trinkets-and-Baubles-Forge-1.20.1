@@ -35,18 +35,17 @@ public class CameraMixin {
                     if (player.getCapability(ModCapabilities.TITAN_CAPABILITY)
                             .map(cap -> cap.isActive())
                             .orElse(false)) {
-                        // 先按配置放大到300%
-                        double scaleUp = startingDistance * RaceAttributesConfig.TITAN.TITAN_SCALE_FACTOR.get();
-                        // 然后减少100%
-                        return scaleUp - startingDistance; // 最终效果是200%的距离
+                        double scale = RaceAttributesConfig.TITAN.TITAN_SCALE_FACTOR.get();
+                        cameraScale = startingDistance * Math.max(0.5, scale);
                     }
+
 
                     // 龙族能力
                     if (player.getCapability(ModCapabilities.DRAGON_CAPABILITY)
                             .map(cap -> cap.isActive())
                             .orElse(false)) {
                         double scale = RaceAttributesConfig.DRAGON.DRAGON_SCALE_FACTOR.get();
-                        cameraScale = startingDistance * scale;
+                        cameraScale = startingDistance * Math.max(0.5, scale);
                     }
 
                     // 矮人族能力
@@ -70,7 +69,7 @@ public class CameraMixin {
                             .map(cap -> cap.isActive())
                             .orElse(false)) {
                         double scale = RaceAttributesConfig.FAELES.FAELES_SCALE_FACTOR.get();
-                        cameraScale = startingDistance * Math.max(0.6, scale);
+                        cameraScale = startingDistance * Math.max(0.5, scale);
                     }
 
                     // 精灵露族能力
@@ -78,7 +77,7 @@ public class CameraMixin {
                             .map(cap -> cap.isActive())
                             .orElse(false)) {
                         double scale = RaceAttributesConfig.FAIRY.FAIRY_DEW_SCALE_FACTOR.get();
-                        cameraScale = startingDistance * Math.max(0.3, scale);
+                        cameraScale = startingDistance * Math.max(0.5, scale);
                     }
 
                     // 哥布林族能力

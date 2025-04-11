@@ -10,29 +10,32 @@ import net.minecraftforge.network.simple.SimpleChannel;
 
 public class RaceCapabilityNetworking {
     private static final String PROTOCOL_VERSION = "2.6";
-    private static SimpleChannel INSTANCE;
+    public static final SimpleChannel INSTANCE = NetworkRegistry.newSimpleChannel(
+            new ResourceLocation(TrinketsandBaublesMod.MOD_ID, "races"),
+            () -> PROTOCOL_VERSION,
+            PROTOCOL_VERSION::equals,
+            PROTOCOL_VERSION::equals
+    );
     private static int packetId = 0;
 
     public static void init() {
-        INSTANCE = NetworkRegistry.newSimpleChannel(
-                new ResourceLocation(TrinketsandBaublesMod.MOD_ID, "races"),
-                () -> PROTOCOL_VERSION,
-                PROTOCOL_VERSION::equals,
-                PROTOCOL_VERSION::equals
+        // 确保在正确的时间注册消息
+        INSTANCE.registerMessage(
+                nextId(),
+                SyncRaceCapabilityPacket.class,
+                SyncRaceCapabilityPacket::encode,
+                SyncRaceCapabilityPacket::decode,
+                SyncRaceCapabilityPacket::handle
         );
-
-        INSTANCE.messageBuilder(SyncRaceCapabilityPacket.class, nextId())
-                .encoder(SyncRaceCapabilityPacket::encode)
-                .decoder(SyncRaceCapabilityPacket::decode)
-                .consumerMainThread(SyncRaceCapabilityPacket::handle)
-                .add();
     }
 
     public static void sendToPlayer(IBaseRaceCapability capability, ServerPlayer player) {
-        INSTANCE.send(
-                PacketDistributor.PLAYER.with(() -> player),
-                new SyncRaceCapabilityPacket(capability)
-        );
+        if (INSTANCE != null && player != null && capability != null) {
+            INSTANCE.send(
+                    PacketDistributor.PLAYER.with(() -> player),
+                    new SyncRaceCapabilityPacket(capability)
+            );
+        }
     }
 
     private static int nextId() {
