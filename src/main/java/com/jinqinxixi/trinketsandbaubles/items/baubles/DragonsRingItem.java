@@ -3,7 +3,9 @@ package com.jinqinxixi.trinketsandbaubles.items.baubles;
 import com.jinqinxixi.trinketsandbaubles.TrinketsandBaublesMod;
 import com.jinqinxixi.trinketsandbaubles.capability.attribute.AttributeRegistry;
 import com.jinqinxixi.trinketsandbaubles.capability.base.AbstractRaceCapability;
+import com.jinqinxixi.trinketsandbaubles.capability.impl.DragonCapability;
 import com.jinqinxixi.trinketsandbaubles.capability.registry.ModCapabilities;
+import com.jinqinxixi.trinketsandbaubles.client.keybind.KeyBindings;
 import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import com.jinqinxixi.trinketsandbaubles.config.RaceAttributesConfig;
 import com.jinqinxixi.trinketsandbaubles.modifier.ModifiableBaubleItem;
@@ -17,12 +19,15 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ShulkerBoxBlock;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.SlotContext;
 import top.theillusivec4.curios.api.type.capability.ICurio;
@@ -172,6 +177,7 @@ public class DragonsRingItem extends ModifiableBaubleItem {
     public ICurio.SoundInfo getEquipSound(SlotContext slotContext, ItemStack stack) {
         return new ICurio.SoundInfo(net.minecraft.sounds.SoundEvents.AMETHYST_BLOCK_CHIME, 1.0f, 1.0f);
     }
+    @OnlyIn(Dist.CLIENT)
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level,
                                 List<Component> tooltip, TooltipFlag flag) {
@@ -262,17 +268,54 @@ public class DragonsRingItem extends ModifiableBaubleItem {
                 }
             }
         } else {
+            String dragonBreathKeyName = KeyBindings.DRAGON_BREATH_KEY.getKey().getDisplayName().getString();
+            String nightVisionKeyName = KeyBindings.DRAGON_NIGHT_VISION_KEY.getKey().getDisplayName().getString();
+            String toggleModeKeyName = KeyBindings.TOGGLE_DRAGONS_EYE_MODE.getKey().getDisplayName().getString();
+            String flightToggleKeyName = KeyBindings.DRAGON_FLIGHT_TOGGLE_KEY.getKey().getDisplayName().getString();
+
             // 简短描述
-            tooltip.add(Component.translatable("item.trinketsandbaubles.dragons_ring.tooltip13")
+            tooltip.add(Component.translatable("item.trinketsandbaubles.dragons_ring.tooltip11")
                     .withStyle(ChatFormatting.GOLD));
-            tooltip.add(Component.translatable("item.trinketsandbaubles.dragons_ring.tooltip14")
+            tooltip.add(Component.translatable("item.trinketsandbaubles.dragons_ring.tooltip12",
+                            dragonBreathKeyName)
+                    .withStyle(ChatFormatting.RED));
+            tooltip.add(Component.translatable("item.trinketsandbaubles.dragons_ring.tooltip13")
+                    .withStyle(ChatFormatting.GREEN));
+            tooltip.add(Component.translatable("item.trinketsandbaubles.dragons_ring.tooltip14",
+                            nightVisionKeyName)
                     .withStyle(ChatFormatting.DARK_GREEN));
-            tooltip.add(Component.translatable("item.trinketsandbaubles.dragons_ring.tooltip15")
+            tooltip.add(Component.translatable("item.trinketsandbaubles.dragons_ring.tooltip15",
+                            toggleModeKeyName)
                     .withStyle(ChatFormatting.AQUA));
-            tooltip.add(Component.translatable("item.trinketsandbaubles.dragons_ring.tooltip16")
+            tooltip.add(Component.translatable("item.trinketsandbaubles.dragons_ring.tooltip16",
+                            flightToggleKeyName)
                     .withStyle(ChatFormatting.DARK_AQUA));
             tooltip.add(Component.translatable("item.trinketsandbaubles.dragons_ring.press_shift")
                     .withStyle(ChatFormatting.GRAY));
+
+            // 在详细属性前添加魔力系统信息
+            if (level != null && level.isClientSide) {
+                Player player = net.minecraft.client.Minecraft.getInstance().player;
+                if (player != null) {
+                    player.getCapability(ModCapabilities.DRAGON_CAPABILITY).ifPresent(cap -> {
+                        if (cap instanceof DragonCapability dragonCap) {
+                            // 只在启用了植物魔法的情况下显示魔力信息
+                            if (ModConfig.USE_BOTANIA_MANA.get() && net.minecraftforge.fml.ModList.get().isLoaded("botania")) {
+                                // 显示魔力系统类型
+                                tooltip.add(Component.translatable("item.trinketsandbaubles.dragons_ring.mana_system", "Botania")
+                                        .withStyle(ChatFormatting.GOLD));
+
+                                // 通过能力来获取当前魔力值
+                                float currentMana = dragonCap.getCurrentMana();
+                                tooltip.add(Component.translatable(
+                                        "item.trinketsandbaubles.dragons_ring.current_mana",
+                                        (int) currentMana
+                                ).withStyle(ChatFormatting.AQUA));
+                            }
+                        }
+                    });
+                }
+            }
         }
         super.appendHoverText(stack, level, tooltip, flag);
     }

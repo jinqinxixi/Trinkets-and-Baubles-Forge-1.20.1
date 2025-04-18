@@ -80,8 +80,8 @@
   "item.trinketsandbaubles.arcing_orb.durability": "Energy: %s / %s",
   "item.trinketsandbaubles.arcing_orb.charging": "Charging: %s",
   "item.trinketsandbaubles.arcing_orb.speed_boost": "Movement Speed: +%s%%",
-  "item.trinketsandbaubles.arcing_orb.dash_cost": "Press ALT to use Dash ability, dash forward a short distance, consuming %s energy and paralyzing nearby enemies.",
-  "item.trinketsandbaubles.arcing_orb.damage_multiplier": "Hold V to charge energy, release to shoot a beam towards your crosshair, dealing %s * X damage. (X is the amount of energy consumed while charging).",
+  "item.trinketsandbaubles.arcing_orb.dash_cost": "Press %2$s to use Dash ability, dash forward a short distance, consuming %s energy and paralyzing nearby enemies.",
+  "item.trinketsandbaubles.arcing_orb.damage_multiplier": "Hold %2$s to charge energy, release to shoot a beam towards your crosshair, dealing %s * X damage. (X is the amount of energy consumed while charging).",
 
   "item.trinketsandbaubles.polarized_stone.mana_cost": "Mana Cost: %d/second",
   "item.trinketsandbaubles.polarized_stone.no_mana": "Not enough mana, deflection mode disabled",
@@ -131,8 +131,8 @@
   "item.trinketsandbaubles.polarized_stone.attraction_status": "Attraction Mode: %s",
   "item.trinketsandbaubles.polarized_stone.enabled": "Enabled",
   "item.trinketsandbaubles.polarized_stone.disabled": "Disabled",
-  "item.trinketsandbaubles.polarized_stone.usage.attraction": "Right Click/Y to toggle Attraction Mode",
-  "item.trinketsandbaubles.polarized_stone.usage.deflection": "Shift+Right Click/U to toggle Deflection Mode",
+  "item.trinketsandbaubles.polarized_stone.usage.attraction": "Right Click/%s to toggle Attraction Mode",
+  "item.trinketsandbaubles.polarized_stone.usage.deflection": "Shift+Right Click/%s to toggle Deflection Mode",
 
   "item.dragons_eye.night_vision.on": "§2Night Vision: On",
   "item.dragons_eye.night_vision.off": "§7Night Vision: Off",
@@ -142,8 +142,8 @@
   "item.dragons_eye.mode.ore.redstone": "§4Dragon's Eye: Scanning for Redstone Ores",
   "item.dragons_eye.mode.ore.all": "§2Dragon's Eye: Scanning for All Ores",
   "item.trinketsandbaubles.dragons_eye.tooltip1": "§3Grants Fire Resistance",
-  "item.trinketsandbaubles.dragons_eye.tooltip2": "§3Grants Night Vision. (Can be toggled with K key)",
-  "item.dragons_eye.tooltip3": "Press hotkey to toggle between ores or chests, selected ores or chests within %s blocks will be marked and displayed on screen",
+  "item.trinketsandbaubles.dragons_eye.tooltip2": "§3Grants Night Vision. (Can be toggled with %s key)",
+  "item.dragons_eye.tooltip3": "Press %s to cycle through ore types or chests, highlighting their locations within %s blocks of you on screen",
 
   "item.trinketsandbaubles.polarized_stone.attraction_on": "§2Attraction Mode Enabled",
   "item.trinketsandbaubles.polarized_stone.attraction_off": "§7Attraction Mode Disabled",
@@ -197,7 +197,7 @@
 
   "item.trinketsandbaubles.fairies_ring.tooltip11": "25% normal size",
   "item.trinketsandbaubles.fairies_ring.tooltip12": "Creative mode flying",
-  "item.trinketsandbaubles.fairies_ring.tooltip13": "Press L to toggle flight ability",
+  "item.trinketsandbaubles.fairies_ring.tooltip13": "Press %s to toggle flight ability",
   "item.trinketsandbaubles.fairies_ring.press_shift": "Hold §eSHIFT§7 for details",
 
 
@@ -216,7 +216,6 @@
 
 
   "item.trinketsandbaubles.goblins_ring.tooltip11": "50% normal size",
-  "item.trinketsandbaubles.goblins_ring.tooltip12": "Can ride tamed wolves",
   "item.trinketsandbaubles.goblins_ring.tooltip13": "Gain Strength and Regeneration while riding",
   "item.trinketsandbaubles.goblins_ring.tooltip14": "Gain minor Fire and Explosion Resistance",
   "item.trinketsandbaubles.goblins_ring.tooltip15": "Creepers will ignore you",
@@ -231,11 +230,11 @@
   "item.trinketsandbaubles.elves_ring.tooltip2": "• +%s%% Attack Speed",
   "item.trinketsandbaubles.elves_ring.tooltip3": "• %s%% Attack Damage",
   "item.trinketsandbaubles.dragons_ring.tooltip11": "120% normal size",
-  "item.trinketsandbaubles.dragons_ring.tooltip12": "Hold V to breathe dragon fire",
+  "item.trinketsandbaubles.dragons_ring.tooltip12": "Hold %s to breathe dragon fire",
   "item.trinketsandbaubles.dragons_ring.tooltip13": "Grants Fire Resistance",
-  "item.trinketsandbaubles.dragons_ring.tooltip14": "Press I to toggle Dragon Night Vision",
-  "item.trinketsandbaubles.dragons_ring.tooltip15": "Press J to toggle Ore Detection",
-  "item.trinketsandbaubles.dragons_ring.tooltip16": "Press L to toggle flight ability",
+  "item.trinketsandbaubles.dragons_ring.tooltip14": "Press %s to toggle Dragon Night Vision",
+  "item.trinketsandbaubles.dragons_ring.tooltip15": "Press %s to toggle Ore Detection",
+  "item.trinketsandbaubles.dragons_ring.tooltip16": "Press %s to toggle flight ability",
   "item.trinketsandbaubles.dragons_ring.press_shift": "Hold §eSHIFT§7 for details",
 
   "message.trinketsandbaubles.dragon.no_mana": "Lack of mana to fly",
@@ -293,6 +292,15 @@
   "attribute.trinketsandbaubles.knockback_resistance": "Knockback Resistance",
   "attribute.trinketsandbaubles.attack_knockback": "Attack Knockback",
   "attribute.trinketsandbaubles.luck": "Luck",
-  "attribute.trinketsandbaubles.step_height": "Step Height"
+  "attribute.trinketsandbaubles.step_height": "Step Height",
+
+  "item.trinketsandbaubles.polarized_stone.mana_system": "Mana System: %s",
+  "item.trinketsandbaubles.polarized_stone.current_mana": "Current Mana: %d",
+
+  "item.trinketsandbaubles.arcing_orb.mana_system": "Mana System: %s",
+  "item.trinketsandbaubles.arcing_orb.current_mana": "Current Mana: %d",
+
+  "item.trinketsandbaubles.dragons_ring.mana_system": "Mana System: %s",
+  "item.trinketsandbaubles.dragons_ring.current_mana": "Current Mana: %d"
 
 }

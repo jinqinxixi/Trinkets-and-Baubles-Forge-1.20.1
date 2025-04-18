@@ -88,9 +88,15 @@ public class ClientForgeEvents {
                 boolean isBreathing = KeyBindings.DRAGON_BREATH_KEY.isDown();
                 if (isBreathing != wasBreathing) {
                     if (isBreathing) {
-                        ClientNetworkHandler.sendDragonBreath();
+                        // 只在按下时发送开启请求
+                        if (!dragonCap.isDragonBreathActive()) {
+                            ClientNetworkHandler.sendDragonBreath();
+                        }
                     } else {
-                        ClientNetworkHandler.sendStopDragonBreath();
+                        // 释放按键时关闭龙息
+                        if (dragonCap.isDragonBreathActive()) {
+                            ClientNetworkHandler.sendStopDragonBreath();
+                        }
                     }
                     wasBreathing = isBreathing;
                 }

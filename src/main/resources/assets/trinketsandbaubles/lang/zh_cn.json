@@ -75,8 +75,8 @@
   "item.trinketsandbaubles.arcing_orb.durability": "能量：%s / %s",
   "item.trinketsandbaubles.arcing_orb.charging": "充能中：%s",
   "item.trinketsandbaubles.arcing_orb.speed_boost": "移动速度：+%s%%",
-  "item.trinketsandbaubles.arcing_orb.dash_cost": "按下ALT键使用闪避技能，向前突进一小段距离，消耗%s能量，并使附近的敌人麻痹。",
-  "item.trinketsandbaubles.arcing_orb.damage_multiplier": "长按V键消耗能量蓄力，松开时向准星处射出光束，造成 %s * X点伤害。（X为蓄力消耗的能量值）。",
+  "item.trinketsandbaubles.arcing_orb.dash_cost": "按下 %2$s 键使用闪避技能，向前突进一小段距离，消耗 %1$s 能量，并使附近的敌人麻痹。",
+  "item.trinketsandbaubles.arcing_orb.damage_multiplier": "长按 %2$s 键消耗能量蓄力，松开时向准星处射出光束，造成 %1$s * X点伤害。（X为蓄力消耗的能量值）。",
 
   "item.trinketsandbaubles.polarized_stone.mana_cost": "魔力消耗: %d/秒",
   "item.trinketsandbaubles.polarized_stone.no_mana": "魔力不足，偏转模式已关闭",
@@ -127,8 +127,8 @@
   "item.trinketsandbaubles.polarized_stone.attraction_status": "吸引模式: %s",
   "item.trinketsandbaubles.polarized_stone.enabled": "开启",
   "item.trinketsandbaubles.polarized_stone.disabled": "关闭",
-  "item.trinketsandbaubles.polarized_stone.usage.attraction": "右键/Y键切换吸引模式",
-  "item.trinketsandbaubles.polarized_stone.usage.deflection": "Shift+右键/U键切换阻挡模式",
+  "item.trinketsandbaubles.polarized_stone.usage.attraction": "右键/%s键切换吸引模式",
+  "item.trinketsandbaubles.polarized_stone.usage.deflection": "Shift+右键/%s键切换阻挡模式",
 
   "item.dragons_eye.night_vision.on": "§2夜视效果：开启",
   "item.dragons_eye.night_vision.off": "§7夜视效果：关闭",
@@ -137,9 +137,9 @@
   "item.dragons_eye.mode.ore.common": "§3巨龙之眼：正在扫描常见矿物",
   "item.dragons_eye.mode.ore.redstone": "§4巨龙之眼：正在扫描红石矿物",
   "item.dragons_eye.mode.ore.all": "§2巨龙之眼：正在扫描所有矿物",
-  "item.trinketsandbaubles.dragons_eye.tooltip1": "§3获得防火效果",
-  "item.trinketsandbaubles.dragons_eye.tooltip2": "§3获得夜视效果。（可手动开关，按k键）",
-  "item.dragons_eye.tooltip3": "按下快捷键切换矿石或箱子，在自己%s格内的所选矿石或箱子的位置会被标记，并显示在屏幕上",
+  "item.trinketsandbaubles.dragons_eye.tooltip1": "获得防火效果",
+  "item.trinketsandbaubles.dragons_eye.tooltip2": "获得夜视效果。（可手动开关，按 %s 键）",
+  "item.dragons_eye.tooltip3": "按下%s键切换矿石或箱子，在自己%s格内的所选矿石或箱子的位置会被标记，并显示在屏幕上",
 
   "tooltip.trinketsandbaubles.dragons_eye_fire.effect": "免疫火龙的龙息伤害",
 
@@ -206,7 +206,7 @@
 
   "item.trinketsandbaubles.fairies_ring.tooltip11": "25%正常体型",
   "item.trinketsandbaubles.fairies_ring.tooltip12": "创造模式飞行",
-  "item.trinketsandbaubles.fairies_ring.tooltip13": "按 L 开关飞行能力",
+  "item.trinketsandbaubles.fairies_ring.tooltip13": "按 %s 开关飞行能力",
   "item.trinketsandbaubles.fairies_ring.press_shift": "按住 §eSHIFT§7 查看详细信息",
 
 
@@ -225,7 +225,6 @@
 
 
   "item.trinketsandbaubles.goblins_ring.tooltip11": "50%正常体型",
-  "item.trinketsandbaubles.goblins_ring.tooltip12": "可以骑乘被驯服的狼",
   "item.trinketsandbaubles.goblins_ring.tooltip13": "骑马时获得力量和生命恢复",
   "item.trinketsandbaubles.goblins_ring.tooltip14": "获得少量火焰抗性和爆炸抗性",
   "item.trinketsandbaubles.goblins_ring.tooltip15": "苦力怕会忽视你",
@@ -239,13 +238,12 @@
 
 
   "item.trinketsandbaubles.dragons_ring.tooltip11": "120%正常体型",
-  "item.trinketsandbaubles.dragons_ring.tooltip12": "按住 V 喷出龙息",
+  "item.trinketsandbaubles.dragons_ring.tooltip12": "按住 %s 喷出龙息",
   "item.trinketsandbaubles.dragons_ring.tooltip13": "获得防火",
-  "item.trinketsandbaubles.dragons_ring.tooltip14": "按 I 开启龙之夜视",
-  "item.trinketsandbaubles.dragons_ring.tooltip15": "按 J 切换矿物探测功能",
-  "item.trinketsandbaubles.dragons_ring.tooltip16": "按 L 开关飞行能力",
+  "item.trinketsandbaubles.dragons_ring.tooltip14": "按 %s 开启龙之夜视",
+  "item.trinketsandbaubles.dragons_ring.tooltip15": "按 %s 切换矿物探测功能",
+  "item.trinketsandbaubles.dragons_ring.tooltip16": "按 %s 开关飞行能力",
   "item.trinketsandbaubles.dragons_ring.press_shift": "按住 §eSHIFT§7 查看详细信息",
-
   "message.trinketsandbaubles.dragon.no_mana": "魔力不足，无法飞行",
 
   "item.trinketsandbaubles.glowing_powder.tooltip": "合成材料",
@@ -301,6 +299,16 @@
   "attribute.trinketsandbaubles.knockback_resistance": "击退抗性",
   "attribute.trinketsandbaubles.attack_knockback": "击退力度",
   "attribute.trinketsandbaubles.luck": "幸运值",
-  "attribute.trinketsandbaubles.step_height": "步行高度"
+  "attribute.trinketsandbaubles.step_height": "步行高度",
+
+
+  "item.trinketsandbaubles.polarized_stone.mana_system": "魔力系统：%s",
+  "item.trinketsandbaubles.polarized_stone.current_mana": "当前魔力：%d",
+
+  "item.trinketsandbaubles.arcing_orb.mana_system": "魔力系统：%s",
+  "item.trinketsandbaubles.arcing_orb.current_mana": "当前魔力：%d",
+
+  "item.trinketsandbaubles.dragons_ring.mana_system": "魔力系统：%s",
+  "item.trinketsandbaubles.dragons_ring.current_mana": "当前魔力：%d"
 
 }

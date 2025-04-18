@@ -3,6 +3,7 @@ package com.jinqinxixi.trinketsandbaubles.items.baubles;
 import com.jinqinxixi.trinketsandbaubles.capability.attribute.AttributeRegistry;
 import com.jinqinxixi.trinketsandbaubles.capability.base.AbstractRaceCapability;
 import com.jinqinxixi.trinketsandbaubles.capability.registry.ModCapabilities;
+import com.jinqinxixi.trinketsandbaubles.client.keybind.KeyBindings;
 import com.jinqinxixi.trinketsandbaubles.config.RaceAttributesConfig;
 import com.jinqinxixi.trinketsandbaubles.modifier.ModifiableBaubleItem;
 import com.jinqinxixi.trinketsandbaubles.util.RaceRingUtil;
@@ -223,12 +224,14 @@ public class FairiesRingItem extends ModifiableBaubleItem {
                 }
             }
         } else {
+            String flightKeyName = KeyBindings.DRAGON_FLIGHT_TOGGLE_KEY.getKey().getDisplayName().getString();
             // 简短描述
             tooltip.add(Component.translatable("item.trinketsandbaubles.fairies_ring.tooltip11")
                     .withStyle(ChatFormatting.GOLD));
             tooltip.add(Component.translatable("item.trinketsandbaubles.fairies_ring.tooltip12")
                     .withStyle(ChatFormatting.DARK_GREEN));
-            tooltip.add(Component.translatable("item.trinketsandbaubles.fairies_ring.tooltip13")
+            tooltip.add(Component.translatable("item.trinketsandbaubles.fairies_ring.tooltip13",
+                            flightKeyName)
                     .withStyle(ChatFormatting.GREEN));
             tooltip.add(Component.translatable("item.trinketsandbaubles.fairies_ring.press_shift")
                     .withStyle(ChatFormatting.GRAY));

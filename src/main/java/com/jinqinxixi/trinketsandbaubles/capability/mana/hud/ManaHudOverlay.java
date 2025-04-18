@@ -3,6 +3,7 @@ package com.jinqinxixi.trinketsandbaubles.capability.mana.hud;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.jinqinxixi.trinketsandbaubles.TrinketsandBaublesMod;
+import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.ChatFormatting;
@@ -22,8 +23,26 @@ import java.io.IOException;
 
 @OnlyIn(Dist.CLIENT)
 public class ManaHudOverlay {
-    private static final ResourceLocation GUI_ICONS_LOCATION = new ResourceLocation(TrinketsandBaublesMod.MOD_ID, "textures/gui/icons.png");
+    private static final ResourceLocation GUI_ICONS_LOCATION = new ResourceLocation(TrinketsandBaublesMod.MOD_ID, "textures/gui/mana_gui.png");
 
+    private boolean shouldShowManaHud() {
+        // 如果没有收到初始同步数据，不显示
+        if (!initialSyncReceived) return false;
+
+        // 检查是否使用Iron's Spells魔力系统
+        try {
+            // 如果配置启用了Iron's Spells魔力系统且模组确实存在
+            if (ModConfig.USE_IRONS_SPELLS_MANA.get() &&
+                    Class.forName("io.redspace.ironsspellbooks.api.magic.MagicData") != null) {
+                return false; // 不显示HUD
+            }
+        } catch (ClassNotFoundException e) {
+            // Iron's Spells模组不存在，继续显示HUD
+        }
+
+        // 在其他情况下显示HUD
+        return true;
+    }
     private boolean initialSyncReceived = false;
     private float cachedMana = -1;
     private float cachedMaxMana = -1;
@@ -220,12 +239,18 @@ public class ManaHudOverlay {
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.player == null || !initialSyncReceived) return;
 
-        // 如果魔力是满的，并且不在拖动模式下，就不显示
+        if (!shouldShowManaHud() && !canDrag) return;
         if (cachedMana >= cachedMaxMana && !canDrag) return;
 
-        int screenWidth = minecraft.getWindow().getGuiScaledWidth();
-        int screenHeight = minecraft.getWindow().getGuiScaledHeight();
+        // 定义纹理实际尺寸
+        final int TEXTURE_WIDTH = 182;
+        final int TEXTURE_HEIGHT = 10;
 
+        Window window = minecraft.getWindow();
+        int screenWidth = window.getGuiScaledWidth();
+        int screenHeight = window.getGuiScaledHeight();
+
+        // 初始化位置
         if (currentX == -1 || currentY == -1) {
             currentX = screenWidth / 2 - 91;
             currentY = screenHeight - 50;
@@ -238,47 +263,56 @@ public class ManaHudOverlay {
         int renderY = (int) Math.round(currentY);
 
         if (!isVertical) {
+            // 水平模式渲染
             if (canDrag) {
                 guiGraphics.fill(renderX - 1, renderY - 1,
                         renderX + HORIZONTAL_BAR_WIDTH + 1, renderY + HORIZONTAL_BAR_HEIGHT + 1,
-                        0x80FFFFFF);
+                        0x80FFFFFF); // 拖动时的半透明边框
             }
 
-            guiGraphics.blit(GUI_ICONS_LOCATION, renderX, renderY, 0, 84,
-                    HORIZONTAL_BAR_WIDTH, HORIZONTAL_BAR_HEIGHT);
+            // 背景条 (UV: 0,0 -> 182,5)
+            guiGraphics.blit(GUI_ICONS_LOCATION,
+                    renderX, renderY,
+                    0, 0,
+                    HORIZONTAL_BAR_WIDTH, HORIZONTAL_BAR_HEIGHT,
+                    TEXTURE_WIDTH, TEXTURE_HEIGHT);
 
+            // 填充条 (UV: 0,5 -> 182,10)
             if (cachedMana > 0) {
                 int manaWidth = (int) ((float) cachedMana / cachedMaxMana * HORIZONTAL_BAR_WIDTH);
-                guiGraphics.blit(GUI_ICONS_LOCATION, renderX, renderY, 0, 89,
-                        manaWidth, HORIZONTAL_BAR_HEIGHT);
+                guiGraphics.blit(GUI_ICONS_LOCATION,
+                        renderX, renderY,
+                        0, 5,
+                        manaWidth, HORIZONTAL_BAR_HEIGHT,
+                        TEXTURE_WIDTH, TEXTURE_HEIGHT);
             }
         } else {
+            // 垂直模式渲染
             if (canDrag) {
                 guiGraphics.fill(renderX - 1, renderY - 1,
                         renderX + VERTICAL_BAR_WIDTH + 1, renderY + VERTICAL_BAR_HEIGHT + 1,
-                        0x80FFFFFF);
+                        0x80FFFFFF); // 拖动时的半透明边框
             }
 
             guiGraphics.pose().pushPose();
             guiGraphics.pose().translate(renderX, renderY + VERTICAL_BAR_HEIGHT, 0);
+            guiGraphics.pose().mulPose(new Quaternionf().rotationZ((float) -Math.PI / 2));
 
-            float angle = (float) -Math.PI / 2;
-            Quaternionf rotation = new Quaternionf().rotationZ(angle);
-            guiGraphics.pose().mulPose(rotation);
-
+            // 背景条 (旋转后)
             guiGraphics.blit(GUI_ICONS_LOCATION,
                     0, 0,
-                    0, 84,
-                    HORIZONTAL_BAR_WIDTH, HORIZONTAL_BAR_HEIGHT
-            );
+                    0, 0,
+                    HORIZONTAL_BAR_WIDTH, HORIZONTAL_BAR_HEIGHT,
+                    TEXTURE_WIDTH, TEXTURE_HEIGHT);
 
+            // 填充条 (旋转后)
             if (cachedMana > 0) {
                 int manaWidth = (int) ((float) cachedMana / cachedMaxMana * HORIZONTAL_BAR_WIDTH);
                 guiGraphics.blit(GUI_ICONS_LOCATION,
                         0, 0,
-                        0, 89,
-                        manaWidth, HORIZONTAL_BAR_HEIGHT
-                );
+                        0, 5,
+                        manaWidth, HORIZONTAL_BAR_HEIGHT,
+                        TEXTURE_WIDTH, TEXTURE_HEIGHT);
             }
 
             guiGraphics.pose().popPose();
@@ -292,7 +326,6 @@ public class ManaHudOverlay {
         guiGraphics.pose().scale(scale, scale, 1.0f);
 
         float scaledX, scaledY;
-
         if (!isVertical) {
             scaledX = (renderX + HORIZONTAL_BAR_WIDTH/2 - minecraft.font.width(manaText) * scale / 2) / scale;
             scaledY = (renderY + HORIZONTAL_BAR_HEIGHT + 5) / scale;
@@ -312,7 +345,7 @@ public class ManaHudOverlay {
 
         guiGraphics.pose().popPose();
 
-        // 拖动模式状态文本
+        // 拖动模式状态提示
         if (canDrag) {
             Component statusText = Component.translatable(
                     "message.trinketsandbaubles.mana_hud.drag_mode.tooltip"

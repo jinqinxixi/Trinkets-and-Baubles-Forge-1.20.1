@@ -391,10 +391,16 @@ public class DragonsEyeItem extends ModifiableBaubleItem {
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level,
                                 List<Component> tooltip, TooltipFlag flag) {
-        tooltip.add(Component.translatable("item.trinketsandbaubles.dragons_eye.tooltip1"));
-        tooltip.add(Component.translatable("item.trinketsandbaubles.dragons_eye.tooltip2"));
+        String nightVisionKeyName = KeyBindings.TOGGLE_DRAGONS_EYE_VISION.getKey().getDisplayName().getString();
+        String toggleModeKeyName = KeyBindings.TOGGLE_DRAGONS_EYE_MODE.getKey().getDisplayName().getString();
+        tooltip.add(Component.translatable("item.trinketsandbaubles.dragons_eye.tooltip1")
+                .withStyle(ChatFormatting.AQUA));
+        tooltip.add(Component.translatable("item.trinketsandbaubles.dragons_eye.tooltip2",
+                        nightVisionKeyName)  // 传入当前设置的键位名称
+                .withStyle(ChatFormatting.DARK_AQUA));
         tooltip.add(Component.translatable("item.dragons_eye.tooltip3",
-                        ModConfig.RENDER_RANGE.get()) // 使用配置值
+                        toggleModeKeyName,   // 传入切换键位名称
+                        ModConfig.RENDER_RANGE.get()) // 传入扫描范围
                 .withStyle(ChatFormatting.GOLD));
         super.appendHoverText(stack, level, tooltip, flag);
     }

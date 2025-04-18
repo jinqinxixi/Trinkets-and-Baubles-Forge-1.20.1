@@ -228,8 +228,6 @@ public class GoblinsRingItem extends ModifiableBaubleItem {
             // 简短描述
             tooltip.add(Component.translatable("item.trinketsandbaubles.goblins_ring.tooltip11")
                     .withStyle(ChatFormatting.GOLD));
-            tooltip.add(Component.translatable("item.trinketsandbaubles.goblins_ring.tooltip12")
-                    .withStyle(ChatFormatting.DARK_GREEN));
             tooltip.add(Component.translatable("item.trinketsandbaubles.goblins_ring.tooltip13")
                     .withStyle(ChatFormatting.AQUA));
             tooltip.add(Component.translatable("item.trinketsandbaubles.goblins_ring.tooltip14")

@@ -29,6 +29,8 @@ public class ModConfig {
     public static final ForgeConfigSpec.IntValue MANA_REGEN_RATE;
     public static final ForgeConfigSpec.IntValue MANA_REGEN_INTERVAL;
     public static final ForgeConfigSpec.IntValue CREATIVE_REGEN_RATE;
+    public static final ForgeConfigSpec.BooleanValue USE_IRONS_SPELLS_MANA;
+    public static final ForgeConfigSpec.BooleanValue USE_BOTANIA_MANA;
 
     // 魔法球配置
     public static final ForgeConfigSpec.DoubleValue SPEED_BOOST;
@@ -192,6 +194,14 @@ public class ModConfig {
         CREATIVE_REGEN_RATE = BUILDER
                 .comment("创造模式每tick恢复的魔力量")
                 .defineInRange("mana.creativeRegenRate", 5, 1, 10000);
+
+        USE_IRONS_SPELLS_MANA = BUILDER
+                .comment("若已安装 Iron's Spells 模组，是否使用其魔力系统")
+                .define("mana.useIronsSpellsMana", false);
+
+        USE_BOTANIA_MANA = BUILDER
+                .comment("若已安装 Botania 模组，是否使用其魔力系统")
+                .define("mana.useBotaniaMana", false);
 
         // 魔法球
         SPEED_BOOST = BUILDER

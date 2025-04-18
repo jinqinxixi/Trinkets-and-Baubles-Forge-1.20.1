@@ -36,7 +36,7 @@ public class EnderQueensCrownEvents {
     @SubscribeEvent
     public static void onEndermanTarget(LivingChangeTargetEvent event) {
         if (event.getEntity() instanceof EnderMan enderman &&
-                event.getNewTarget() instanceof Player player && // 在 1.20.1 中使用 getNewTarget
+                event.getNewTarget() instanceof Player player &&
                 EnderQueensCrownItem.isEquipped(player) &&
                 enderman.getPersistentData().getBoolean(EnderQueensCrownItem.FRIENDLY_ENDERMAN_TAG)) {
 

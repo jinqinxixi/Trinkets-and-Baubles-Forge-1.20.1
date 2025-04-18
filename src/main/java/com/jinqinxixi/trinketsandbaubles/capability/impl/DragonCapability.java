@@ -5,6 +5,7 @@ import com.jinqinxixi.trinketsandbaubles.capability.base.AbstractRaceCapability;
 import com.jinqinxixi.trinketsandbaubles.capability.mana.ManaData;
 import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import com.jinqinxixi.trinketsandbaubles.config.RaceAttributesConfig;
+import com.jinqinxixi.trinketsandbaubles.items.baubles.DragonsRingItem;
 import com.jinqinxixi.trinketsandbaubles.modeffects.ModEffects;
 import com.jinqinxixi.trinketsandbaubles.network.handler.NetworkHandler;
 import com.jinqinxixi.trinketsandbaubles.network.message.DragonRingMessage.SyncAllDragonStatesMessage;
@@ -17,14 +18,85 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.network.PacketDistributor;
+import top.theillusivec4.curios.api.CuriosApi;
+import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
+
+import java.util.Optional;
 
 public class DragonCapability extends AbstractRaceCapability implements IDragonCapability {
+    // 魔力系统接口
+    private interface ManaSystem {
+        float getMana(Player player, ItemStack stack);
+        void consumeMana(Player player, float amount, ItemStack stack);
+        boolean hasMana(Player player, float amount, ItemStack stack);
+    }
+    public float getCurrentMana() {
+        return getManaSystem().getMana(player, BotaniaManaSystem.DUMMY_RECEIVER);
+    }
+    private class IronsSpellsManaSystem implements ManaSystem {
+        @Override
+        public float getMana(Player player, ItemStack stack) {
+            return io.redspace.ironsspellbooks.api.magic.MagicData.getPlayerMagicData(player).getMana();
+        }
+
+        @Override
+        public void consumeMana(Player player, float amount, ItemStack stack) {
+            io.redspace.ironsspellbooks.api.magic.MagicData.getPlayerMagicData(player).addMana(-amount);
+        }
+
+        @Override
+        public boolean hasMana(Player player, float amount, ItemStack stack) {
+            return getMana(player, stack) >= amount;
+        }
+    }
+
+
+    private class InternalManaSystem implements ManaSystem {
+        @Override
+        public float getMana(Player player, ItemStack stack) {
+            return ManaData.getMana(player);
+        }
+
+        @Override
+        public void consumeMana(Player player, float amount, ItemStack stack) {
+            ManaData.consumeMana(player, amount);
+        }
+
+        @Override
+        public boolean hasMana(Player player, float amount, ItemStack stack) {
+            return ManaData.hasMana(player, amount);
+        }
+    }
+
+    private class BotaniaManaSystem implements ManaSystem {
+        private static final ItemStack DUMMY_RECEIVER = new ItemStack(net.minecraft.world.item.Items.STICK); // 创建一个虚拟接收者
+
+        @Override
+        public float getMana(Player player, ItemStack stack) {
+            var handler = vazkii.botania.api.mana.ManaItemHandler.instance();
+            return handler.requestMana(DUMMY_RECEIVER, player, Integer.MAX_VALUE, false);
+        }
+
+        @Override
+        public void consumeMana(Player player, float amount, ItemStack stack) {
+            var handler = vazkii.botania.api.mana.ManaItemHandler.instance();
+            handler.requestMana(DUMMY_RECEIVER, player, (int)amount, true);
+        }
+
+        @Override
+        public boolean hasMana(Player player, float amount, ItemStack stack) {
+            var handler = vazkii.botania.api.mana.ManaItemHandler.instance();
+            return handler.requestMana(DUMMY_RECEIVER, player, (int)amount, false) >= amount;
+        }
+    }
+
     private boolean flightEnabled = true;
     private boolean nightVisionEnabled = false;
     private boolean dragonBreathActive = false;
@@ -32,6 +104,29 @@ public class DragonCapability extends AbstractRaceCapability implements IDragonC
     public DragonCapability(Player player) {
         super(player);
         this.scaleFactor = RaceAttributesConfig.DRAGON.DRAGON_SCALE_FACTOR.get().floatValue();
+    }
+
+    private ManaSystem getManaSystem() {
+        if (shouldUseIronsSpellsMana()) {
+            return new IronsSpellsManaSystem();
+        }
+        if (shouldUseBotaniaMana()) {
+            return new BotaniaManaSystem();
+        }
+        return new InternalManaSystem();
+    }
+
+    private boolean shouldUseBotaniaMana() {
+        return net.minecraftforge.fml.ModList.get().isLoaded("botania") && ModConfig.USE_BOTANIA_MANA.get();
+    }
+
+    private boolean shouldUseIronsSpellsMana() {
+        try {
+            Class.forName("io.redspace.ironsspellbooks.api.magic.MagicData");
+            return ModConfig.USE_IRONS_SPELLS_MANA.get();
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
     }
 
     @Override
@@ -94,26 +189,45 @@ public class DragonCapability extends AbstractRaceCapability implements IDragonC
                 false
         ));
 
-
-
         // 处理飞行魔力消耗
         if (flightEnabled && !player.isCreative() && !player.isSpectator() && player.getAbilities().flying) {
-            if (tickCounter % RaceAttributesConfig.DRAGON.DRAGON_MANA_CHECK_INTERVAL.get() == 0) {
-                float manaCost = RaceAttributesConfig.DRAGON.DRAGON_FLIGHT_MANA_COST.get().floatValue();
-                if (ManaData.hasMana(player, manaCost)) {
-                    ManaData.consumeMana(player, manaCost);
-                } else {
-                    player.getAbilities().flying = false;
-                    player.getAbilities().mayfly = false;
-                    player.onUpdateAbilities();
+            float manaCost = RaceAttributesConfig.DRAGON.DRAGON_FLIGHT_MANA_COST.get().floatValue();
+            ManaSystem manaSystem = getManaSystem();
 
-                    if (player instanceof ServerPlayer serverPlayer) {
-                        serverPlayer.displayClientMessage(
-                                Component.translatable("message.trinketsandbaubles.dragon.no_mana")
-                                        .withStyle(ChatFormatting.RED),
-                                true
-                        );
+            // 根据魔力系统类型使用不同的消耗逻辑
+            boolean hasSufficientMana = false;
+            if (manaSystem instanceof BotaniaManaSystem) {
+                // 植物魔法使用间隔检查
+                if (tickCounter % RaceAttributesConfig.DRAGON.DRAGON_MANA_CHECK_INTERVAL.get() == 0) {
+                    if (manaSystem.hasMana(player, manaCost, BotaniaManaSystem.DUMMY_RECEIVER)) {
+                        manaSystem.consumeMana(player, manaCost, BotaniaManaSystem.DUMMY_RECEIVER);
+                        hasSufficientMana = true;
                     }
+                } else {
+                    // 在间隔期间也要检查是否有足够的魔力
+                    hasSufficientMana = manaSystem.hasMana(player, manaCost, BotaniaManaSystem.DUMMY_RECEIVER);
+                }
+            } else {
+                // 其他魔力系统每tick检查
+                float tickCost = manaCost / 20f;
+                if (manaSystem.hasMana(player, tickCost, BotaniaManaSystem.DUMMY_RECEIVER)) {
+                    manaSystem.consumeMana(player, tickCost, BotaniaManaSystem.DUMMY_RECEIVER);
+                    hasSufficientMana = true;
+                }
+            }
+
+            // 如果没有足够的魔力，禁用飞行并显示消息
+            if (!hasSufficientMana) {
+                player.getAbilities().flying = false;
+                player.getAbilities().mayfly = false;
+                player.onUpdateAbilities();
+
+                if (player instanceof ServerPlayer serverPlayer) {
+                    serverPlayer.displayClientMessage(
+                            Component.translatable("message.trinketsandbaubles.dragon.no_mana")
+                                    .withStyle(ChatFormatting.RED),
+                            true
+                    );
                 }
             }
         }
@@ -164,42 +278,16 @@ public class DragonCapability extends AbstractRaceCapability implements IDragonC
         }
     }
 
-    public void handleGameModeChange(GameType newGameMode) {
-        // 只处理生存模式玩家的飞行速度
-        if (!player.isCreative() && !player.isSpectator()) {
-            if (newGameMode != GameType.SURVIVAL) {
-                player.getAbilities().setFlyingSpeed(0.05f);
-            } else {
-                player.getAbilities().setFlyingSpeed(0.05f * RaceAttributesConfig.DRAGON.DRAGON_FLIGHT_SPEED.get().floatValue());
-            }
-            player.onUpdateAbilities();
-        }
-    }
-
-    private void disableDragonFlight() {
-        // 确保只禁用龙族赋予的飞行能力，不干扰其他模组的飞行，且只对非创造模式玩家生效
-        if (!player.isCreative() && (player.getAbilities().mayfly || player.getAbilities().flying)) {
-            player.getAbilities().mayfly = false; // 禁用飞行权限
-            player.getAbilities().flying = false; // 禁用飞行状态
-            player.getAbilities().setFlyingSpeed(0.05f); // 恢复默认飞行速度
-            player.onUpdateAbilities(); // 更新玩家能力状态
-        }
-    }
-
     @Override
     public void toggleFlight() {
-        if (!isActive) return; // 如果能力未激活，直接返回
+        if (!isActive) return;
 
-        // 切换飞行状态
         flightEnabled = !flightEnabled;
 
-        if (!flightEnabled) {
-            // 如果禁用飞行，只对非创造模式玩家执行飞行关闭逻辑
-            if (!player.isCreative()) {
-                disableDragonFlight();
-            }
+        if (!flightEnabled && !player.isCreative()) {
+            disableDragonFlight();
         }
-        // 发送飞行状态反馈消息
+
         if (player instanceof ServerPlayer serverPlayer) {
             Component message = Component.translatable(
                     flightEnabled ?
@@ -209,7 +297,6 @@ public class DragonCapability extends AbstractRaceCapability implements IDragonC
             serverPlayer.displayClientMessage(message, true);
         }
 
-        // 确保同步状态
         sync();
     }
 
@@ -217,7 +304,6 @@ public class DragonCapability extends AbstractRaceCapability implements IDragonC
     public void toggleNightVision() {
         nightVisionEnabled = !nightVisionEnabled;
 
-        // 发送反馈消息
         if (player instanceof ServerPlayer serverPlayer) {
             Component message = Component.translatable(
                     nightVisionEnabled ?
@@ -236,8 +322,19 @@ public class DragonCapability extends AbstractRaceCapability implements IDragonC
 
     @Override
     public void toggleDragonBreath() {
+        // 如果正在开启龙息，检查魔力是否足够
+        if (!dragonBreathActive) {
+            ManaSystem manaSystem = getManaSystem();
+            float manaCost = RaceAttributesConfig.DRAGON.DRAGON_BREATH_MANA_COST.get().floatValue();
+
+            if (!manaSystem.hasMana(player, manaCost, BotaniaManaSystem.DUMMY_RECEIVER)) {
+                return;  // 如果魔力不足，直接返回不切换状态
+            }
+        }
+
+        // 只有在有足够魔力的情况下才切换状态
         dragonBreathActive = !dragonBreathActive;
-        // 同步到客户端
+
         if (player instanceof ServerPlayer serverPlayer) {
             NetworkHandler.INSTANCE.send(
                     PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> serverPlayer),
@@ -245,17 +342,16 @@ public class DragonCapability extends AbstractRaceCapability implements IDragonC
             );
         }
     }
+
     @Override
     public void setActive(boolean active) {
         if (this.isActive == active) return;
 
         if (!active) {
-            // 先移除夜视效果
             if (nightVisionEnabled) {
                 player.removeEffect(MobEffects.NIGHT_VISION);
             }
 
-            // 同步到客户端
             if (player instanceof ServerPlayer serverPlayer) {
                 NetworkHandler.INSTANCE.send(
                         PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> serverPlayer),
@@ -263,10 +359,8 @@ public class DragonCapability extends AbstractRaceCapability implements IDragonC
                 );
             }
 
-            // 调用父类的清理逻辑 - 清除属性
             super.setActive(false);
 
-            // 最后再设置状态和处理飞行能力
             this.isActive = false;
             if (!player.isCreative()) {
                 player.getAbilities().mayfly = false;
@@ -275,10 +369,8 @@ public class DragonCapability extends AbstractRaceCapability implements IDragonC
                 player.onUpdateAbilities();
             }
         } else {
-            // 激活能力时的顺序
             super.setActive(true);
             this.isActive = true;
-            // 确保飞行状态正确
             updateFlightAbility();
         }
     }
@@ -292,27 +384,6 @@ public class DragonCapability extends AbstractRaceCapability implements IDragonC
             );
         }
         super.sync();
-    }
-
-    @Override
-    public void updateFlightAbility() {
-        // 检查能力是否激活
-        if (!isActive) {
-            return; // 如果未激活，直接跳过
-        }
-
-        // 如果飞行功能被禁用，跳过我们的飞行逻辑
-        if (!flightEnabled) {
-            return; // 如果飞行被禁用，直接跳过
-        }
-
-        // 只有生存模式玩家才需要设置我们自定义的飞行速度
-        if (!player.isCreative() && !player.isSpectator()) {
-            // 启用飞行能力，只设置我们自己的飞行速度
-            player.getAbilities().mayfly = true;
-            player.getAbilities().setFlyingSpeed(0.05f * RaceAttributesConfig.DRAGON.DRAGON_FLIGHT_SPEED.get().floatValue());
-            player.onUpdateAbilities();
-        }
     }
 
     @Override
@@ -331,11 +402,6 @@ public class DragonCapability extends AbstractRaceCapability implements IDragonC
     }
 
     @Override
-    public void onBreakBlock(BlockPos pos, Block block, ServerLevel level) {
-        // 龙族不需要特殊的破坏方块逻辑
-    }
-
-    @Override
     protected void saveAdditional(CompoundTag tag) {
         super.saveAdditional(tag);
         tag.putBoolean("FlightEnabled", flightEnabled);
@@ -349,5 +415,43 @@ public class DragonCapability extends AbstractRaceCapability implements IDragonC
         flightEnabled = tag.contains("FlightEnabled") ? tag.getBoolean("FlightEnabled") : true;
         nightVisionEnabled = tag.contains("NightVisionEnabled") ? tag.getBoolean("NightVisionEnabled") : false;
         dragonBreathActive = tag.contains("DragonBreathActive") ? tag.getBoolean("DragonBreathActive") : false;
+    }
+
+    private void disableDragonFlight() {
+        if (!player.isCreative() && (player.getAbilities().mayfly || player.getAbilities().flying)) {
+            player.getAbilities().mayfly = false;
+            player.getAbilities().flying = false;
+            player.getAbilities().setFlyingSpeed(0.05f);
+            player.onUpdateAbilities();
+        }
+    }
+
+    public void handleGameModeChange(GameType newGameMode) {
+        if (!player.isCreative() && !player.isSpectator()) {
+            if (newGameMode != GameType.SURVIVAL) {
+                player.getAbilities().setFlyingSpeed(0.05f);
+            } else {
+                player.getAbilities().setFlyingSpeed(0.05f * RaceAttributesConfig.DRAGON.DRAGON_FLIGHT_SPEED.get().floatValue());
+            }
+            player.onUpdateAbilities();
+        }
+    }
+
+    @Override
+    public void updateFlightAbility() {
+        if (!isActive || !flightEnabled) {
+            return;
+        }
+
+        if (!player.isCreative() && !player.isSpectator()) {
+            player.getAbilities().mayfly = true;
+            player.getAbilities().setFlyingSpeed(0.05f * RaceAttributesConfig.DRAGON.DRAGON_FLIGHT_SPEED.get().floatValue());
+            player.onUpdateAbilities();
+        }
+    }
+
+    @Override
+    public void onBreakBlock(BlockPos pos, Block block, ServerLevel level) {
+        // 龙族不需要特殊的破坏方块逻辑
     }
 }

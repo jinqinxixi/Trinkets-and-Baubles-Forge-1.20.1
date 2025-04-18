@@ -54,9 +54,8 @@ public abstract class AbstractRaceCapability implements IBaseRaceCapability {
     }
     @Override
     public void applyAttributes() {
-        if (!isActive) return;
+            if (!isActive) return;
 
-        // 在这里调用registerAttributeValues
         if (attributeValues.isEmpty()) {
             registerAttributeValues();
         }
@@ -235,6 +234,7 @@ public abstract class AbstractRaceCapability implements IBaseRaceCapability {
     public void forceRemoveAllModifiers() {
         removeAttributes();
     }
+
     protected void saveAdditional(CompoundTag tag) {
         // 只保存当前容器的魔力值
         tag.putFloat("CurrentMaxMana", ManaData.getMaxMana(player));

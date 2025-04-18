@@ -1,5 +1,6 @@
 package com.jinqinxixi.trinketsandbaubles.items.baubles;
 
+import com.jinqinxixi.trinketsandbaubles.client.keybind.KeyBindings;
 import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import com.jinqinxixi.trinketsandbaubles.capability.mana.ManaData;
 import com.jinqinxixi.trinketsandbaubles.modifier.ModifiableBaubleItem;
@@ -24,15 +25,114 @@ import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fml.ModList;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.SlotContext;
 import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
+import vazkii.botania.api.mana.ManaItemHandler;
 
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.UUID;
 
 public class ArcingOrbItem extends ModifiableBaubleItem  {
+    private interface ManaSystem {
+        float getMana(Player player, ItemStack stack);
+        void consumeMana(Player player, float amount, ItemStack stack);
+        boolean hasMana(Player player, float amount, ItemStack stack);
+    }
+
+    private class IronsSpellsManaSystem implements ManaSystem {
+        @Override
+        public float getMana(Player player, ItemStack stack) {
+            return io.redspace.ironsspellbooks.api.magic.MagicData.getPlayerMagicData(player).getMana();
+        }
+
+        @Override
+        public void consumeMana(Player player, float amount, ItemStack stack) {
+            io.redspace.ironsspellbooks.api.magic.MagicData.getPlayerMagicData(player).addMana(-amount);
+        }
+
+        @Override
+        public boolean hasMana(Player player, float amount, ItemStack stack) {
+            return getMana(player, stack) >= amount;
+        }
+    }
+
+    private class InternalManaSystem implements ManaSystem {
+        @Override
+        public float getMana(Player player, ItemStack stack) {
+            return ManaData.getMana(player);
+        }
+
+        @Override
+        public void consumeMana(Player player, float amount, ItemStack stack) {
+            ManaData.consumeMana(player, amount);
+        }
+
+        @Override
+        public boolean hasMana(Player player, float amount, ItemStack stack) {
+            return ManaData.hasMana(player, amount);
+        }
+    }
+
+    private class BotaniaManaSystem implements ManaSystem {
+        @Override
+        public float getMana(Player player, ItemStack stack) {
+            return ManaItemHandler.instance().requestMana(
+                    stack,
+                    player,
+                    Integer.MAX_VALUE,
+                    false  // 不实际消耗
+            );
+        }
+
+        @Override
+        public void consumeMana(Player player, float amount, ItemStack stack) {
+            ManaItemHandler.instance().requestManaExactForTool(
+                    stack,
+                    player,
+                    (int)amount,
+                    true  // 实际消耗
+            );
+        }
+
+        @Override
+        public boolean hasMana(Player player, float amount, ItemStack stack) {
+            return ManaItemHandler.instance().requestManaExact(
+                    stack,
+                    player,
+                    (int)amount,
+                    false  // 只检查，不消耗
+            );
+        }
+    }
+
+    private ManaSystem getManaSystem() {
+        if (shouldUseIronsSpellsMana()) {
+            return new IronsSpellsManaSystem();
+        }
+        if (shouldUseBotaniaMana()) {
+            return new BotaniaManaSystem();
+        }
+        return new InternalManaSystem();
+    }
+
+    private boolean shouldUseBotaniaMana() {
+        return ModList.get().isLoaded("botania") && ModConfig.USE_BOTANIA_MANA.get();
+    }
+
+    private boolean shouldUseIronsSpellsMana() {
+        try {
+            Class.forName("io.redspace.ironsspellbooks.api.magic.MagicData");
+            return ModConfig.USE_IRONS_SPELLS_MANA.get();
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
+
     // NBT 标签常量
     private static final String DASH_COOLDOWN_TAG = "DashCooldown";
     private static final String ARCING_ORB_CHARGING_TAG = "ArcingOrbCharging";
@@ -131,9 +231,10 @@ public class ArcingOrbItem extends ModifiableBaubleItem  {
             return;
         }
 
-        if (ManaData.hasMana(player, ModConfig.DASH_MANA_COST.get().floatValue())) {
+        ManaSystem manaSystem = getManaSystem();
+        if (manaSystem.hasMana(player, ModConfig.DASH_MANA_COST.get().floatValue(), stack)) {
             performDash(player);
-            ManaData.consumeMana(player, ModConfig.DASH_MANA_COST.get().floatValue());
+            manaSystem.consumeMana(player, ModConfig.DASH_MANA_COST.get().floatValue(), stack);
             stack.getOrCreateTag().putFloat(DASH_COOLDOWN_TAG, ModConfig.DASH_COOLDOWN.get().floatValue());
             playDashEffects(player);
         }
@@ -293,7 +394,19 @@ public class ArcingOrbItem extends ModifiableBaubleItem  {
         if (stack.getOrCreateTag().getBoolean(ARCING_ORB_CHARGING_TAG)) {
             float chargeAmount = stack.getOrCreateTag().getFloat(CHARGE_AMOUNT_TAG);
             if (chargeAmount >= ModConfig.MIN_CHARGE.get().floatValue()) {
-                releaseEnergyBeam(player, chargeAmount);
+                ManaSystem manaSystem = getManaSystem();
+                float manaCost = chargeAmount; // 使用充能量作为魔力消耗
+
+                // 只有植物魔法系统需要在释放时检查魔力
+                if (manaSystem instanceof BotaniaManaSystem) {
+                    if (manaSystem.hasMana(player, manaCost, stack)) {
+                        manaSystem.consumeMana(player, manaCost, stack);
+                        releaseEnergyBeam(player, chargeAmount);
+                    }
+                } else {
+                    // 其他魔力系统直接释放，因为已经在充能过程中消耗了魔力
+                    releaseEnergyBeam(player, chargeAmount);
+                }
             }
             stack.getOrCreateTag().putBoolean(ARCING_ORB_CHARGING_TAG, false);
             stack.getOrCreateTag().putFloat(CHARGE_AMOUNT_TAG, 0.0f);
@@ -304,21 +417,39 @@ public class ArcingOrbItem extends ModifiableBaubleItem  {
         if (stack.getOrCreateTag().getBoolean(ARCING_ORB_CHARGING_TAG)) {
             float currentCharge = stack.getOrCreateTag().getFloat(CHARGE_AMOUNT_TAG);
 
-            if (currentCharge < ModConfig.MAX_CHARGE.get() &&
-                    ManaData.hasMana(player, ModConfig.CHARGE_RATE.get().floatValue())) {
-                ManaData.consumeMana(player, ModConfig.CHARGE_RATE.get().floatValue());
-                float chargeToAdd = Math.min(
-                        ModConfig.CHARGE_RATE.get().floatValue(),
-                        ModConfig.MAX_CHARGE.get().floatValue() - currentCharge
-                );
-                stack.getOrCreateTag().putFloat(CHARGE_AMOUNT_TAG, currentCharge + chargeToAdd);
+            if (currentCharge < ModConfig.MAX_CHARGE.get()) {
+                ManaSystem manaSystem = getManaSystem();
+                float chargeRate = ModConfig.CHARGE_RATE.get().floatValue();
+
+                if (manaSystem instanceof BotaniaManaSystem) {
+                    // 植物魔法只检查魔力是否足够，不消耗
+                    if (manaSystem.hasMana(player, chargeRate, stack)) {
+                        float chargeToAdd = Math.min(
+                                chargeRate,
+                                ModConfig.MAX_CHARGE.get().floatValue() - currentCharge
+                        );
+                        stack.getOrCreateTag().putFloat(CHARGE_AMOUNT_TAG, currentCharge + chargeToAdd);
+                    }
+                } else {
+                    // 其他魔力系统在充能时就消耗魔力
+                    if (manaSystem.hasMana(player, chargeRate, stack)) {
+                        manaSystem.consumeMana(player, chargeRate, stack);
+                        float chargeToAdd = Math.min(
+                                chargeRate,
+                                ModConfig.MAX_CHARGE.get().floatValue() - currentCharge
+                        );
+                        stack.getOrCreateTag().putFloat(CHARGE_AMOUNT_TAG, currentCharge + chargeToAdd);
+                    }
+                }
             }
 
-            // 无论魔力是否足够，都继续显示魔法阵效果
+            // 显示魔法阵效果
             if (player.level() instanceof ServerLevel serverLevel) {
                 Vec3 lookVec = player.getLookAngle();
                 float playerScale = player.getScale();
-                Vec3 circleCenter = player.getEyePosition().add(lookVec.multiply(2 * playerScale, 2 * playerScale, 2 * playerScale));
+                Vec3 circleCenter = player.getEyePosition().add(
+                        lookVec.multiply(2 * playerScale, 2 * playerScale, 2 * playerScale)
+                );
                 createMagicCircle(serverLevel, circleCenter, currentCharge, player);
             }
         }
@@ -1165,7 +1296,7 @@ public class ArcingOrbItem extends ModifiableBaubleItem  {
             }
         }
     }
-
+    @OnlyIn(Dist.CLIENT)
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level,
                                 List<Component> tooltip, TooltipFlag flag) {
@@ -1175,13 +1306,17 @@ public class ArcingOrbItem extends ModifiableBaubleItem  {
                 .withStyle(ChatFormatting.BLUE));
 
         // 伤害系数信息
+        String chargeKeyName = KeyBindings.CHARGE_KEY.getKey().getDisplayName().getString();
         tooltip.add(Component.translatable("item.trinketsandbaubles.arcing_orb.damage_multiplier",
-                        String.format("%.3f", ModConfig.DAMAGE_MULTIPLIER.get()))
+                        String.format("%.3f", ModConfig.DAMAGE_MULTIPLIER.get()),
+                        chargeKeyName)  // 传入当前设置的键位名称
                 .withStyle(ChatFormatting.GOLD));
 
         // 闪避消耗魔力信息
+        String dashKeyName = KeyBindings.DASH_KEY.getKey().getDisplayName().getString();
         tooltip.add(Component.translatable("item.trinketsandbaubles.arcing_orb.dash_cost",
-                        String.format("%.1f", ModConfig.DASH_MANA_COST.get()))
+                        String.format("%.1f", ModConfig.DASH_MANA_COST.get()),
+                        dashKeyName)    // 传入当前设置的键位名称
                 .withStyle(ChatFormatting.AQUA));
 
         // 充能状态信息
@@ -1191,6 +1326,24 @@ public class ArcingOrbItem extends ModifiableBaubleItem  {
                             String.format("%.1f", chargeAmount))
                     .withStyle(ChatFormatting.YELLOW));
         }
+
+        // 只在启用了植物魔法时显示魔力系统信息
+        if (ModConfig.USE_BOTANIA_MANA.get() && net.minecraftforge.fml.ModList.get().isLoaded("botania")) {
+            tooltip.add(Component.translatable("item.trinketsandbaubles.arcing_orb.mana_system", "Botania")
+                    .withStyle(ChatFormatting.GOLD));
+
+            if (level != null && level.isClientSide) {
+                Player player = net.minecraft.client.Minecraft.getInstance().player;
+                if (player != null) {
+                    float currentMana = getManaSystem().getMana(player, stack);
+                    tooltip.add(Component.translatable(
+                            "item.trinketsandbaubles.arcing_orb.current_mana",
+                            (int)currentMana
+                    ).withStyle(ChatFormatting.AQUA));
+                }
+            }
+        }
+
         super.appendHoverText(stack, level, tooltip, flag);
     }
 

@@ -6,6 +6,7 @@ import com.jinqinxixi.trinketsandbaubles.capability.registry.ModCapabilities;
 import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import com.jinqinxixi.trinketsandbaubles.capability.mana.ManaData;
 import com.jinqinxixi.trinketsandbaubles.config.RaceAttributesConfig;
+import com.jinqinxixi.trinketsandbaubles.items.baubles.DragonsRingItem;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -14,14 +15,107 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import top.theillusivec4.curios.api.CuriosApi;
+import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Mod.EventBusSubscriber(modid = TrinketsandBaublesMod.MOD_ID)
 public class DragonCapabilityServerHandler {
+    // 魔力系统接口
+    private interface ManaSystem {
+        float getMana(Player player, ItemStack stack);
+        void consumeMana(Player player, float amount, ItemStack stack);
+        boolean hasMana(Player player, float amount, ItemStack stack);
+    }
+
+    private static class BotaniaManaSystem implements ManaSystem {
+        public static final ItemStack DUMMY_RECEIVER = new ItemStack(net.minecraft.world.item.Items.STICK);// 创建一个虚拟接收者
+
+        @Override
+        public float getMana(Player player, ItemStack stack) {
+            var handler = vazkii.botania.api.mana.ManaItemHandler.instance();
+            return handler.requestMana(DUMMY_RECEIVER, player, Integer.MAX_VALUE, false);
+        }
+
+        @Override
+        public void consumeMana(Player player, float amount, ItemStack stack) {
+            var handler = vazkii.botania.api.mana.ManaItemHandler.instance();
+            handler.requestMana(DUMMY_RECEIVER, player, (int)amount, true);
+        }
+
+        @Override
+        public boolean hasMana(Player player, float amount, ItemStack stack) {
+            var handler = vazkii.botania.api.mana.ManaItemHandler.instance();
+            return handler.requestMana(DUMMY_RECEIVER, player, (int)amount, false) >= amount;
+        }
+    }
+
+    private static class IronsSpellsManaSystem implements ManaSystem {
+        @Override
+        public float getMana(Player player, ItemStack stack) {
+            return io.redspace.ironsspellbooks.api.magic.MagicData.getPlayerMagicData(player).getMana();
+        }
+
+        @Override
+        public void consumeMana(Player player, float amount, ItemStack stack) {
+            io.redspace.ironsspellbooks.api.magic.MagicData.getPlayerMagicData(player).addMana(-amount);
+        }
+
+        @Override
+        public boolean hasMana(Player player, float amount, ItemStack stack) {
+            return getMana(player, stack) >= amount;
+        }
+    }
+
+    private static class InternalManaSystem implements ManaSystem {
+        @Override
+        public float getMana(Player player, ItemStack stack) {
+            return ManaData.getMana(player);
+        }
+
+        @Override
+        public void consumeMana(Player player, float amount, ItemStack stack) {
+            ManaData.consumeMana(player, amount);
+        }
+
+        @Override
+        public boolean hasMana(Player player, float amount, ItemStack stack) {
+            return ManaData.hasMana(player, amount);
+        }
+    }
+
+    private static ManaSystem getManaSystem() {
+        if (shouldUseIronsSpellsMana()) {
+            return new IronsSpellsManaSystem();
+        }
+        if (shouldUseBotaniaMana()) {
+            return new BotaniaManaSystem();
+        }
+        return new InternalManaSystem();
+    }
+
+    private static boolean shouldUseBotaniaMana() {
+        return net.minecraftforge.fml.ModList.get().isLoaded("botania") && ModConfig.USE_BOTANIA_MANA.get();
+    }
+
+    private static boolean shouldUseIronsSpellsMana() {
+        try {
+            Class.forName("io.redspace.ironsspellbooks.api.magic.MagicData");
+            return ModConfig.USE_IRONS_SPELLS_MANA.get();
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
+
 
     @SubscribeEvent
     public static void onServerTick(TickEvent.ServerTickEvent event) {
@@ -31,27 +125,39 @@ public class DragonCapabilityServerHandler {
             for (ServerPlayer player : level.players()) {
                 player.getCapability(ModCapabilities.DRAGON_CAPABILITY).ifPresent(cap -> {
                     if (cap instanceof DragonCapability dragonCap) {
-                        if (!dragonCap.isActive()) {
+                        if (!dragonCap.isActive() || !dragonCap.isDragonBreathActive()) {
                             return;
                         }
 
-                        boolean isBreathing = dragonCap.isDragonBreathActive();
-                        if (!isBreathing) {
-                            return;
-                        }
+                        ManaSystem manaSystem = getManaSystem();
+                        float manaCost = RaceAttributesConfig.DRAGON.DRAGON_BREATH_MANA_COST.get().floatValue();
 
-                        // 魔力消耗检查
-                        float tickCost = RaceAttributesConfig.DRAGON.DRAGON_BREATH_MANA_COST.get().floatValue() / 20f;
-                        if (ManaData.getMana(player) >= tickCost) {
-                            // 消耗魔力
-                            ManaData.consumeMana(player, tickCost);
-
-                            // 处理伤害效果
-                            handleDragonBreathDamage(player, level);
+                        boolean hasSufficientMana = false;
+                        if (manaSystem instanceof BotaniaManaSystem) {
+                            // 植物魔法使用间隔检查
+                            if (player.tickCount % RaceAttributesConfig.DRAGON.DRAGON_MANA_CHECK_INTERVAL.get() == 0) {
+                                if (manaSystem.hasMana(player, manaCost, BotaniaManaSystem.DUMMY_RECEIVER)) {
+                                    manaSystem.consumeMana(player, manaCost, BotaniaManaSystem.DUMMY_RECEIVER);
+                                    hasSufficientMana = true;
+                                }
+                            } else {
+                                hasSufficientMana = true; // 非检查间隔时允许继续
+                            }
                         } else {
-                            // 魔力不足，停止龙息
-                            dragonCap.toggleDragonBreath();
+                            // 其他魔力系统每tick检查
+                            float tickCost = manaCost / 20f;
+                            if (manaSystem.hasMana(player, tickCost, BotaniaManaSystem.DUMMY_RECEIVER)) {
+                                manaSystem.consumeMana(player, tickCost, BotaniaManaSystem.DUMMY_RECEIVER);
+                                hasSufficientMana = true;
+                            }
                         }
+
+                        if (!hasSufficientMana) {
+                            dragonCap.toggleDragonBreath();
+                            return;
+                        }
+
+                        handleDragonBreathDamage(player, level);
                     }
                 });
             }
@@ -112,7 +218,6 @@ public class DragonCapabilityServerHandler {
                     return;
                 }
 
-                // 处理粒子效果
                 if (!player.level().isClientSide && player.level() instanceof ServerLevel serverLevel) {
                     spawnDragonBreathParticles(player, serverLevel);
                 }

@@ -1,5 +1,6 @@
 package com.jinqinxixi.trinketsandbaubles.items.baubles;
 
+import com.jinqinxixi.trinketsandbaubles.client.keybind.KeyBindings;
 import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import com.jinqinxixi.trinketsandbaubles.capability.mana.ManaData;
 import com.jinqinxixi.trinketsandbaubles.modifier.ModifiableBaubleItem;
@@ -25,8 +26,12 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fml.ModList;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.SlotContext;
+import vazkii.botania.api.mana.ManaItemHandler;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -36,8 +41,6 @@ public class PolarizedStoneItem extends ModifiableBaubleItem {
     // NBT 标签常量
     public static final String DEFLECTION_MODE_TAG = "DeflectionMode";
     public static final String ATTRACTION_MODE_TAG = "AttractionMode";
-
-
 
     private static final Modifier[] MODIFIERS = Modifier.values();
 
@@ -50,18 +53,91 @@ public class PolarizedStoneItem extends ModifiableBaubleItem {
         super(properties);
     }
 
+    // ==================== 魔力系统集成 ====================
+
+    private interface ManaSystem {
+        float getMana(Player player, ItemStack stack);
+        void consumeMana(Player player, float amount, ItemStack stack);
+    }
+
+    private class IronsSpellsManaSystem implements ManaSystem {
+        @Override
+        public float getMana(Player player, ItemStack stack) {
+            return io.redspace.ironsspellbooks.api.magic.MagicData.getPlayerMagicData(player).getMana();
+        }
+
+        @Override
+        public void consumeMana(Player player, float amount, ItemStack stack) {
+            io.redspace.ironsspellbooks.api.magic.MagicData.getPlayerMagicData(player).addMana(-amount);
+        }
+    }
+
+    private class BotaniaManaSystem implements ManaSystem {
+        @Override
+        public float getMana(Player player, ItemStack stack) {
+            return ManaItemHandler.instance().requestMana(
+                    stack,
+                    player,
+                    Integer.MAX_VALUE,
+                    false  // 不实际消耗
+            );
+        }
+
+        @Override
+        public void consumeMana(Player player, float amount, ItemStack stack) {
+            ManaItemHandler.instance().requestManaExactForTool(
+                    stack,
+                    player,
+                    (int)amount,
+                    true  // 实际消耗
+            );
+        }
+    }
+
+    private class InternalManaSystem implements ManaSystem {
+        @Override
+        public float getMana(Player player, ItemStack stack) {
+            return ManaData.getMana(player);
+        }
+
+        @Override
+        public void consumeMana(Player player, float amount, ItemStack stack) {
+            ManaData.consumeMana(player, amount);
+        }
+    }
+
+    // 判断使用哪个魔力系统
+    private ManaSystem getManaSystem() {
+        if (shouldUseIronsSpellsMana()) {
+            return new IronsSpellsManaSystem();
+        }
+        if (shouldUseBotaniaMana()) {
+            return new BotaniaManaSystem();
+        }
+        return new InternalManaSystem();
+    }
+
+    private boolean shouldUseIronsSpellsMana() {
+        return ModList.get().isLoaded("irons_spellbooks") && ModConfig.USE_IRONS_SPELLS_MANA.get();
+    }
+
+    private boolean shouldUseBotaniaMana() {
+        return ModList.get().isLoaded("botania") && ModConfig.USE_BOTANIA_MANA.get();
+    }
+
+    // ==================== 物品功能 ====================
+    @OnlyIn(Dist.CLIENT)
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level,
-                                List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
         boolean deflectionActive = isDeflectionActive(stack);
         boolean attractionActive = isAttractionActive(stack);
 
-        // 添加魔力消耗信息
+        // 魔力消耗信息
         tooltip.add(Component.translatable("item.trinketsandbaubles.polarized_stone.mana_cost",
                         ModConfig.POLARIZED_STONE_DEFLECTION_MANA_COST.get())
                 .withStyle(ChatFormatting.BLUE));
 
-        // 添加模式状态信息
+        // 模式状态
         tooltip.add(Component.translatable("item.trinketsandbaubles.polarized_stone.deflection_status",
                         Component.translatable("item.trinketsandbaubles.polarized_stone." + (deflectionActive ? "enabled" : "disabled")))
                 .withStyle(deflectionActive ? ChatFormatting.GREEN : ChatFormatting.GRAY));
@@ -70,31 +146,36 @@ public class PolarizedStoneItem extends ModifiableBaubleItem {
                         Component.translatable("item.trinketsandbaubles.polarized_stone." + (attractionActive ? "enabled" : "disabled")))
                 .withStyle(attractionActive ? ChatFormatting.GREEN : ChatFormatting.GRAY));
 
-        // 添加使用说明
-        tooltip.add(Component.translatable("item.trinketsandbaubles.polarized_stone.usage.attraction")
+        // 使用说明
+        String attractionKeyName = KeyBindings.ATTRACTION_TOGGLE_KEY.getKey().getDisplayName().getString();
+        String deflectionKeyName = KeyBindings.DEFLECTION_TOGGLE_KEY.getKey().getDisplayName().getString();
+
+        tooltip.add(Component.translatable("item.trinketsandbaubles.polarized_stone.usage.attraction",
+                        attractionKeyName)
                 .withStyle(ChatFormatting.YELLOW));
-        tooltip.add(Component.translatable("item.trinketsandbaubles.polarized_stone.usage.deflection")
+
+        tooltip.add(Component.translatable("item.trinketsandbaubles.polarized_stone.usage.deflection",
+                        deflectionKeyName)
                 .withStyle(ChatFormatting.YELLOW));
+
+        // 当前魔力系统信息
+        if (ModConfig.USE_BOTANIA_MANA.get() && ModList.get().isLoaded("botania")) {
+            tooltip.add(Component.translatable("item.trinketsandbaubles.polarized_stone.mana_system", "Botania")
+                    .withStyle(ChatFormatting.GOLD));
+
+            if (level != null && level.isClientSide) {
+                Player player = net.minecraft.client.Minecraft.getInstance().player;
+                if (player != null) {
+                    float currentMana = getCurrentMana(player, stack);
+                    tooltip.add(Component.translatable(
+                            "item.trinketsandbaubles.polarized_stone.current_mana",
+                            (int) currentMana
+                    ).withStyle(ChatFormatting.AQUA));
+                }
+            }
+        }
+
         super.appendHoverText(stack, level, tooltip, flag);
-    }
-
-    // 检查是否装备
-    private static boolean isEquipped(LivingEntity entity) {
-        return CuriosApi.getCuriosInventory(entity).resolve()
-                .flatMap(curios -> curios.findFirstCurio(stack ->
-                        stack.getItem() instanceof PolarizedStoneItem))
-                .isPresent();
-    }
-
-    @Override
-    public void onEquip(SlotContext slotContext, ItemStack prevStack, ItemStack stack) {
-        super.onEquip(slotContext, prevStack, stack);
-    }
-
-    @Override
-    public void onUnequip(SlotContext slotContext, ItemStack newStack, ItemStack stack) {
-
-        super.onUnequip(slotContext, newStack, stack);
     }
 
     @Override
@@ -102,30 +183,36 @@ public class PolarizedStoneItem extends ModifiableBaubleItem {
         ItemStack stack = player.getItemInHand(hand);
         if (!level.isClientSide) {
             if (player.isShiftKeyDown()) {
-                boolean newDeflection = !stack.getOrCreateTag().getBoolean(DEFLECTION_MODE_TAG);
-                stack.getOrCreateTag().putBoolean(DEFLECTION_MODE_TAG, newDeflection);
-                player.displayClientMessage(Component.translatable(
-                        "item.trinketsandbaubles.polarized_stone.deflection_" + (newDeflection ? "on" : "off")), true);
+                toggleDeflectionMode(stack, player);
             } else {
-                boolean newAttraction = !stack.getOrCreateTag().getBoolean(ATTRACTION_MODE_TAG);
-                stack.getOrCreateTag().putBoolean(ATTRACTION_MODE_TAG, newAttraction);
-                player.displayClientMessage(Component.translatable(
-                        "item.trinketsandbaubles.polarized_stone.attraction_" + (newAttraction ? "on" : "off")), true);
+                toggleAttractionMode(stack, player);
             }
         }
         return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
+    }
+
+    private void toggleDeflectionMode(ItemStack stack, Player player) {
+        boolean newDeflection = !stack.getOrCreateTag().getBoolean(DEFLECTION_MODE_TAG);
+        stack.getOrCreateTag().putBoolean(DEFLECTION_MODE_TAG, newDeflection);
+        player.displayClientMessage(Component.translatable(
+                "item.trinketsandbaubles.polarized_stone.deflection_" + (newDeflection ? "on" : "off")), true);
+    }
+
+    private void toggleAttractionMode(ItemStack stack, Player player) {
+        boolean newAttraction = !stack.getOrCreateTag().getBoolean(ATTRACTION_MODE_TAG);
+        stack.getOrCreateTag().putBoolean(ATTRACTION_MODE_TAG, newAttraction);
+        player.displayClientMessage(Component.translatable(
+                "item.trinketsandbaubles.polarized_stone.attraction_" + (newAttraction ? "on" : "off")), true);
     }
 
     @Override
     public void inventoryTick(ItemStack stack, Level level, Entity entity, int slot, boolean selected) {
         super.inventoryTick(stack, level, entity, slot, selected);
         if (!level.isClientSide && entity instanceof Player player) {
-            // 检查物品是否在饰品栏中
             boolean isInCurio = CuriosApi.getCuriosInventory(player).resolve()
                     .flatMap(curios -> curios.findFirstCurio(item -> item == stack))
                     .isPresent();
 
-            // 只有当物品不在饰品栏时才在这里处理
             if (!isInCurio) {
                 updateManaConsumption(player, stack);
             }
@@ -144,7 +231,6 @@ public class PolarizedStoneItem extends ModifiableBaubleItem {
         super.curioTick(slotContext, stack);
         if (slotContext.entity() instanceof Player player) {
             if (!player.level().isClientSide) {
-                // 在饰品栏中时在这里处理
                 updateManaConsumption(player, stack);
                 if (isAttractionActive(stack)) {
                     attractItemsAndXP(player.level(), player);
@@ -157,34 +243,33 @@ public class PolarizedStoneItem extends ModifiableBaubleItem {
     }
 
     private boolean isAttractionActive(ItemStack stack) {
-        return stack.hasTag() && stack.getTag().getBoolean(ATTRACTION_MODE_TAG);
+        return stack.getOrCreateTag().getBoolean(ATTRACTION_MODE_TAG);
     }
 
     private boolean isDeflectionActive(ItemStack stack) {
-        return stack.hasTag() && stack.getTag().getBoolean(DEFLECTION_MODE_TAG);
+        return stack.getOrCreateTag().getBoolean(DEFLECTION_MODE_TAG);
     }
 
     private void updateManaConsumption(Player player, ItemStack stack) {
-        boolean isDeflecting = stack.hasTag() && stack.getTag().getBoolean(DEFLECTION_MODE_TAG);
-        if (!isDeflecting) {
-            return;
-        }
+        if (!isDeflectionActive(stack)) return;
 
-        // 每20tick（1秒）检查一次魔力消耗
         if (player.tickCount % 20 == 0) {
             float manaCost = ModConfig.POLARIZED_STONE_DEFLECTION_MANA_COST.get().floatValue();
-            float currentMana = ManaData.getMana(player);
+            ManaSystem manaSystem = getManaSystem();
+            float currentMana = manaSystem.getMana(player, stack);
 
             if (currentMana < manaCost) {
-                // 魔力不足，关闭防御模式
                 stack.getOrCreateTag().putBoolean(DEFLECTION_MODE_TAG, false);
                 player.displayClientMessage(Component.translatable(
                         "item.trinketsandbaubles.polarized_stone.no_mana"), true);
             } else {
-                // 消耗魔力（每秒消耗一次完整的配置值）
-                ManaData.consumeMana(player, manaCost);
+                manaSystem.consumeMana(player, manaCost, stack);
             }
         }
+    }
+
+    private float getCurrentMana(Player player, ItemStack stack) {
+        return getManaSystem().getMana(player, stack);
     }
 
     private void attractItemsAndXP(Level level, Player player) {
@@ -196,46 +281,30 @@ public class PolarizedStoneItem extends ModifiableBaubleItem {
         );
 
         // 吸引物品
-        List<ItemEntity> items = level.getEntitiesOfClass(ItemEntity.class, attractionBox);
-        for (ItemEntity item : items) {
+        level.getEntitiesOfClass(ItemEntity.class, attractionBox).forEach(item -> {
             if (!item.isRemoved() && item.getOwner() != player) {
                 Vec3 motion = playerPos.subtract(item.position()).normalize()
                         .scale(ModConfig.POLARIZED_STONE_ATTRACTION_SPEED.get());
                 item.setDeltaMovement(motion);
                 item.hasImpulse = true;
             }
-        }
+        });
 
         // 吸引经验球
-        List<ExperienceOrb> xpOrbs = level.getEntitiesOfClass(ExperienceOrb.class, attractionBox);
-        for (ExperienceOrb orb : xpOrbs) {
+        level.getEntitiesOfClass(ExperienceOrb.class, attractionBox).forEach(orb -> {
             if (!orb.isRemoved()) {
                 Vec3 motion = playerPos.subtract(orb.position()).normalize()
                         .scale(ModConfig.POLARIZED_STONE_ATTRACTION_SPEED.get());
                 orb.setDeltaMovement(motion);
                 orb.hasImpulse = true;
             }
-        }
-    }
-
-    private boolean isHostileProjectile(Projectile projectile, Player player) {
-        if (projectile instanceof AbstractArrow) {
-            AbstractArrow arrow = (AbstractArrow) projectile;
-            return arrow.getOwner() != player;
-        }
-        if (projectile instanceof Fireball) {
-            Fireball fireball = (Fireball) projectile;
-            return fireball.getOwner() != player;
-        }
-        return false;
+        });
     }
 
     private void deflectProjectiles(Level level, Player player) {
         AABB deflectionBox = player.getBoundingBox()
                 .inflate(ModConfig.POLARIZED_STONE_DEFLECTION_RANGE.get());
-        List<Projectile> projectiles = level.getEntitiesOfClass(Projectile.class, deflectionBox);
-
-        for (Projectile projectile : projectiles) {
+        level.getEntitiesOfClass(Projectile.class, deflectionBox).forEach(projectile -> {
             if (!projectile.isRemoved() && isHostileProjectile(projectile, player)) {
                 Vec3 position = projectile.position();
                 Vec3 motion = projectile.getDeltaMovement();
@@ -249,7 +318,17 @@ public class PolarizedStoneItem extends ModifiableBaubleItem {
                         1.0F,
                         1.0F + (float) level.getRandom().nextDouble() * 0.2F);
             }
+        });
+    }
+
+    private boolean isHostileProjectile(Projectile projectile, Player player) {
+        if (projectile instanceof AbstractArrow arrow) {
+            return arrow.getOwner() != player;
         }
+        if (projectile instanceof Fireball fireball) {
+            return fireball.getOwner() != player;
+        }
+        return false;
     }
 
     private void convertProjectileToParticles(Level level, Vec3 projectilePos, Vec3 motion) {
@@ -260,12 +339,8 @@ public class PolarizedStoneItem extends ModifiableBaubleItem {
             double expandSpeed = 0.6;
 
             Vec3 normal = motion.normalize();
-            Vec3 basis;
-            if (Math.abs(normal.y) < 0.999) {
-                basis = new Vec3(0, 1, 0).cross(normal).normalize();
-            } else {
-                basis = new Vec3(1, 0, 0).cross(normal).normalize();
-            }
+            Vec3 basis = Math.abs(normal.y) < 0.999 ? new Vec3(0, 1, 0).cross(normal).normalize()
+                    : new Vec3(1, 0, 0).cross(normal).normalize();
             Vec3 perpendicular = normal.cross(basis);
 
             for (int ring = 0; ring < rings; ring++) {
@@ -274,22 +349,14 @@ public class PolarizedStoneItem extends ModifiableBaubleItem {
 
                 for (int i = 0; i < particlesPerRing; i++) {
                     double angle = (i * 2 * Math.PI) / particlesPerRing;
-
                     Vec3 offset = basis.scale(Math.cos(angle) * radius)
                             .add(perpendicular.scale(Math.sin(angle) * radius));
 
-                    ParticleOptions particle;
-                    switch (ring % 3) {
-                        case 0:
-                            particle = ParticleTypes.END_ROD;
-                            break;
-                        case 1:
-                            particle = ParticleTypes.SOUL_FIRE_FLAME;
-                            break;
-                        default:
-                            particle = ParticleTypes.DRAGON_BREATH;
-                            break;
-                    }
+                    ParticleOptions particle = switch (ring % 3) {
+                        case 0 -> ParticleTypes.END_ROD;
+                        case 1 -> ParticleTypes.SOUL_FIRE_FLAME;
+                        default -> ParticleTypes.DRAGON_BREATH;
+                    };
 
                     Vec3 particleVelocity = offset.normalize().scale(expandSpeed * (1 - progress));
 
@@ -316,12 +383,12 @@ public class PolarizedStoneItem extends ModifiableBaubleItem {
             );
         }
     }
+
     @Override
     public int getEnchantmentValue() {
-        return 0; // 附魔等级为0
+        return 0;
     }
 
-    // 禁止任何形式的附魔（包括铁砧）
     @Override
     public boolean isEnchantable(ItemStack stack) {
         return false;

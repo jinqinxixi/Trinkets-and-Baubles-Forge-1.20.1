@@ -140,14 +140,6 @@ public class TrinketsandBaublesMod
         }
     }
 
-
-
-
-
-
-
-
-
     @Mod.EventBusSubscriber(modid = MOD_ID)
     public static class ModEvents {
         @SubscribeEvent
