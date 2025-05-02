@@ -13,10 +13,27 @@ import top.theillusivec4.curios.api.SlotContext;
 import javax.annotation.Nullable;
 import java.util.List;
 
+@Mod.EventBusSubscriber
 public class DragonsEyeFireItem extends DragonsEyeItem {
 
     public DragonsEyeFireItem(Properties properties) {
         super(properties);
+    }
+
+    @SubscribeEvent
+    public static void onLivingHurt(LivingAttackEvent event) {   //LivingAttackEvent fires before LivingHurtEvent, I think you will prefer this.
+        if (event.getEntity() instanceof Player player && !player.level().isClientSide) {
+            // 检查是否是龙火伤害
+            if (event.getSource().is(ResourceKey.create(Registries.DAMAGE_TYPE,
+                    new ResourceLocation("iceandfire", "dragon_fire")))) {
+
+                // 检查玩家是否有这个效果
+                if (CuriosApi.getCuriosHelper().findEquippedCurio(ModItem.DRAGON_FIRE_EYES.get(), player).isPresent()) {
+                    // 取消伤害
+                    event.setCanceled(true);
+                }
+            }
+        }
     }
 
     @Override
