@@ -35,14 +35,16 @@ public class ManaCrystalPotion extends Item {
     @Override
     public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity livingEntity) {
         if (!level.isClientSide && livingEntity instanceof Player player) {
-
-            // 直接修改全局魔力值
+            // 获取当前最大魔力值
             float currentMaxMana = ManaData.getMaxMana(player);
             float increaseAmount = ModConfig.MANA_CRYSTAL_MAX_INCREASE.get().floatValue();
             float newMaxMana = currentMaxMana + increaseAmount;
 
+            // 设置新的最大魔力值
             ManaData.setMaxMana(player, newMaxMana);
 
+            // 恢复当前魔力值到最大值
+            ManaData.restorePlayerMana(player);
 
             // 消耗物品
             if (!player.getAbilities().instabuild) {

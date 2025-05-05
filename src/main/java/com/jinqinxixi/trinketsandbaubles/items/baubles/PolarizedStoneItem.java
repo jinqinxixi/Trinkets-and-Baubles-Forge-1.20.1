@@ -68,7 +68,9 @@ public class PolarizedStoneItem extends ModifiableBaubleItem {
 
         @Override
         public void consumeMana(Player player, float amount, ItemStack stack) {
-            io.redspace.ironsspellbooks.api.magic.MagicData.getPlayerMagicData(player).addMana(-amount);
+            // 确保消耗量向上取整且最小为1
+            float actualAmount = Math.max(1.0f, (float) Math.ceil(amount));
+            io.redspace.ironsspellbooks.api.magic.MagicData.getPlayerMagicData(player).addMana(-actualAmount);
         }
     }
 
@@ -257,6 +259,11 @@ public class PolarizedStoneItem extends ModifiableBaubleItem {
             float manaCost = ModConfig.POLARIZED_STONE_DEFLECTION_MANA_COST.get().floatValue();
             ManaSystem manaSystem = getManaSystem();
             float currentMana = manaSystem.getMana(player, stack);
+
+            // 如果是铁魔法系统，确保消耗量向上取整且最小为1
+            if (manaSystem instanceof IronsSpellsManaSystem) {
+                manaCost = Math.max(1.0f, (float) Math.ceil(manaCost));
+            }
 
             if (currentMana < manaCost) {
                 stack.getOrCreateTag().putBoolean(DEFLECTION_MODE_TAG, false);

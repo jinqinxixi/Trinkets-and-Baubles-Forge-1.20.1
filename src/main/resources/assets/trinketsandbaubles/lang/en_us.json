@@ -301,6 +301,9 @@
   "item.trinketsandbaubles.arcing_orb.current_mana": "Current Mana: %d",
 
   "item.trinketsandbaubles.dragons_ring.mana_system": "Mana System: %s",
-  "item.trinketsandbaubles.dragons_ring.current_mana": "Current Mana: %d"
+  "item.trinketsandbaubles.dragons_ring.current_mana": "Current Mana: %d",
+
+  "message.trinketsandbaubles.dragon.no_mana_breath": "Not enough mana to use dragon breath!"
+
 
 }

@@ -31,8 +31,8 @@ import java.util.UUID;
 
 @Mod.EventBusSubscriber
 public abstract class ModifiableBaubleItem extends Item implements ICurioItem {
-    protected static final String MODIFIER_TAG = "BaubleModifier";
-    protected static final String INITIALIZED_TAG = "IsInitialized";
+    public static final String MODIFIER_TAG = "BaubleModifier";
+    public static final String INITIALIZED_TAG = "IsInitialized";
     protected static final Random RANDOM = new Random();
     private static final Logger LOGGER = LoggerFactory.getLogger(ModifiableBaubleItem.class);
 
@@ -196,7 +196,7 @@ public abstract class ModifiableBaubleItem extends Item implements ICurioItem {
         return (attribute == Attributes.ATTACK_SPEED ||
                 attribute == Attributes.MOVEMENT_SPEED ||
                 attribute == Attributes.ATTACK_DAMAGE)
-                ? AttributeModifier.Operation.MULTIPLY_TOTAL
+                ? AttributeModifier.Operation.MULTIPLY_BASE
                 : AttributeModifier.Operation.ADDITION;
     }
 
@@ -232,6 +232,7 @@ public abstract class ModifiableBaubleItem extends Item implements ICurioItem {
 
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+
         if (!ModConfig.isModifierEnabled()) {
             return;
         }

@@ -17,21 +17,21 @@ public class FireResistanceEffect extends MobEffect {
         super(MobEffectCategory.BENEFICIAL, 0xFF4400);
     }
 
-    @SubscribeEvent
-    public static void onLivingHurt(LivingHurtEvent event) {
-        if (event.getEntity() instanceof Player player && !player.level().isClientSide) {
-            // 检查是否是龙火伤害
-            if (event.getSource().is(ResourceKey.create(Registries.DAMAGE_TYPE,
-                    new ResourceLocation("iceandfire", "dragon_fire")))) {
-
-                // 检查玩家是否有这个效果
-                if (player.hasEffect(ModEffects.FIRE_RESISTANCE.get())) {
-                    // 取消伤害
-                    event.setCanceled(true);
-                }
-            }
-        }
-    }
+//    @SubscribeEvent
+//    public static void onLivingHurt(LivingHurtEvent event) {
+//        if (event.getEntity() instanceof Player player && !player.level().isClientSide) {
+//            // 检查是否是龙火伤害
+//            if (event.getSource().is(ResourceKey.create(Registries.DAMAGE_TYPE,
+//                    new ResourceLocation("iceandfire", "dragon_fire")))) {
+//
+//                // 检查玩家是否有这个效果
+//                if (player.hasEffect(ModEffects.FIRE_RESISTANCE.get())) {
+//                    // 取消伤害
+//                    event.setCanceled(true);
+//                }
+//            }
+//        }
+//    }
 
     @Override
     public boolean isDurationEffectTick(int duration, int amplifier) {

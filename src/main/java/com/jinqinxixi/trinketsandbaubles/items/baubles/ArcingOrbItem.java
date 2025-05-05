@@ -52,12 +52,16 @@ public class ArcingOrbItem extends ModifiableBaubleItem  {
 
         @Override
         public void consumeMana(Player player, float amount, ItemStack stack) {
-            io.redspace.ironsspellbooks.api.magic.MagicData.getPlayerMagicData(player).addMana(-amount);
+            // 确保消耗量向上取整且最小为1
+            float actualAmount = Math.max(1.0f, (float) Math.ceil(amount));
+            io.redspace.ironsspellbooks.api.magic.MagicData.getPlayerMagicData(player).addMana(-actualAmount);
         }
 
         @Override
         public boolean hasMana(Player player, float amount, ItemStack stack) {
-            return getMana(player, stack) >= amount;
+            // 确保检查量向上取整且最小为1
+            float actualAmount = Math.max(1.0f, (float) Math.ceil(amount));
+            return getMana(player, stack) >= actualAmount;
         }
     }
 
@@ -232,9 +236,16 @@ public class ArcingOrbItem extends ModifiableBaubleItem  {
         }
 
         ManaSystem manaSystem = getManaSystem();
-        if (manaSystem.hasMana(player, ModConfig.DASH_MANA_COST.get().floatValue(), stack)) {
+        float manaCost = ModConfig.DASH_MANA_COST.get().floatValue();
+
+        // 如果是铁魔法系统，确保消耗量向上取整且最小为1
+        if (manaSystem instanceof IronsSpellsManaSystem) {
+            manaCost = Math.max(1.0f, (float) Math.ceil(manaCost));
+        }
+
+        if (manaSystem.hasMana(player, manaCost, stack)) {
             performDash(player);
-            manaSystem.consumeMana(player, ModConfig.DASH_MANA_COST.get().floatValue(), stack);
+            manaSystem.consumeMana(player, manaCost, stack);
             stack.getOrCreateTag().putFloat(DASH_COOLDOWN_TAG, ModConfig.DASH_COOLDOWN.get().floatValue());
             playDashEffects(player);
         }
@@ -432,6 +443,10 @@ public class ArcingOrbItem extends ModifiableBaubleItem  {
                     }
                 } else {
                     // 其他魔力系统在充能时就消耗魔力
+                    // 如果是铁魔法系统，确保消耗量向上取整且最小为1
+                    if (manaSystem instanceof IronsSpellsManaSystem) {
+                        chargeRate = Math.max(1.0f, (float) Math.ceil(chargeRate));
+                    }
                     if (manaSystem.hasMana(player, chargeRate, stack)) {
                         manaSystem.consumeMana(player, chargeRate, stack);
                         float chargeToAdd = Math.min(

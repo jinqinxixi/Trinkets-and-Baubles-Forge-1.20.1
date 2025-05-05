@@ -38,6 +38,9 @@ public class RestorationSerumPotion extends Item {
             // 使用通用的清除方法移除所有种族能力
             AbstractRaceCapability.clearAllRaceAbilities(player);
 
+            // 清除保存的种族数据
+            player.getPersistentData().remove("SavedRace");
+
             // 添加药水效果
             player.addEffect(new MobEffectInstance(
                     MobEffects.POISON, 400, 1, false, false, false));

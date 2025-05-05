@@ -1,15 +1,13 @@
 package com.jinqinxixi.trinketsandbaubles.recast;
 
-
-
 import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.event.AnvilUpdateEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-
-
+import com.jinqinxixi.trinketsandbaubles.modifier.ModifiableBaubleItem;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,7 +15,6 @@ import java.util.Map;
 public class AnvilRecastHandler {
     private static final Map<Item, RecastRecipe> RECIPES = new HashMap<>();
 
-    // 通过方法获取当前配置值
     private static int getExpCost() {
         return ModConfig.getAnvilRecastExpCost();
     }
@@ -32,13 +29,34 @@ public class AnvilRecastHandler {
 
     @SubscribeEvent
     public static void onAnvilUpdate(AnvilUpdateEvent event) {
+        // 首先检查修饰系统是否启用
+        if (!ModConfig.isModifierEnabled()) {
+            return; // 如果修饰系统未启用，直接返回
+        }
+
         ItemStack left = event.getLeft();
         ItemStack right = event.getRight();
 
         if (!left.isEmpty() && !right.isEmpty()) {
             RecastRecipe recipe = RECIPES.get(left.getItem());
             if (recipe != null && recipe.matches(right)) {
-                event.setOutput(recipe.getResult(left));
+                // 创建输出物品的副本
+                ItemStack output = left.copy();
+
+                // 重置修饰符标签
+                CompoundTag tag = output.getTag();
+                if (tag != null) {
+                    // 移除已初始化标记
+                    if (tag.contains(ModifiableBaubleItem.INITIALIZED_TAG)) {
+                        tag.remove(ModifiableBaubleItem.INITIALIZED_TAG);
+                    }
+                    // 移除修饰符数据
+                    if (tag.contains(ModifiableBaubleItem.MODIFIER_TAG)) {
+                        tag.remove(ModifiableBaubleItem.MODIFIER_TAG);
+                    }
+                }
+
+                event.setOutput(output);
                 event.setCost(getExpCost());
                 event.setMaterialCost(getMaterialCost());
             }
@@ -57,11 +75,5 @@ public class AnvilRecastHandler {
         public boolean matches(ItemStack rightStack) {
             return rightStack.getItem() == tokenItem;
         }
-
-        public ItemStack getResult(ItemStack input) {
-            return new ItemStack(resultItem, input.getCount());
-        }
-
     }
-
 }

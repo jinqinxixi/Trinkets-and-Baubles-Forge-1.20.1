@@ -1,5 +1,6 @@
 package com.jinqinxixi.trinketsandbaubles.network.message.DragonRingMessage;
 
+import com.jinqinxixi.trinketsandbaubles.capability.impl.DragonCapability;
 import com.jinqinxixi.trinketsandbaubles.capability.registry.ModCapabilities;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
@@ -35,8 +36,9 @@ public class SyncDragonBreathMessage {
                 Entity entity = minecraft.level.getEntity(message.playerId);
                 if (entity instanceof Player player) {
                     player.getCapability(ModCapabilities.DRAGON_CAPABILITY).ifPresent(cap -> {
-                        if (message.isActive != cap.isDragonBreathActive()) {
-                            cap.toggleDragonBreath();
+                        if (cap instanceof DragonCapability dragonCap) {
+                            // 直接设置字段值
+                            dragonCap.dragonBreathActive = message.isActive;
                         }
                     });
                 }

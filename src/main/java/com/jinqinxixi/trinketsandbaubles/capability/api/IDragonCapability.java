@@ -14,12 +14,6 @@ public interface IDragonCapability extends IBaseRaceCapability {
     void toggleFlight();
 
     /**
-     * 切换夜视能力的开启状态
-     * 当关闭时会立即移除夜视效果
-     */
-    void toggleNightVision();
-
-    /**
      * 切换龙息能力的开启状态
      * 状态改变时会同步到所有客户端
      */
@@ -37,12 +31,8 @@ public interface IDragonCapability extends IBaseRaceCapability {
     boolean isFlightEnabled();
 
     /**
-     * @return 夜视能力是否启用
-     */
-    boolean isNightVisionEnabled();
-
-    /**
      * @return 龙息能力是否激活
      */
     boolean isDragonBreathActive();
+
 }

@@ -7,6 +7,7 @@ import com.jinqinxixi.trinketsandbaubles.config.RaceAttributesConfig;
 import com.jinqinxixi.trinketsandbaubles.modifier.ModifiableBaubleItem;
 import com.jinqinxixi.trinketsandbaubles.util.RaceRingUtil;
 import net.minecraft.ChatFormatting;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
@@ -119,7 +120,27 @@ public class DwarvesRingItem extends ModifiableBaubleItem {
         if (!isEquipped(entity) && entity instanceof ServerPlayer serverPlayer) {
             serverPlayer.getCapability(ModCapabilities.DWARVES_CAPABILITY).ifPresent(cap -> {
                 if (cap.isActive()) {
-                    cap.setActive(false);
+                    // 检查是否是因为死亡而取消装备
+                    if (serverPlayer.isDeadOrDying()) {
+                        // 如果是死亡，直接停用能力，不恢复任何保存的种族
+                        cap.setActive(false);
+                        // 清除保存的死亡状态数据
+                        CompoundTag playerData = serverPlayer.getPersistentData();
+                        if (playerData.contains("DwarvesCapability")) {
+                            playerData.remove("DwarvesCapability");
+                        }
+                    } else {
+                        // 如果不是死亡，正常处理取消装备
+                        cap.setActive(false);
+                        // 在停用能力后，从保存的数据中恢复之前的种族能力
+                        CompoundTag playerData = serverPlayer.getPersistentData();
+                        String savedRace = playerData.getString("SavedRace");
+
+                        // 如果有保存的种族，激活它
+                        if (!savedRace.isEmpty()) {
+                            RaceRingUtil.activateRace(serverPlayer, savedRace);
+                        }
+                    }
                 }
             });
         }

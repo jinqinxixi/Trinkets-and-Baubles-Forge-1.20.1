@@ -5,6 +5,7 @@ import com.jinqinxixi.trinketsandbaubles.TrinketsandBaublesMod;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
 
@@ -15,7 +16,8 @@ import java.util.*;
 public class ModConfig {
     public static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
     public static final ForgeConfigSpec SPEC;
-
+    private static final String BAUBLES_REFORKED_MOD_ID = "baublesreforked";
+    private static boolean baublesReforkedLoaded;
     //修饰系统
     public static final ForgeConfigSpec.BooleanValue MODIFIER_ENABLED;
 
@@ -154,11 +156,17 @@ public class ModConfig {
 
 
     static {
+        baublesReforkedLoaded = ModList.get().isLoaded(BAUBLES_REFORKED_MOD_ID);
+
         BUILDER.comment("修饰系统配置").push("modifiers");
 
         MODIFIER_ENABLED = BUILDER
-                .comment("是否启用饰品修饰系统")
-                .define("enabled", true);
+                .comment(
+                        "是否启用饰品修饰系统",
+                        "注意：如果检测到安装了 Baubles Reforked 模组，此选项默认为 false",
+                        "你仍然可以手动启用此选项，但不建议同时使用两个模组的修饰符系统"
+                )
+                .define("enabled", !baublesReforkedLoaded);
 
         BUILDER.pop();
 

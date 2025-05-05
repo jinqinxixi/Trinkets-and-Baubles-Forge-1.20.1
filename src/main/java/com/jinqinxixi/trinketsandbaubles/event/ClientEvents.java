@@ -17,7 +17,7 @@ public class ClientEvents {
         event.register(KeyBindings.DEFLECTION_TOGGLE_KEY);
         event.register(KeyBindings.MANA_HUD_POSITION_KEY );
         event.register(KeyBindings.TOGGLE_DRAGONS_EYE_MODE);
-        event.register(KeyBindings.TOGGLE_DRAGONS_EYE_VISION);
+      //  event.register(KeyBindings.TOGGLE_DRAGONS_EYE_VISION);
         event.register(KeyBindings.DRAGON_NIGHT_VISION_KEY);
         event.register(KeyBindings.DRAGON_BREATH_KEY);
         event.register(KeyBindings.DRAGON_FLIGHT_TOGGLE_KEY);

@@ -9,10 +9,12 @@ import com.jinqinxixi.trinketsandbaubles.capability.mana.ManaData;
 import com.jinqinxixi.trinketsandbaubles.capability.registry.ModCapabilities;
 import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import com.jinqinxixi.trinketsandbaubles.config.RaceAttributesConfig;
+import com.jinqinxixi.trinketsandbaubles.util.RaceRingUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.damagesource.DamageSource;
@@ -35,6 +37,8 @@ import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+
+import static com.jinqinxixi.trinketsandbaubles.util.RaceHelper.SAVED_RACE_KEY;
 
 @Mod.EventBusSubscriber(modid = TrinketsandBaublesMod.MOD_ID)
 public class RaceEventHandler {
@@ -146,24 +150,31 @@ public class RaceEventHandler {
     }
 
     private static void handleDeathClone(Player original, Player player) {
-        // 在恢复种族能力之前先清除所有能力
+        // 先保存之前存储的种族
+        String savedRace = original.getPersistentData().getString(SAVED_RACE_KEY);
+
+        // 清除所有能力
         AbstractRaceCapability.clearAllRaceAbilities(player);
 
         // 添加延迟处理
         net.minecraft.server.MinecraftServer server = player.level().getServer();
-        if (server != null) {
+        if (server != null && player instanceof ServerPlayer serverPlayer) {  // 确保是服务器端玩家
             server.tell(new TickTask(server.getTickCount() + 1, () -> {
-
                 // 恢复种族能力
-                restoreRaceCapabilityFromKey(original, player, DWARVES_CAP_KEY, ModCapabilities.DWARVES_CAPABILITY);
-                restoreRaceCapabilityFromKey(original, player, ELVES_CAP_KEY, ModCapabilities.ELVES_CAPABILITY);
-                restoreRaceCapabilityFromKey(original, player, FAELES_CAP_KEY, ModCapabilities.FAELES_CAPABILITY);
-                restoreRaceCapabilityFromKey(original, player, TITAN_CAP_KEY, ModCapabilities.TITAN_CAPABILITY);
-                restoreRaceCapabilityFromKey(original, player, GOBLINS_CAP_KEY, ModCapabilities.GOBLINS_CAPABILITY);
-                restoreRaceCapabilityFromKey(original, player, FAIRY_CAP_KEY, ModCapabilities.FAIRY_CAPABILITY);
-                restoreRaceCapabilityFromKey(original, player, DRAGON_CAP_KEY, ModCapabilities.DRAGON_CAPABILITY);
+                restoreRaceCapabilityFromKey(original, serverPlayer, DWARVES_CAP_KEY, ModCapabilities.DWARVES_CAPABILITY);
+                restoreRaceCapabilityFromKey(original, serverPlayer, ELVES_CAP_KEY, ModCapabilities.ELVES_CAPABILITY);
+                restoreRaceCapabilityFromKey(original, serverPlayer, FAELES_CAP_KEY, ModCapabilities.FAELES_CAPABILITY);
+                restoreRaceCapabilityFromKey(original, serverPlayer, TITAN_CAP_KEY, ModCapabilities.TITAN_CAPABILITY);
+                restoreRaceCapabilityFromKey(original, serverPlayer, GOBLINS_CAP_KEY, ModCapabilities.GOBLINS_CAPABILITY);
+                restoreRaceCapabilityFromKey(original, serverPlayer, FAIRY_CAP_KEY, ModCapabilities.FAIRY_CAPABILITY);
+                restoreRaceCapabilityFromKey(original, serverPlayer, DRAGON_CAP_KEY, ModCapabilities.DRAGON_CAPABILITY);
 
-                restorePlayerMana(player);
+                // 如果有之前保存的种族，且现在没有任何种族戒指，则恢复该种族
+                if (!savedRace.isEmpty() && !RaceRingUtil.hasAnyRaceRing(serverPlayer)) {
+                    RaceRingUtil.activateRace(serverPlayer, savedRace);
+                }
+
+                restorePlayerMana(serverPlayer);
             }));
         }
     }

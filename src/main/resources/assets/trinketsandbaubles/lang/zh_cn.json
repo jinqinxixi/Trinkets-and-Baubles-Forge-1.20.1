@@ -309,6 +309,7 @@
   "item.trinketsandbaubles.arcing_orb.current_mana": "当前魔力：%d",
 
   "item.trinketsandbaubles.dragons_ring.mana_system": "魔力系统：%s",
-  "item.trinketsandbaubles.dragons_ring.current_mana": "当前魔力：%d"
+  "item.trinketsandbaubles.dragons_ring.current_mana": "当前魔力：%d",
 
+  "message.trinketsandbaubles.dragon.no_mana_breath": "魔力不足，无法使用龙息"
 }

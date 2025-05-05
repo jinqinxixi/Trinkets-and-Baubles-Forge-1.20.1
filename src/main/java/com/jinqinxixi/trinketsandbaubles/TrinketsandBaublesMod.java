@@ -19,6 +19,7 @@ import com.jinqinxixi.trinketsandbaubles.capability.mana.hud.ManaHudOverlay;
 import com.jinqinxixi.trinketsandbaubles.modifier.CurioAttributeEvents;
 import com.jinqinxixi.trinketsandbaubles.network.handler.NetworkHandler;
 import com.jinqinxixi.trinketsandbaubles.recast.AnvilRecastRegistry;
+import com.jinqinxixi.trinketsandbaubles.util.ScanSystem;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.logging.LogUtils;
@@ -34,6 +35,7 @@ import net.minecraftforge.client.event.RenderGuiEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -68,7 +70,7 @@ public class TrinketsandBaublesMod
         ModCreativeModeTab.register(modEventBus);
         ModBlocks.register(modEventBus);
         EFFECTS.register(modEventBus);
-
+        modEventBus.register(ModConfig.class);
         // 通用事件监听
         MinecraftForge.EVENT_BUS.register(LootTableHandler.class);
         modEventBus.addListener(this::commonSetup);
@@ -135,8 +137,7 @@ public class TrinketsandBaublesMod
 
     private void onConfigLoad(final ModConfigEvent.Loading event) {
         if (event.getConfig().getType() == net.minecraftforge.fml.config.ModConfig.Type.COMMON) {
-            DragonsEyeItem.initializeOreGroups();
-            DragonsRingItem.initializeOreGroups();
+            ScanSystem.initializeOreGroups();
         }
     }
 
@@ -221,11 +222,9 @@ public class TrinketsandBaublesMod
             ModConfig.loadLootConfig();
             AnvilRecastRegistry.registerAllRecipes();
 
-            CurioAttributeEvents.init();
+   //         CurioAttributeEvents.init();
         });
     }
-
-
 
     private void addCreative(BuildCreativeModeTabContentsEvent event)
     {
@@ -237,6 +236,26 @@ public class TrinketsandBaublesMod
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event)
         {
+        }
+    }
+    @SubscribeEvent
+    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
+        if (event.phase != TickEvent.Phase.END) return;
+
+        Player player = event.player;
+        // 获取玩家当前生命值和最大生命值
+        float currentHealth = player.getHealth();
+        float maxHealth = player.getMaxHealth();
+
+        // 如果当前生命值超过最大生命值，进行调整
+        if (currentHealth > maxHealth) {
+            player.hurt(player.damageSources().generic(), 0f);
+            player.setHealth(maxHealth);
+        }
+        // 如果属性未正确应用，强制刷新
+        else if (Math.abs(currentHealth - player.getHealth()) > 0.01f) {
+            player.hurt(player.damageSources().generic(), 0f);
+            player.setHealth(currentHealth);
         }
     }
 }

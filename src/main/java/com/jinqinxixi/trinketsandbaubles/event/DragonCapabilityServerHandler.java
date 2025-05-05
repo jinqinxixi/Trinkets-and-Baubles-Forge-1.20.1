@@ -6,7 +6,6 @@ import com.jinqinxixi.trinketsandbaubles.capability.registry.ModCapabilities;
 import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import com.jinqinxixi.trinketsandbaubles.capability.mana.ManaData;
 import com.jinqinxixi.trinketsandbaubles.config.RaceAttributesConfig;
-import com.jinqinxixi.trinketsandbaubles.items.baubles.DragonsRingItem;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -21,12 +20,6 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import top.theillusivec4.curios.api.CuriosApi;
-import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 @Mod.EventBusSubscriber(modid = TrinketsandBaublesMod.MOD_ID)
 public class DragonCapabilityServerHandler {
@@ -67,12 +60,16 @@ public class DragonCapabilityServerHandler {
 
         @Override
         public void consumeMana(Player player, float amount, ItemStack stack) {
-            io.redspace.ironsspellbooks.api.magic.MagicData.getPlayerMagicData(player).addMana(-amount);
+            // 确保最小消耗为1点魔力
+            float actualAmount = Math.max(1.0f, amount);
+            io.redspace.ironsspellbooks.api.magic.MagicData.getPlayerMagicData(player).addMana(-actualAmount);
         }
 
         @Override
         public boolean hasMana(Player player, float amount, ItemStack stack) {
-            return getMana(player, stack) >= amount;
+            // 确保最小检查为1点魔力
+            float actualAmount = Math.max(1.0f, amount);
+            return getMana(player, stack) >= actualAmount;
         }
     }
 
@@ -145,7 +142,7 @@ public class DragonCapabilityServerHandler {
                             }
                         } else {
                             // 其他魔力系统每tick检查
-                            float tickCost = manaCost / 20f;
+                            float tickCost = Math.max(1.0f, manaCost / 20f); // 确保每tick至少消耗1点魔力
                             if (manaSystem.hasMana(player, tickCost, BotaniaManaSystem.DUMMY_RECEIVER)) {
                                 manaSystem.consumeMana(player, tickCost, BotaniaManaSystem.DUMMY_RECEIVER);
                                 hasSufficientMana = true;

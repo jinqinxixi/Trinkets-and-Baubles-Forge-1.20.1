@@ -98,11 +98,6 @@ public class NetworkHandler {
                 .consumerMainThread(StopDragonBreathMessage::handle)
                 .add();
 
-        INSTANCE.messageBuilder(DragonNightVisionMessage.class, nextId())
-                .encoder(DragonNightVisionMessage::encode)
-                .decoder(DragonNightVisionMessage::decode)
-                .consumerMainThread(DragonNightVisionMessage::handle)
-                .add();
 
         INSTANCE.messageBuilder(DashKeyPressMessage.class, nextId())
                 .encoder(DashKeyPressMessage::encode)

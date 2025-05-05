@@ -1,12 +1,9 @@
 package com.jinqinxixi.trinketsandbaubles.network.message.DragonsEyeMessage;
 
-import com.jinqinxixi.trinketsandbaubles.items.baubles.DragonsEyeItem;
-import com.jinqinxixi.trinketsandbaubles.items.baubles.DragonsRingItem;
+import com.jinqinxixi.trinketsandbaubles.util.ScanSystem;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.network.NetworkEvent;
-import top.theillusivec4.curios.api.CuriosApi;
 
 import java.util.function.Supplier;
 
@@ -30,27 +27,9 @@ public class DragonsEyeToggleMessage {
         context.enqueueWork(() -> {
             ServerPlayer serverPlayer = context.getSender();
             if (serverPlayer != null) {
-                CuriosApi.getCuriosInventory(serverPlayer).ifPresent(handler -> {
-                    // 检查龙眼
-                    handler.findFirstCurio(item -> item.getItem() instanceof DragonsEyeItem)
-                            .ifPresent(slotResult -> {
-                                ItemStack stack = slotResult.stack();
-                                if (message.actionType == 0) {
-                                    DragonsEyeItem.handleModeToggle(serverPlayer, stack);
-                                } else {
-                                    DragonsEyeItem.handleVisionToggle(serverPlayer, stack);
-                                }
-                            });
-
-                    // 检查龙戒
-                    handler.findFirstCurio(item -> item.getItem() instanceof DragonsRingItem)
-                            .ifPresent(slotResult -> {
-                                ItemStack stack = slotResult.stack();
-                                if (message.actionType == 0) {
-                                    DragonsRingItem.handleModeToggle(serverPlayer, stack);
-                                }
-                            });
-                });
+                switch (message.actionType) {
+                    case 1 -> ScanSystem.toggleNightVision(serverPlayer);
+                }
             }
         });
         context.setPacketHandled(true);

@@ -191,7 +191,11 @@ public class FairyCapability extends AbstractRaceCapability implements IFairyCap
         if (!player.level().isClientSide && player instanceof ServerPlayer serverPlayer) {
             NetworkHandler.INSTANCE.send(
                     PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> serverPlayer),
-                    new SyncAllDragonStatesMessage(flightEnabled, false, false, serverPlayer.getId())
+                    new SyncAllDragonStatesMessage(
+                            flightEnabled,    // 飞行状态
+                            false,           // dragonBreathActive (对于仙女始终为 false)
+                            serverPlayer.getId()
+                    )
             );
         }
         super.sync();
