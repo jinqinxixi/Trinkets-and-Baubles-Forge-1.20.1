@@ -27,7 +27,6 @@ public class DwarfStoutPotion extends Item {
                         .nutrition(0)
                         .saturationMod(0)
                         .build())
-                .craftRemainder(Items.GLASS_BOTTLE)
                 .rarity(Rarity.UNCOMMON)
                 .fireResistant());
     }

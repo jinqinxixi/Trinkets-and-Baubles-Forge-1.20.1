@@ -7,6 +7,7 @@ import com.jinqinxixi.trinketsandbaubles.modifier.ModifiableBaubleItem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -18,6 +19,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -27,7 +29,11 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.common.Mod;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.SlotContext;
 import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
@@ -37,6 +43,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.UUID;
 
+@Mod.EventBusSubscriber(modid = "trinketsandbaubles")
 public class ArcingOrbItem extends ModifiableBaubleItem  {
     private interface ManaSystem {
         float getMana(Player player, ItemStack stack);
@@ -1292,6 +1299,12 @@ public class ArcingOrbItem extends ModifiableBaubleItem  {
     @Override
     public void inventoryTick(ItemStack stack, Level level, Entity entity, int slot, boolean selected) {
         super.inventoryTick(stack, level, entity, slot, selected);
+
+        // 如果物品在物品栏中（不是装备状态），确保充能状态被重置
+        if (!isEquipped((LivingEntity)entity) && stack.getOrCreateTag().getBoolean(ARCING_ORB_CHARGING_TAG)) {
+            resetChargingState(stack);
+        }
+
         if (!level.isClientSide && entity instanceof Player player) {
             updateCharging(stack, player);
         }
@@ -1406,5 +1419,40 @@ public class ArcingOrbItem extends ModifiableBaubleItem  {
     @Override
     public boolean isEnchantable(ItemStack stack) {
         return false;
+    }
+
+    @SubscribeEvent
+    public static void onPlayerDeath(PlayerEvent.Clone event) {
+        if (event.isWasDeath()) { // 确认是因为死亡而不是从末地回来
+            Player original = event.getOriginal();
+
+            // 检查原始玩家的饰品栏
+            CuriosApi.getCuriosInventory(original).ifPresent(handler -> {
+                handler.findFirstCurio(item -> item.getItem() instanceof ArcingOrbItem)
+                        .ifPresent(found -> {
+                            // 重置充能状态
+                            ItemStack stack = found.stack();
+                            resetChargingState(stack);
+                        });
+            });
+        }
+    }
+
+    // 在物品被捡起时重置状态
+    @SubscribeEvent
+    public static void onItemPickup(EntityItemPickupEvent event) {
+        ItemStack stack = event.getItem().getItem();
+        if (stack.getItem() instanceof ArcingOrbItem) {
+            resetChargingState(stack);
+        }
+    }
+
+    // 添加一个重置方法
+    private static void resetChargingState(ItemStack stack) {
+        if (stack.hasTag()) {
+            CompoundTag tag = stack.getTag();
+            tag.putBoolean(ARCING_ORB_CHARGING_TAG, false);
+            tag.putFloat(CHARGE_AMOUNT_TAG, 0.0f);
+        }
     }
 }
