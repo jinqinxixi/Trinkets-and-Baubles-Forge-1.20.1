@@ -47,18 +47,10 @@ public class DragonsEyeFireItem extends DragonsEyeItem {
     @Override
     public void onEquip(SlotContext slotContext, ItemStack prevStack, ItemStack stack) {
         super.onEquip(slotContext, prevStack, stack);
-        if (slotContext.entity() instanceof Player player) {
-            // 添加永久效果（-1表示持续时间无限）
-            player.addEffect(new MobEffectInstance(ModEffects.FIRE_RESISTANCE.get(), -1, 0, true, true));
-        }
     }
     @Override
     public void onUnequip(SlotContext slotContext, ItemStack newStack, ItemStack stack) {
         super.onUnequip(slotContext, newStack, stack);
-        if (slotContext.entity() instanceof Player player) {
-            // 移除效果
-            player.removeEffect(ModEffects.FIRE_RESISTANCE.get());
-        }
     }
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
