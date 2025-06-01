@@ -36,7 +36,12 @@ public class RingofEnchantedEyesItem extends ModifiableBaubleItem {
     @Override
     public void curioTick(SlotContext slotContext, ItemStack stack) {
         super.curioTick(slotContext, stack);
-        slotContext.entity().addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, Integer.MAX_VALUE, 0, false, false));
+        if (slotContext.entity() instanceof Player player) {
+            if (!player.hasEffect(MobEffects.NIGHT_VISION) ||
+                    player.getEffect(MobEffects.NIGHT_VISION).getDuration() <= 20) {
+                player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, Integer.MAX_VALUE, 0, false, false));
+            }
+        }
     }
 
     @Override
