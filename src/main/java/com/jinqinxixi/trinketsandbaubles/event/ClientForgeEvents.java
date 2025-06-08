@@ -72,7 +72,9 @@ public class ClientForgeEvents {
     private static void handleDragonCapability(InputEvent.Key event, Minecraft minecraft, Player player) {
         player.getCapability(ModCapabilities.DRAGON_CAPABILITY).ifPresent(cap -> {
             if (cap instanceof DragonCapability dragonCap && dragonCap.isActive()) {
-                // ...
+                if (KeyBindings.DRAGON_FLIGHT_TOGGLE_KEY.consumeClick()) {
+                    ClientNetworkHandler.sendDragonFlightToggle();
+                }
                 boolean isBreathing = KeyBindings.DRAGON_BREATH_KEY.isDown();
                 if (isBreathing != wasBreathing) {
                     TrinketsandBaublesMod.LOGGER.info("Dragon breath key state changed. isBreathing: {}, wasBreathing: {}",

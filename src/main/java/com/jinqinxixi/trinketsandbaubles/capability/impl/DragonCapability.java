@@ -439,9 +439,14 @@ public class DragonCapability extends AbstractRaceCapability implements IDragonC
             return;
         }
 
+        // 只对非创造/旁观模式的玩家修改飞行能力
         if (!player.isCreative() && !player.isSpectator()) {
             player.getAbilities().mayfly = true;
             player.getAbilities().setFlyingSpeed(0.05f * RaceAttributesConfig.DRAGON.DRAGON_FLIGHT_SPEED.get().floatValue());
+            player.onUpdateAbilities();
+        } else if (flightEnabled) {
+            // 创造/旁观模式下只确保可以飞行
+            player.getAbilities().mayfly = true;
             player.onUpdateAbilities();
         }
     }
