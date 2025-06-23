@@ -139,6 +139,11 @@ repositories {
         url = "https://code.redspace.io/snapshots"
     }
     maven { url 'https://maven.blamejared.com' }
+
+    maven {
+        // Shadows_of_Fire's Maven
+        url "https://maven.shadowsoffire.dev/releases"
+    }
 }
 
 dependencies {
@@ -176,6 +181,9 @@ dependencies {
 
     compileOnly fg.deobf("vazkii.botania:Botania:1.20.1-448-FORGE:api")
     runtimeOnly fg.deobf("vazkii.botania:Botania:1.20.1-448-FORGE")
+
+    runtimeOnly fg.deobf("dev.shadowsoffire:Placebo:1.20.1-8.6.3")
+    runtimeOnly fg.deobf("dev.shadowsoffire:ApothicAttributes:1.20.1-1.3.7")
 
 }
 

@@ -58,83 +58,83 @@ public class AttributeRegistry {
         // ====== 百分比修改的属性 (使用 MULTIPLY_TOTAL) ======
         // 最大生命值
         register("MAX_HEALTH", Attributes.MAX_HEALTH,
-                UUID.fromString("dc3b4b8c-a02c-4bd8-82e9-204088927d1f"),
+                UUID.fromString("fff14b8c-a02c-4bd8-82e9-204088927d1f"),
                 AttributeModifier.Operation.MULTIPLY_TOTAL, true,
                 "attribute.trinketsandbaubles.max_health");
 
         // 跟随范围
         register("FOLLOW_RANGE", Attributes.FOLLOW_RANGE,
-                UUID.fromString("1d85e342-5786-4c72-b01d-8c65525702b2"),
+                UUID.fromString("fff2e342-5786-4c72-b01d-8c65525702b2"),
                 AttributeModifier.Operation.MULTIPLY_TOTAL, true,
                 "attribute.trinketsandbaubles.follow_range");
 
         // 移动速度
         register("MOVEMENT_SPEED", Attributes.MOVEMENT_SPEED,
-                UUID.fromString("3b8f4065-5f43-4939-8e6a-a34f2d67c55d"),
+                UUID.fromString("fff34065-5f43-4939-8e6a-a34f2d67c55d"),
                 AttributeModifier.Operation.MULTIPLY_TOTAL, true,
                 "attribute.trinketsandbaubles.movement_speed");
 
         // 攻击速度
         register("ATTACK_SPEED", Attributes.ATTACK_SPEED,
-                UUID.fromString("4520f278-fb8f-4c75-9336-5c3ab7c6134a"),
+                UUID.fromString("fff4f278-fb8f-4c75-9336-5c3ab7c6134a"),
                 AttributeModifier.Operation.MULTIPLY_TOTAL, true,
                 "attribute.trinketsandbaubles.attack_speed");
 
         // 攻击伤害
         register("ATTACK_DAMAGE", Attributes.ATTACK_DAMAGE,
-                UUID.fromString("d141ef28-51c6-4b47-8a0d-6946e841c132"),
+                UUID.fromString("fff5ef28-51c6-4b47-8a0d-6946e841c132"),
                 AttributeModifier.Operation.MULTIPLY_TOTAL, true,
                 "attribute.trinketsandbaubles.attack_damage");
 
         // 游泳速度
         register("SWIM_SPEED", ForgeMod.SWIM_SPEED.get(),
-                UUID.fromString("7a925a64-d1e0-4cb9-8926-dd7848482bb4"),
+                UUID.fromString("fff65a64-d1e0-4cb9-8926-dd7848482bb4"),
                 AttributeModifier.Operation.MULTIPLY_TOTAL, true,
                 "attribute.trinketsandbaubles.swim_speed");
 
         // 飞行速度
         register("FLYING_SPEED", Attributes.FLYING_SPEED,
-                UUID.fromString("b2c5e342-5786-4c72-b01d-8c65525702b2"),
+                UUID.fromString("fff7e342-5786-4c72-b01d-8c65525702b2"),
                 AttributeModifier.Operation.MULTIPLY_TOTAL, true,
                 "attribute.trinketsandbaubles.flying_speed");
 
         // 实体重力
         register("ENTITY_GRAVITY", ForgeMod.ENTITY_GRAVITY.get(),
-                UUID.fromString("1d85e342-5786-4c72-b01d-8c65525702b2"),
+                UUID.fromString("fff8e342-5786-4c72-b01d-8c65525702b2"),
                 AttributeModifier.Operation.MULTIPLY_TOTAL, true,
                 "attribute.trinketsandbaubles.entity_gravity");
 
         // 方块交互距离
         register("BLOCK_REACH", ForgeMod.BLOCK_REACH.get(),
-                UUID.fromString("d74f3a1c-89b2-4b3e-bf8e-6d24d8c9517d"),
+                UUID.fromString("fff93a1c-89b2-4b3e-bf8e-6d24d8c9517d"),
                 AttributeModifier.Operation.MULTIPLY_TOTAL, true,
                 "attribute.trinketsandbaubles.block_reach");
 
         // 实体交互距离
         register("ENTITY_REACH", ForgeMod.ENTITY_REACH.get(),
-                UUID.fromString("b2c5e342-5786-4c72-b01d-8c65525702b2"),
+                UUID.fromString("fffae342-5786-4c72-b01d-8c65525702b2"),
                 AttributeModifier.Operation.MULTIPLY_TOTAL, true,
                 "attribute.trinketsandbaubles.entity_reach");
 
         // 名称标签显示距离
         register("NAMETAG_DISTANCE", ForgeMod.NAMETAG_DISTANCE.get(),
-                UUID.fromString("9cd3e438-8c5c-4ab2-9845-9a1e3c4a2242"),
+                UUID.fromString("fffb e438-8c5c-4ab2-9845-9a1e3c4a2242".replace(" ","")),
                 AttributeModifier.Operation.MULTIPLY_TOTAL, true,
                 "attribute.trinketsandbaubles.nametag_distance");
 
         // 护甲值
         register("ARMOR", Attributes.ARMOR,
-                UUID.fromString("2AD3F246-FEE1-4E67-B886-69FD380BB150"),
+                UUID.fromString("fffcf246-fee1-4e67-b886-69fd380bb150"),
                 AttributeModifier.Operation.MULTIPLY_TOTAL, true,
                 "attribute.trinketsandbaubles.armor");
 
         // 护甲韧性
         register("ARMOR_TOUGHNESS", Attributes.ARMOR_TOUGHNESS,
-                UUID.fromString("8fc5e73c-2cf2-4729-8128-d99f49aa37f2"),
+                UUID.fromString("fffde73c-2cf2-4729-8128-d99f49aa37f2"),
                 AttributeModifier.Operation.MULTIPLY_TOTAL, true,
                 "attribute.trinketsandbaubles.armor_toughness");
 
-        // ====== 固定数值修改的属性 (使用 ADDITION) ======
+        // ====== 以下是固定数值修改的属性 (使用 ADDITION) ======
         // 击退抗性
         register("KNOCKBACK_RESISTANCE", Attributes.KNOCKBACK_RESISTANCE,
                 UUID.fromString("95eb4f0a-dd60-4ada-98c1-2ce5c3d4374c"),
