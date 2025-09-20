@@ -3,6 +3,7 @@ package com.jinqinxixi.trinketsandbaubles;
 import com.jinqinxixi.trinketsandbaubles.block.ModBlocks;
 
 import com.jinqinxixi.trinketsandbaubles.capability.network.RaceCapabilityNetworking;
+import com.jinqinxixi.trinketsandbaubles.compat.FirstAidCompat;
 import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import com.jinqinxixi.trinketsandbaubles.config.RaceAttributesConfig;
 import com.jinqinxixi.trinketsandbaubles.items.baubles.DragonsEyeItem;
@@ -78,7 +79,8 @@ public class TrinketsandBaublesMod
         MinecraftForge.EVENT_BUS.register(ManaData.class);
         // 注册网络处理器
         RaceCapabilityNetworking.init();
-
+        // First aid mod 兼容性处理
+        tryRegisterFirstAidCompat();
         // 配置注册
         ModLoadingContext.get().registerConfig(
                 net.minecraftforge.fml.config.ModConfig.Type.COMMON,
@@ -104,34 +106,19 @@ public class TrinketsandBaublesMod
                     DragonsEyeRenderer::onRenderWorld
             );
         }
-        // First aid mod 兼容性
+    }
+
+    private void tryRegisterFirstAidCompat() {
         if (FMLLoader.getLoadingModList().getModFileById("firstaid") != null) {
-            MinecraftForge.EVENT_BUS.register(new Object() {
-                @SubscribeEvent
-                public void onDamage(FirstAidLivingDamageEvent event) {
-                    // 检查是否启用了功能
-                    if (!ModConfig.ENABLE_DAMAGE_SHIELD_EFFECT.get()) {
-                        return;
-                    }
-
-                    Player player = event.getEntity();
-
-                    // 使用新的API方法查找护盾饰品
-                    Optional<SlotResult> result = CuriosApi.getCuriosInventory(player)
-                            .resolve()
-                            .flatMap(handler -> handler.findFirstCurio(ModItem.DAMAGE_SHIELD.get()));
-
-                    if (result.isPresent()) {
-                        AbstractPlayerDamageModel after = event.getAfterDamage();
-                        if (after.HEAD.currentHealth < 1 || (after.BODY.currentHealth < 1)) {
-                            // 使用配置的触发概率
-                            if (player.getRandom().nextDouble() < ModConfig.DAMAGE_SHIELD_TRIGGER_CHANCE.get()) {
-                                event.setCanceled(true);
-                            }
-                        }
-                    }
-                }
-            });
+            try {
+                // 尝试加载 FirstAid 的类
+                Class.forName("ichttt.mods.firstaid.api.event.FirstAidLivingDamageEvent");
+                // 如果成功加载，注册兼容性处理器
+                MinecraftForge.EVENT_BUS.register(new FirstAidCompat());
+                LOGGER.info("FirstAid compatibility enabled");
+            } catch (ClassNotFoundException e) {
+                LOGGER.error("FirstAid API classes not found, compatibility disabled");
+            }
         }
     }
 
