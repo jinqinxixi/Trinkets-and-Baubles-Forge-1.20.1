@@ -1,0 +1,29 @@
+{
+  "replace": false,
+  "values": [
+    "trinketsandbaubles:weightless_stone",
+    "trinketsandbaubles:inertia_null_stone",
+    "trinketsandbaubles:greater_inertia_stone",
+    "trinketsandbaubles:faelis_claw",
+    "trinketsandbaubles:glow_ring",
+    "trinketsandbaubles:sea_stone",
+    "trinketsandbaubles:poison_stone",
+    "trinketsandbaubles:wither_ring",
+    "trinketsandbaubles:damage_shield",
+    "trinketsandbaubles:teddy_bear",
+    "trinketsandbaubles:dragons_eye",
+    "trinketsandbaubles:dragons_eye_fire",
+    "trinketsandbaubles:dragons_eye_ice",
+    "trinketsandbaubles:dragons_eye_lightning",
+    "trinketsandbaubles:polarized_stone",
+    "trinketsandbaubles:ender_tiara",
+    "trinketsandbaubles:arcing_orb",
+    "trinketsandbaubles:dragons_ring",
+    "trinketsandbaubles:dwarves_ring",
+    "trinketsandbaubles:elves_ring",
+    "trinketsandbaubles:faelis_ring",
+    "trinketsandbaubles:fairies_ring",
+    "trinketsandbaubles:goblins_ring",
+    "trinketsandbaubles:titan_ring"
+  ]
+}
