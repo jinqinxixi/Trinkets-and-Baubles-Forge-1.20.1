@@ -1,11 +1,14 @@
 package com.jinqinxixi.trinketsandbaubles.util;
 
+import com.jinqinxixi.trinketsandbaubles.modeffects.ModEffects;
 import com.jinqinxixi.trinketsandbaubles.TrinketsandBaublesMod;
 import com.jinqinxixi.trinketsandbaubles.capability.impl.DragonCapability;
 import com.jinqinxixi.trinketsandbaubles.capability.registry.ModCapabilities;
 import com.jinqinxixi.trinketsandbaubles.client.keybind.KeyBindings;
 import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import com.jinqinxixi.trinketsandbaubles.items.baubles.DragonsEyeItem;
+import com.jinqinxixi.trinketsandbaubles.items.baubles.DragonsEyeIceItem;
+import com.jinqinxixi.trinketsandbaubles.items.baubles.DragonsEyeLightningItem;
 import com.jinqinxixi.trinketsandbaubles.network.handler.NetworkHandler;
 import com.jinqinxixi.trinketsandbaubles.network.message.DragonsEyeMessage.UpdateTargetsMessage;
 import net.minecraft.client.Minecraft;
@@ -98,6 +101,16 @@ public class ScanSystem {
                 .map(handler -> handler.findFirstCurio(stack -> stack.getItem() instanceof DragonsEyeItem)
                         .isPresent())
                 .orElse(false);
+				
+		boolean hasIceDragonsEye = CuriosApi.getCuriosInventory(player)
+                .map(handler -> handler.findFirstCurio(stack -> stack.getItem() instanceof DragonsEyeIceItem)
+                        .isPresent())
+                .orElse(false);
+		
+		boolean hasLightningDragonsEye = CuriosApi.getCuriosInventory(player)
+                .map(handler -> handler.findFirstCurio(stack -> stack.getItem() instanceof DragonsEyeLightningItem)
+                        .isPresent())
+                .orElse(false);
 
         if (!hasDragonCapability && !hasDragonsEye) {
             return;
@@ -115,6 +128,28 @@ public class ScanSystem {
                     false
             );
             player.addEffect(fireResistance);
+        }
+		
+		if (hasIceDragonsEye && !player.hasEffect(ModEffects.ICE_RESISTANCE.get())) {
+            MobEffectInstance iceResistance = new MobEffectInstance(
+                    ModEffects.ICE_RESISTANCE.get(),
+                    Integer.MAX_VALUE,
+                    0,
+                    true,
+                    false
+            );
+            player.addEffect(iceResistance);
+        }
+		
+		if (hasLightningDragonsEye && !player.hasEffect(ModEffects.LIGHTNING_RESISTANCE.get())) {
+            MobEffectInstance lightningResistance = new MobEffectInstance(
+                    ModEffects.LIGHTNING_RESISTANCE.get(),
+                    Integer.MAX_VALUE,
+                    0,
+                    true,
+                    false
+            );
+            player.addEffect(lightningResistance);
         }
 
         if (state.nightVisionEnabled) {
