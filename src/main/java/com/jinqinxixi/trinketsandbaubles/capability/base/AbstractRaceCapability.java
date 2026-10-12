@@ -1,6 +1,7 @@
 package com.jinqinxixi.trinketsandbaubles.capability.base;
 
 import com.jinqinxixi.trinketsandbaubles.capability.api.IBaseRaceCapability;
+import com.jinqinxixi.trinketsandbaubles.capability.api.IRaceAppearance;
 import com.jinqinxixi.trinketsandbaubles.capability.attribute.AttributeRegistry;
 import com.jinqinxixi.trinketsandbaubles.capability.mana.ManaData;
 import com.jinqinxixi.trinketsandbaubles.capability.network.RaceCapabilityNetworking;
@@ -25,12 +26,35 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public abstract class AbstractRaceCapability implements IBaseRaceCapability {
+public abstract class AbstractRaceCapability implements IBaseRaceCapability, IRaceAppearance {
     protected boolean isActive = false;
     protected float scaleFactor = 1.0f;
     protected final Player player;
     protected int tickCounter = 0;
     protected float permanentManaDecrease = 0.0f;
+
+    /**
+     * How this race is drawn on the player wearing it.
+     *
+     * <p>Held here rather than on the client, and synced like everything else about a race, because
+     * the shape and colour a player picked are part of who they are rather than part of what this
+     * machine happens to have cached. A player who picked green ears sees green ears on every
+     * client, and the server is the one that decides.
+     *
+     * <p>Defaults are the ones that need no configuration: features shown, the first shape, and the
+     * colours taken from the player's own skin. A race that never touches any of this is drawn, and
+     * looks like the player it is on.
+     */
+    protected boolean showTraits = true;
+
+    protected int traitVariant = 0;
+
+    protected int primaryTraitColor = 0xFFFFFF;
+
+    protected int secondaryTraitColor = 0xFFFFFF;
+
+    /** Zero means take the colours from the player's skin; above zero means use them as given. */
+    protected int traitColorOption = 0;
 
 
     public AbstractRaceCapability(Player player) {
@@ -193,19 +217,147 @@ public abstract class AbstractRaceCapability implements IBaseRaceCapability {
         onTick();
     }
 
+    /**
+     * Whether this race's features are drawn, with the setting applied as it happens.
+     *
+     * <p>Written through to the client on every change, so that a player turning their own features
+     * off sees them go at once rather than at the next time something else about the race happens to
+     * be synced.
+     */
+    @Override
+    public boolean showTraits() {
+        return showTraits;
+    }
+
+    @Override
+    public void setShowTraits(boolean show) {
+        if (this.showTraits == show) {
+            return;
+        }
+
+        this.showTraits = show;
+        sync();
+    }
+
+    @Override
+    public int traitVariant() {
+        return traitVariant;
+    }
+
+    @Override
+    public void setTraitVariant(int variant) {
+        if (this.traitVariant == variant) {
+            return;
+        }
+
+        this.traitVariant = variant;
+        sync();
+    }
+
+    @Override
+    public int primaryTraitColor() {
+        return primaryTraitColor;
+    }
+
+    @Override
+    public void setPrimaryTraitColor(int colour) {
+        if (this.primaryTraitColor == colour) {
+            return;
+        }
+
+        this.primaryTraitColor = colour;
+        sync();
+    }
+
+    @Override
+    public int secondaryTraitColor() {
+        return secondaryTraitColor;
+    }
+
+    @Override
+    public void setSecondaryTraitColor(int colour) {
+        if (this.secondaryTraitColor == colour) {
+            return;
+        }
+
+        this.secondaryTraitColor = colour;
+        sync();
+    }
+
+    @Override
+    public int traitColorOption() {
+        return traitColorOption;
+    }
+
+    @Override
+    public void setTraitColorOption(int option) {
+        if (this.traitColorOption == option) {
+            return;
+        }
+
+        this.traitColorOption = option;
+        sync();
+    }
+
     @Override
     public CompoundTag serializeNBT() {
         CompoundTag tag = new CompoundTag();
         tag.putBoolean("active", isActive);
         tag.putFloat("permanentManaDecrease", permanentManaDecrease);
+        saveAppearance(tag);
         saveAdditional(tag);
         return tag;
+    }
+
+    /**
+     * Writes the appearance out, under names of its own.
+     *
+     * <p>Kept apart from {@link #saveAdditional} because the two belong to different questions —
+     * that one is what a race does, this one is what it looks like — and a subclass overriding that
+     * one should not have to know these keys exist.
+     */
+    protected void saveAppearance(CompoundTag tag) {
+        tag.putBoolean("showTraits", showTraits);
+        tag.putInt("traitVariant", traitVariant);
+        tag.putInt("primaryTraitColor", primaryTraitColor);
+        tag.putInt("secondaryTraitColor", secondaryTraitColor);
+        tag.putInt("traitColorOption", traitColorOption);
+    }
+
+    /**
+     * Reads the appearance back, leaving the defaults for anything absent.
+     *
+     * <p>Absent is the ordinary case for a player who has never opened the appearance controls, and
+     * it has to mean "unchanged" rather than "zero": a default of zero for the colour would draw
+     * every such player's features black.
+     */
+    protected void loadAppearance(CompoundTag tag) {
+        if (tag.contains("showTraits")) {
+            showTraits = tag.getBoolean("showTraits");
+        }
+
+        if (tag.contains("traitVariant")) {
+            traitVariant = tag.getInt("traitVariant");
+        }
+
+        if (tag.contains("primaryTraitColor")) {
+            primaryTraitColor = tag.getInt("primaryTraitColor");
+        }
+
+        if (tag.contains("secondaryTraitColor")) {
+            secondaryTraitColor = tag.getInt("secondaryTraitColor");
+        }
+
+        if (tag.contains("traitColorOption")) {
+            traitColorOption = tag.getInt("traitColorOption");
+        }
     }
 
     @Override
     public void deserializeNBT(CompoundTag tag) {
         this.isActive = tag.getBoolean("active");
         this.permanentManaDecrease = tag.getFloat("permanentManaDecrease");
+        loadAppearance(tag);
         if (tag.contains("CurrentMaxMana")) {
             ManaData.setMaxMana(player, tag.getFloat("CurrentMaxMana"));
         }
@@ -252,6 +404,25 @@ public abstract class AbstractRaceCapability implements IBaseRaceCapability {
         if (isActive) {
             RaceScaleHelper.setSmoothModelScale(player, scale, 20);
         }
+    }
+
+    /**
+     * Takes the appearance from a sync packet.
+     *
+     * <p>Written without going through the setters, which each call {@link #sync()} back to the
+     * server — on the client that would be a reply to a packet that just arrived, and the two would
+     * talk to each other for as long as the connection lasted.
+     *
+     * <p>Separate from {@link #updateStateOnly} rather than folded into it because the two arrive in
+     * one packet but mean different things: one is what the race does, the other is what it looks
+     * like, and a caller that has only one of them to hand should be able to say so.
+     */
+    public void updateAppearance(boolean show, int variant, int primary, int secondary, int colorOption) {
+        this.showTraits = show;
+        this.traitVariant = variant;
+        this.primaryTraitColor = primary;
+        this.secondaryTraitColor = secondary;
+        this.traitColorOption = colorOption;
     }
 
     // 静态方法用于清除所有种族能力
