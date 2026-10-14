@@ -88,4 +88,22 @@ public class KeyBindings {
             GLFW.GLFW_KEY_L, // 使用G键作为默认键
             "key.categories.trinketsandbaubles"
     );
+
+    // 哥布林骑狼能力键（骑乘冲锋 / 对准驯服狼骑上）
+    public static final KeyMapping WOLF_RIDER_KEY = new KeyMapping(
+            "key.trinketsandbaubles.wolf_rider",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_G,
+            "key.categories.trinketsandbaubles"
+    );
+
+    // 种族技能键（金牛踏击等，按当前激活种族分发）
+    public static final KeyMapping RACE_ABILITY_KEY = new KeyMapping(
+            "key.trinketsandbaubles.race_ability",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_B,
+            "key.categories.trinketsandbaubles"
+    );
 }

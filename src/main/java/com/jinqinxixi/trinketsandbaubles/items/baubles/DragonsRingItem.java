@@ -8,7 +8,10 @@ import com.jinqinxixi.trinketsandbaubles.capability.registry.ModCapabilities;
 import com.jinqinxixi.trinketsandbaubles.client.keybind.KeyBindings;
 import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import com.jinqinxixi.trinketsandbaubles.config.RaceAttributesConfig;
+import com.jinqinxixi.trinketsandbaubles.init.ModElements;
 import com.jinqinxixi.trinketsandbaubles.modifier.ModifiableBaubleItem;
+import com.jinqinxixi.trinketsandbaubles.traits.elements.Element;
+import com.jinqinxixi.trinketsandbaubles.traits.elements.IElementProvider;
 import com.jinqinxixi.trinketsandbaubles.util.RaceRingUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
@@ -29,13 +32,46 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 
-public class DragonsRingItem extends ModifiableBaubleItem {
+public class DragonsRingItem extends ModifiableBaubleItem implements IElementProvider {
 
     private static final Modifier[] MODIFIERS = Modifier.values();
 
     @Override
     public Modifier[] getModifiers() {
         return MODIFIERS;
+    }
+
+    /**
+     * 龙戒的元素变体：火、冰、雷。
+     *
+     * <p>在调用时才取注册对象，不写成静态字段：元素注册表在类加载时还没填好，静态初始化里调
+     * {@code get()} 会抛「Registry Object not present」。
+     */
+    @Override
+    public Element[] getSubElements() {
+        return new Element[]{
+                ModElements.FIRE.get(),
+                ModElements.ICE.get(),
+                ModElements.LIGHTNING.get()
+        };
+    }
+
+    /**
+     * 名字按元素变体区分：{@code dragon_ring.fire} / {@code .ice} / {@code .lightning}。
+     *
+     * <p>创造栏里的三个变体是同一个物品加不同的元素 NBT，物品本身分不出来，名字要靠这里读 NBT
+     * 决定——不这么做三个变体就是同一个名字、同一段描述，看起来像复制了三份。
+     */
+    @Override
+    public String getDescriptionId(ItemStack stack) {
+        Element element = getPrimaryElement(stack);
+        if (!element.isNone()) {
+            String name = element.getName().toLowerCase();
+            if ("fire".equals(name) || "ice".equals(name) || "lightning".equals(name)) {
+                return super.getDescriptionId() + "." + name;
+            }
+        }
+        return super.getDescriptionId();
     }
 
     public DragonsRingItem(Properties properties) {
@@ -49,7 +85,7 @@ public class DragonsRingItem extends ModifiableBaubleItem {
                 .isPresent();
     }
 
-    private void applyFaelisBuff(LivingEntity entity) {
+    private void applyDragonBuff(LivingEntity entity, ItemStack stack) {
         if (entity instanceof ServerPlayer serverPlayer) {
             if (RaceRingUtil.hasMultipleRaceRings(serverPlayer)) {
                 serverPlayer.getCapability(ModCapabilities.DRAGON_CAPABILITY).ifPresent(cap -> {
@@ -86,8 +122,16 @@ public class DragonsRingItem extends ModifiableBaubleItem {
 
             if (isEquipped(entity)) {
                 serverPlayer.getCapability(ModCapabilities.DRAGON_CAPABILITY).ifPresent(cap -> {
+                    // 元素只在变化时才同步：换一枚不同元素的龙戒时能力仍是激活状态，只在「未激活」
+                    // 时读会让元素永远停在第一次戴上的那枚。读一次 NBT 很便宜，但没必要每 tick 都写。
+                    if (cap instanceof DragonCapability dragonCap) {
+                        String ringElement = dragonCap.readElementFromRing(stack);
+                        if (!ringElement.equals(dragonCap.getDragonElement())) {
+                            dragonCap.applyElementFromRing(stack);
+                        }
+                    }
                     if (!cap.isActive()) {
-                        applyFaelisBuff(entity);
+                        applyDragonBuff(entity, stack);
                     }
                 });
             }
@@ -104,7 +148,13 @@ public class DragonsRingItem extends ModifiableBaubleItem {
 
             if (!RaceRingUtil.hasMultipleRaceRings(serverPlayer)) {
                 if (isEquipped(entity)) {
-                    applyFaelisBuff(entity);
+                    // 戴上就把这枚戒指的元素写进能力，不等下一个 tick。
+                    serverPlayer.getCapability(ModCapabilities.DRAGON_CAPABILITY).ifPresent(cap -> {
+                        if (cap instanceof DragonCapability dragonCap) {
+                            dragonCap.applyElementFromRing(stack);
+                        }
+                    });
+                    applyDragonBuff(entity, stack);
                 }
             }
         }
@@ -258,7 +308,11 @@ public class DragonsRingItem extends ModifiableBaubleItem {
             tooltip.add(Component.translatable("item.trinketsandbaubles.dragons_ring.tooltip12",
                             dragonBreathKeyName)
                     .withStyle(ChatFormatting.RED));
-            tooltip.add(Component.translatable("item.trinketsandbaubles.dragons_ring.tooltip13")
+            // 按元素显示免疫与专属能力（火：火免疫；冰：冰免疫 + 冰霜行者；雷：雷免疫 + 闪电箭）。
+            Element ringElement = getPrimaryElement(stack);
+            String elementName = ringElement.isNone() ? "fire" : ringElement.getName().toLowerCase();
+            tooltip.add(Component.translatable("item.trinketsandbaubles.dragons_ring.tooltip13."
+                            + elementName)
                     .withStyle(ChatFormatting.GREEN));
             tooltip.add(Component.translatable("item.trinketsandbaubles.dragons_ring.tooltip14",
                             nightVisionKeyName)
@@ -269,6 +323,10 @@ public class DragonsRingItem extends ModifiableBaubleItem {
             tooltip.add(Component.translatable("item.trinketsandbaubles.dragons_ring.tooltip16",
                             flightToggleKeyName)
                     .withStyle(ChatFormatting.DARK_AQUA));
+            tooltip.add(Component.translatable("item.trinketsandbaubles.glide.hint")
+                    .withStyle(ChatFormatting.GOLD));
+            tooltip.add(Component.translatable("item.trinketsandbaubles.glide.boost_hint")
+                    .withStyle(ChatFormatting.GOLD));
             tooltip.add(Component.translatable("item.trinketsandbaubles.dragons_ring.press_shift")
                     .withStyle(ChatFormatting.GRAY));
 

@@ -6,23 +6,18 @@ import com.jinqinxixi.trinketsandbaubles.items.ModItem;
 import com.jinqinxixi.trinketsandbaubles.capability.mana.ManaData;
 import com.jinqinxixi.trinketsandbaubles.util.RaceScaleHelper;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeMap;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.animal.horse.AbstractHorse;
-import net.minecraft.world.entity.animal.horse.Horse;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.ForgeMod;
-import net.minecraftforge.event.entity.EntityMountEvent;
 import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
@@ -152,39 +147,8 @@ public class GoblinsEffect extends MobEffect {
                 ManaData.setMaxMana(player, Math.max(0, newMaxMana));
                 data.putBoolean(MANA_PENALTY_TAG, true);
             }
-
-            if (player.getVehicle() instanceof Horse horse) {
-                // 给玩家添加BUFF
-                player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 60, 1, false, false));
-                player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 60, 0, false, false));
-
-                // 给马添加生命恢复效果
-                if (horse.isAlive() && !horse.hasEffect(MobEffects.REGENERATION)) {
-                    horse.addEffect(new MobEffectInstance(
-                            MobEffects.REGENERATION, 60,1,false,false));
-                }
-            }
         }
     }
-    @SubscribeEvent
-    public static void onEntityMount(EntityMountEvent event) {
-        if (event.isMounting() &&
-                event.getEntityMounting() instanceof Player player &&
-                event.getEntityBeingMounted() instanceof AbstractHorse horse) {
-
-            if (player.hasEffect(ModEffects.GOBLINS.get()) && !horse.level().isClientSide) {
-                // 使用官方方法装备鞍
-                horse.equipSaddle(SoundSource.NEUTRAL);
-
-                // 自动驯服并设置主人
-                horse.setTamed(true);
-                horse.setOwnerUUID(player.getUUID());
-            }
-        }
-    }
-
-
-    // 处理伤害减免和苦力怕无视
     @SubscribeEvent
     public static void onLivingHurt(LivingDamageEvent event) {
         if (event.getEntity() instanceof Player player) {

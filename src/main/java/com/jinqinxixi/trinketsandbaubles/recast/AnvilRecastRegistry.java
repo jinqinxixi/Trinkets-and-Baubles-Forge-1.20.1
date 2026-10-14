@@ -31,6 +31,8 @@ public class AnvilRecastRegistry {
         register(ModItem.GOBLINS_RING.get());
         register(ModItem.ELVES_RING.get());
         register(ModItem.DRAGONS_RING.get());
+        register(ModItem.TAURUS_RING.get());
+        register(ModItem.COSMETIC.get());
 
 
 

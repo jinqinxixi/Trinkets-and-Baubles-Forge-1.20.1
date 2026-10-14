@@ -1,0 +1,19 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "P P",
+        " S ",
+        "P P"
+    ],
+    "key": {
+        "P": {
+            "item": "trinketsandbaubles:glowing_powder"
+        },
+        "S": {
+            "item": "minecraft:paper"
+        }
+    },
+    "result": {
+        "item": "trinketsandbaubles:cosmetic"
+    }
+}

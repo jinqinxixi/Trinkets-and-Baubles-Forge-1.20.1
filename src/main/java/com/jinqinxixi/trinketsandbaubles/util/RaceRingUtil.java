@@ -37,7 +37,8 @@ public class RaceRingUtil {
                 item instanceof TitanRingItem ||
                 item instanceof GoblinsRingItem ||
                 item instanceof ElvesRingItem ||
-                item instanceof DragonsRingItem;
+                item instanceof DragonsRingItem ||
+                item instanceof TaurusRingItem;
     }
     public static boolean hasAnyRaceRing(Player player) {
         AtomicInteger raceRingCount = new AtomicInteger(0);
@@ -65,7 +66,18 @@ public class RaceRingUtil {
                 break;
             case "dragon":
                 player.getCapability(ModCapabilities.DRAGON_CAPABILITY)
-                        .ifPresent(capability -> capability.setActive(true));
+                        .ifPresent(capability -> {
+                            // 还原戴戒指前变的那条龙：元素也要跟着还原，否则 buff 图标停在最后戴的
+                            // 戒指的元素上。
+                            if (capability instanceof com.jinqinxixi.trinketsandbaubles.capability.impl.DragonCapability dragon) {
+                                String saved = player.getPersistentData().getString(
+                                        RaceHelper.SAVED_DRAGON_ELEMENT_KEY);
+                                if (!saved.isEmpty()) {
+                                    dragon.setDragonElement(saved);
+                                }
+                            }
+                            capability.setActive(true);
+                        });
                 break;
             case "elves":
                 player.getCapability(ModCapabilities.ELVES_CAPABILITY)
@@ -85,6 +97,10 @@ public class RaceRingUtil {
                 break;
             case "titan":
                 player.getCapability(ModCapabilities.TITAN_CAPABILITY)
+                        .ifPresent(capability -> capability.setActive(true));
+                break;
+            case "taurus":
+                player.getCapability(ModCapabilities.TAURUS_CAPABILITY)
                         .ifPresent(capability -> capability.setActive(true));
                 break;
         }

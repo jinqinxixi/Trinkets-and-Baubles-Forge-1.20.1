@@ -3,6 +3,7 @@ package com.jinqinxixi.trinketsandbaubles.items.baubles;
 import com.jinqinxixi.trinketsandbaubles.capability.attribute.AttributeRegistry;
 import com.jinqinxixi.trinketsandbaubles.capability.base.AbstractRaceCapability;
 import com.jinqinxixi.trinketsandbaubles.capability.registry.ModCapabilities;
+import com.jinqinxixi.trinketsandbaubles.client.keybind.KeyBindings;
 import com.jinqinxixi.trinketsandbaubles.config.RaceAttributesConfig;
 import com.jinqinxixi.trinketsandbaubles.modifier.ModifiableBaubleItem;
 import com.jinqinxixi.trinketsandbaubles.util.RaceRingUtil;
@@ -247,9 +248,14 @@ public class GoblinsRingItem extends ModifiableBaubleItem {
             }
         } else {
             // 简短描述
+            String wolfRiderKeyName = KeyBindings.WOLF_RIDER_KEY.getKey().getDisplayName().getString();
             tooltip.add(Component.translatable("item.trinketsandbaubles.goblins_ring.tooltip11")
                     .withStyle(ChatFormatting.GOLD));
-            tooltip.add(Component.translatable("item.trinketsandbaubles.goblins_ring.tooltip13")
+            tooltip.add(Component.translatable("item.trinketsandbaubles.goblins_ring.tooltip13",
+                            wolfRiderKeyName)
+                    .withStyle(ChatFormatting.AQUA));
+            tooltip.add(Component.translatable("item.trinketsandbaubles.goblins_ring.tooltip16",
+                            wolfRiderKeyName)
                     .withStyle(ChatFormatting.AQUA));
             tooltip.add(Component.translatable("item.trinketsandbaubles.goblins_ring.tooltip14")
                     .withStyle(ChatFormatting.DARK_GREEN));

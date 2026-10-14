@@ -23,6 +23,7 @@ import java.util.function.Supplier;
  * has changed one thing about one race, and two packets could arrive in either order.
  */
 public class SyncRaceCapabilityPacket {
+    private final int playerId;
     private final String raceId;
     private final boolean isActive;
     private final float scaleFactor;
@@ -38,9 +39,12 @@ public class SyncRaceCapabilityPacket {
     private final int traitVariant;
     private final int primaryTraitColor;
     private final int secondaryTraitColor;
+    private final int auxTraitColor;
+    private final int auxTraitVariant;
     private final int traitColorOption;
 
-    public SyncRaceCapabilityPacket(IBaseRaceCapability capability) {
+    public SyncRaceCapabilityPacket(int playerId, IBaseRaceCapability capability) {
+        this.playerId = playerId;
         this.raceId = capability.getRaceId();
         this.isActive = capability.isActive();
         this.scaleFactor = capability.getScaleFactor();
@@ -50,17 +54,22 @@ public class SyncRaceCapabilityPacket {
             this.traitVariant = appearance.traitVariant();
             this.primaryTraitColor = appearance.primaryTraitColor();
             this.secondaryTraitColor = appearance.secondaryTraitColor();
+            this.auxTraitColor = appearance.auxTraitColor();
+            this.auxTraitVariant = appearance.auxTraitVariant();
             this.traitColorOption = appearance.traitColorOption();
         } else {
             this.showTraits = true;
             this.traitVariant = 0;
             this.primaryTraitColor = 0xFFFFFF;
             this.secondaryTraitColor = 0xFFFFFF;
+            this.auxTraitColor = 0xFFFFFF;
+            this.auxTraitVariant = 0;
             this.traitColorOption = 0;
         }
     }
 
     public SyncRaceCapabilityPacket(FriendlyByteBuf buf) {
+        this.playerId = buf.readVarInt();
         this.raceId = buf.readUtf();
         this.isActive = buf.readBoolean();
         this.scaleFactor = buf.readFloat();
@@ -68,10 +77,13 @@ public class SyncRaceCapabilityPacket {
         this.traitVariant = buf.readVarInt();
         this.primaryTraitColor = buf.readInt();
         this.secondaryTraitColor = buf.readInt();
+        this.auxTraitColor = buf.readInt();
+        this.auxTraitVariant = buf.readVarInt();
         this.traitColorOption = buf.readVarInt();
     }
 
     public void encode(FriendlyByteBuf buf) {
+        buf.writeVarInt(playerId);
         buf.writeUtf(raceId);
         buf.writeBoolean(isActive);
         buf.writeFloat(scaleFactor);
@@ -79,6 +91,8 @@ public class SyncRaceCapabilityPacket {
         buf.writeVarInt(traitVariant);
         buf.writeInt(primaryTraitColor);
         buf.writeInt(secondaryTraitColor);
+        buf.writeInt(auxTraitColor);
+        buf.writeVarInt(auxTraitVariant);
         buf.writeVarInt(traitColorOption);
     }
 
@@ -97,6 +111,7 @@ public class SyncRaceCapabilityPacket {
     }
 
     // Getters
+    public int getPlayerId() { return playerId; }
     public String getRaceId() { return raceId; }
     public boolean isActive() { return isActive; }
     public float getScaleFactor() { return scaleFactor; }
@@ -104,5 +119,7 @@ public class SyncRaceCapabilityPacket {
     public int getTraitVariant() { return traitVariant; }
     public int getPrimaryTraitColor() { return primaryTraitColor; }
     public int getSecondaryTraitColor() { return secondaryTraitColor; }
+    public int getAuxTraitColor() { return auxTraitColor; }
+    public int getAuxTraitVariant() { return auxTraitVariant; }
     public int getTraitColorOption() { return traitColorOption; }
 }

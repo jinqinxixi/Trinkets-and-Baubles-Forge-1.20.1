@@ -83,7 +83,7 @@ public class StoneofNegativeGravityItem extends ModifiableBaubleItem {
                 // 取下饰品时关闭飞行
                 player.getAbilities().mayfly = false;
                 player.getAbilities().flying = false;
-                // 恢复原版飞行速度
+                // 恢复默认飞行速度
                 player.getAbilities().setFlyingSpeed(0.05f);
                 player.onUpdateAbilities();
             }

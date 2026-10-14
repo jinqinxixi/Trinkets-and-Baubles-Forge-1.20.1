@@ -58,11 +58,19 @@ minecraft {
 
         client {
             property 'forge.enabledGameTestNamespaces', mod_id
+            // 和服务端一致：关掉 GeckoLib 的 example 测试内容注册，否则客户端打开创造栏会因
+            // 引用未注册的 geckolib:jack_in_the_box 等测试物品而崩（Registry Object not present）。
+            jvmArgs '-Dgeckolib.disable_examples=true'
         }
 
         server {
             property 'forge.enabledGameTestNamespaces', mod_id
             args '--nogui'
+            // 服务端用独立目录，否则和 runClient 共用 run/，世界存档、日志、25565 端口互相冲突。
+            workingDirectory project.file('run-server')
+            // GeckoLib 在 dev 环境会注册 example 测试内容（fertilizer/bat 等），正式客户端（production）
+            // 不注册，导致 registry 不同步、正式客户端连不上。这里强制关闭 example 注册，对齐正式版。
+            jvmArgs '-Dgeckolib.disable_examples=true'
         }
 
         gameTestServer {
@@ -151,30 +159,27 @@ dependencies {
 
 
 
-    compileOnly(fg.deobf("top.theillusivec4.curios:curios-forge:5.11.1+1.20.1:api"))
-    implementation(fg.deobf("top.theillusivec4.curios:curios-forge:5.11.1+1.20.1"))
+    implementation fg.deobf("curse.maven:curios-309927:6418456")
 
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
     compileOnly(fg.deobf("mezz.jei:jei-1.20.1-forge-api:15.20.0.106"))
     runtimeOnly(fg.deobf("mezz.jei:jei-1.20.1-forge:15.20.0.106"))
 
-    implementation fg.deobf("com.github.Virtuoel:Pehkui:3.8.2-1.20.1-forge")
-
     compileOnly fg.deobf("curse.maven:first-aid-276837:5127567")
 
 
-    compileOnly fg.deobf("top.theillusivec4.caelus:caelus-forge:3.1.0+1.20:api")
-    runtimeOnly fg.deobf("top.theillusivec4.caelus:caelus-forge:3.1.0+1.20")
+    compileOnly fg.deobf("top.theillusivec4.caelus:caelus-forge:3.2.0+1.20.1:api")
+    runtimeOnly fg.deobf("top.theillusivec4.caelus:caelus-forge:3.2.0+1.20.1")
 
 
-    runtimeOnly fg.deobf("software.bernie.geckolib:geckolib-forge-1.20.1:4.7.1.2")
+    implementation fg.deobf("curse.maven:geckolib-388172:8285794")
     runtimeOnly("com.eliotlash.mclib:mclib:20")
 
     runtimeOnly fg.deobf("dev.kosmx.player-anim:player-animation-lib-forge:1.0.2-rc1+1.20")
 
-    compileOnly fg.deobf("io.redspace.ironsspellbooks:irons_spellbooks:1.20.1-3.4.0:api")
-    runtimeOnly fg.deobf("io.redspace.ironsspellbooks:irons_spellbooks:1.20.1-3.4.0")
+    implementation fg.deobf("curse.maven:irons-lib-1492763:9003169")
+    implementation fg.deobf("curse.maven:irons-spells-n-spellbooks-855414:8680180")
 
     compileOnly fg.deobf("vazkii.patchouli:Patchouli:1.20.1-84.1-FORGE:api")
     runtimeOnly fg.deobf("vazkii.patchouli:Patchouli:1.20.1-84.1-FORGE")

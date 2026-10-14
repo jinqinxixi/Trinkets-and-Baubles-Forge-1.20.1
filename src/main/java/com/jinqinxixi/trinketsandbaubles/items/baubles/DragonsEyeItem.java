@@ -69,7 +69,7 @@ public class DragonsEyeItem extends ModifiableBaubleItem {
                 .withStyle(ChatFormatting.DARK_AQUA));
         tooltip.add(Component.translatable("item.dragons_eye.tooltip3",
                         toggleModeKeyName,   // 传入切换键位名称
-                        ModConfig.RENDER_RANGE.get()) // 传入扫描范围
+                        ModConfig.GREEDY_EYES_RANGE_HORIZONTAL.get()) // 传入扫描范围
                 .withStyle(ChatFormatting.GOLD));
         super.appendHoverText(stack, level, tooltip, flag);
     }

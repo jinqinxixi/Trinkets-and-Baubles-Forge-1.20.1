@@ -6,6 +6,8 @@ import com.jinqinxixi.trinketsandbaubles.capability.registry.ModCapabilities;
 import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import com.jinqinxixi.trinketsandbaubles.capability.mana.ManaData;
 import com.jinqinxixi.trinketsandbaubles.config.RaceAttributesConfig;
+import com.jinqinxixi.trinketsandbaubles.entity.BreathProjectile;
+import com.jinqinxixi.trinketsandbaubles.network.message.Messages.EffectsRenderPacket;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -162,185 +164,46 @@ public class DragonCapabilityServerHandler {
     }
 
     private static void handleDragonBreathDamage(Player player, ServerLevel level) {
+        // 喷的是会飞行的龙息球（BreathProjectile），命中实体伤害+点燃，命中地面生成滞留药水云。
+        // 这里持续喷（每 3 tick 从眼睛射出一颗），球的飞行、命中、伤害、地面云全部走投射物自身逻辑。
+        if (player.tickCount % 3 != 0) {
+            return;
+        }
+
         Vec3 look = player.getLookAngle();
-        Vec3 playerPos = player.getEyePosition();
-        double range = 15.0;
-        double baseSpread = 1.0;
-        double startDistance = 1.0;
-        double maxSpreadMultiplier = 2.0;
+        Vec3 eye = player.getEyePosition();
+        double yaw = Math.toRadians(player.getYRot() + 90.0F);
+        double headX = player.getX() + 0.3F * Math.cos(yaw);
+        double headZ = player.getZ() + 0.3F * Math.sin(yaw);
+        double headY = player.getY() + player.getEyeHeight() * 0.8;
 
-        level.getEntities(player, player.getBoundingBox().inflate(range + 2),
-                entity -> {
-                    if (!(entity instanceof LivingEntity) || entity == player) {
-                        return false;
-                    }
-
-                    Vec3 targetPos = entity.position().add(0, entity.getBbHeight() * 0.5, 0);
-                    Vec3 toTarget = targetPos.subtract(playerPos);
-                    double projectionLength = toTarget.dot(look);
-
-                    if (projectionLength < startDistance || projectionLength > range) {
-                        return false;
-                    }
-
-                    Vec3 projection = playerPos.add(look.scale(projectionLength));
-                    double distanceFromLine = targetPos.distanceTo(projection);
-                    double distanceRatio = projectionLength / range;
-                    double currentSpread = baseSpread * (1 + (distanceRatio * maxSpreadMultiplier));
-
-                    return distanceFromLine <= currentSpread;
-                }
-        ).forEach(target -> {
-            if (target instanceof LivingEntity living) {
-                double distance = target.position().subtract(playerPos).length();
-                float damage = RaceAttributesConfig.DRAGON.DRAGON_BREATH_BASE_DAMAGE.get().floatValue() *
-                        (float)(1.0 - (distance / range) * RaceAttributesConfig.DRAGON.DRAGON_BREATH_DECAY_RATE.get());
-                damage = Math.max(RaceAttributesConfig.DRAGON.DRAGON_BREATH_MIN_DAMAGE.get().floatValue(), damage);
-
-                target.setRemainingFireTicks(100);
-                target.hurt(player.damageSources().playerAttack(player), damage);
+        // 龙息颜色跟随玩家种族外观的副色（getBreathColor = secondary trait color），
+        // 玩家在种族外观界面改副色，龙息就跟着变。元素由龙戒/龙宝石变体决定（火/冰/雷）。
+        String element = "fire";
+        int color = 0xFF0000;
+        var dragonCapOpt = player.getCapability(ModCapabilities.DRAGON_CAPABILITY).resolve();
+        if (dragonCapOpt.isPresent() && dragonCapOpt.get() instanceof DragonCapability dragonCap) {
+            element = dragonCap.getDragonElement();
+            // 无元素的基础巨龙龙息按火算（点燃），"none" 是给 buff 图标区分用的。
+            if ("none".equals(element)) {
+                element = "fire";
             }
-        });
+            color = dragonCap.secondaryTraitColor();
+        }
+        BreathProjectile breath = new BreathProjectile(level, player, color, element);
+        breath.setPos(headX, headY, headZ);
+        breath.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, 1.5F, 0.0F);
+        level.addFreshEntity(breath);
+
+        // 龙息声音：末影龙发射音，音量 0.5，音高 0.4/(随机*0.4+0.8)，
+        // 每次发射龙息球（每 3 tick）播一次。
+        level.playSound(null, headX, headY, headZ,
+                SoundEvents.ENDER_DRAGON_SHOOT, SoundSource.PLAYERS,
+                0.5F, 0.4F / (player.getRandom().nextFloat() * 0.4F + 0.8F));
     }
 
     @SubscribeEvent
     public static void onLivingUpdate(LivingEvent.LivingTickEvent event) {
-        if (!(event.getEntity() instanceof Player player)) {
-            return;
-        }
-
-        player.getCapability(ModCapabilities.DRAGON_CAPABILITY).ifPresent(cap -> {
-            if (cap instanceof DragonCapability dragonCap) {
-                if (!dragonCap.isActive() || !dragonCap.isDragonBreathActive()) {
-                    return;
-                }
-
-                if (!player.level().isClientSide && player.level() instanceof ServerLevel serverLevel) {
-                    spawnDragonBreathParticles(player, serverLevel);
-                }
-            }
-        });
-    }
-
-    private static void spawnDragonBreathParticles(Player player, ServerLevel serverLevel) {
-        RandomSource random = player.getRandom();
-        Vec3 look = player.getLookAngle();
-        Vec3 eyePos = player.getEyePosition(1.0F);
-        Vec3 startPos = eyePos.add(look.x, look.y, look.z);
-
-        double range = 15.0;
-        double spread = 0.5;
-        double startDistance = 0.0;
-
-        // 主要火焰效果
-        for (int i = 1; i <= range - startDistance; i++) {
-            createFireParticles(serverLevel, random, look, startPos, i, range, spread);
-        }
-
-        // 龙息特效
-        createDragonBreathParticles(serverLevel, random, look, startPos);
-
-        // 音效
-        playDragonBreathSounds(serverLevel, random, player);
-    }
-
-    private static void createFireParticles(ServerLevel serverLevel, RandomSource random,
-                                            Vec3 look, Vec3 startPos, int i, double range, double spread) {
-        double distance = i / 2.0;
-        int particles = 5 + (int)(i / 2);
-
-        for (int p = 0; p < particles; p++) {
-            double spreadFactor = spread * (i / range);
-            double angle = random.nextDouble() * Math.PI * 2;
-            double offsetX = Math.cos(angle) * spreadFactor * random.nextDouble();
-            double offsetY = Math.sin(angle) * spreadFactor * random.nextDouble();
-            double offsetZ = Math.cos(angle) * spreadFactor * random.nextDouble();
-
-            double x = startPos.x + look.x * distance + offsetX;
-            double y = startPos.y + look.y * distance + offsetY;
-            double z = startPos.z + look.z * distance + offsetZ;
-
-            // 火焰粒子
-            serverLevel.sendParticles(ParticleTypes.FLAME, x, y, z, 1,
-                    (random.nextDouble() - 0.5) * 0.1,
-                    (random.nextDouble() - 0.5) * 0.1,
-                    (random.nextDouble() - 0.5) * 0.1,
-                    0.01);
-
-            // 烟雾效果
-            if (random.nextFloat() < 0.3) {
-                serverLevel.sendParticles(ParticleTypes.SMOKE, x, y, z, 1,
-                        0, 0.1, 0, 0.01);
-            }
-
-            // 火星效果
-            if (random.nextFloat() < 0.1) {
-                serverLevel.sendParticles(ParticleTypes.LAVA, x, y, z, 1,
-                        (random.nextDouble() - 0.5) * 0.2,
-                        (random.nextDouble() - 0.5) * 0.2,
-                        (random.nextDouble() - 0.5) * 0.2,
-                        0.01);
-            }
-        }
-
-        // 魂焰中心线
-        if (i % 1 == 0) {
-            createSoulFireParticles(serverLevel, random, look, startPos, distance);
-        }
-    }
-
-    private static void createSoulFireParticles(ServerLevel serverLevel, RandomSource random,
-                                                Vec3 look, Vec3 startPos, double distance) {
-        for (int centerParticles = 0; centerParticles < 3; centerParticles++) {
-            serverLevel.sendParticles(
-                    ParticleTypes.SOUL_FIRE_FLAME,
-                    startPos.x + look.x * distance + (random.nextDouble() - 0.5) * 0.2,
-                    startPos.y + look.y * distance + (random.nextDouble() - 0.5) * 0.2,
-                    startPos.z + look.z * distance + (random.nextDouble() - 0.5) * 0.2,
-                    1,
-                    (random.nextDouble() - 0.5) * 0.02,
-                    (random.nextDouble() - 0.5) * 0.02,
-                    (random.nextDouble() - 0.5) * 0.02,
-                    0.01
-            );
-        }
-    }
-
-    private static void createDragonBreathParticles(ServerLevel serverLevel, RandomSource random,
-                                                    Vec3 look, Vec3 startPos) {
-        Vec3 dragonBreathPos = startPos.add(look.multiply(0.5, 0.5, 0.5));
-        for (int i = 0; i < 2; i++) {
-            serverLevel.sendParticles(
-                    ParticleTypes.DRAGON_BREATH,
-                    dragonBreathPos.x + (random.nextDouble() - 0.5) * 0.5,
-                    dragonBreathPos.y + (random.nextDouble() - 0.5) * 0.5,
-                    dragonBreathPos.z + (random.nextDouble() - 0.5) * 0.5,
-                    1,
-                    look.x * 0.2 + (random.nextDouble() - 0.5) * 0.1,
-                    look.y * 0.2 + (random.nextDouble() - 0.5) * 0.1,
-                    look.z * 0.2 + (random.nextDouble() - 0.5) * 0.1,
-                    0.01
-            );
-        }
-    }
-
-    private static void playDragonBreathSounds(ServerLevel serverLevel, RandomSource random, Player player) {
-        if (random.nextFloat() < 0.4f) {
-            serverLevel.playSound(null,
-                    player.getX(), player.getY(), player.getZ(),
-                    SoundEvents.BLAZE_SHOOT,
-                    SoundSource.PLAYERS,
-                    0.3f,
-                    0.7f + random.nextFloat() * 0.3f);
-        }
-
-        if (random.nextFloat() < 0.4f) {
-            serverLevel.playSound(null,
-                    player.getX(), player.getY(), player.getZ(),
-                    SoundEvents.FIRE_AMBIENT,
-                    SoundSource.PLAYERS,
-                    0.2f,
-                    0.8f + random.nextFloat() * 0.2f);
-        }
+        // 龙息已完全改由 BreathProjectile 投射物负责（onServerTick 发射），这里不再喷旧粒子。
     }
 }

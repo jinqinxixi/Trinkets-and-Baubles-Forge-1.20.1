@@ -8,6 +8,8 @@ import com.jinqinxixi.trinketsandbaubles.network.message.Messages.ChargeKeyMessa
 import com.jinqinxixi.trinketsandbaubles.network.message.Messages.DashKeyPressMessage;
 import com.jinqinxixi.trinketsandbaubles.network.message.Messages.PolarizedStoneToggleMessage;
 import com.jinqinxixi.trinketsandbaubles.network.message.Messages.StopChargeMessage;
+import com.jinqinxixi.trinketsandbaubles.network.message.Messages.WolfRiderKeyMessage;
+import com.jinqinxixi.trinketsandbaubles.network.message.Messages.RaceAbilityMessage;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -52,5 +54,28 @@ public class  ClientNetworkHandler {
     }
     public static void sendDragonFlightToggle() {
         NetworkHandler.sendToServer(new DragonFlightToggleMessage());
+    }
+
+    /** Reports the jump key while airborne, which starts a glide or asks for a push. */
+    /** Tells the server a glide has started, which it would otherwise correct away. */
+    public static void sendGlideStart() {
+        NetworkHandler.sendToServer(
+                new com.jinqinxixi.trinketsandbaubles.network.message.Messages.GlideMessage(false));
+    }
+
+    /** Asks the server for a push, which it pays for out of the player's mana. */
+    public static void sendGlidePush() {
+        NetworkHandler.sendToServer(
+                new com.jinqinxixi.trinketsandbaubles.network.message.Messages.GlideMessage(true));
+    }
+
+    /** 哥布林骑狼按键。 */
+    public static void sendWolfRiderKey() {
+        NetworkHandler.sendToServer(new WolfRiderKeyMessage());
+    }
+
+    /** 种族技能键（金牛踏击等）。charge 为蓄力比例 0~1。 */
+    public static void sendRaceAbility(float charge) {
+        NetworkHandler.sendToServer(new RaceAbilityMessage(charge));
     }
 }

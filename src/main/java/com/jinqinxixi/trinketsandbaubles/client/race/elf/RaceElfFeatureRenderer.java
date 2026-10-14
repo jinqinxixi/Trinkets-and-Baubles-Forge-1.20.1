@@ -2,7 +2,7 @@ package com.jinqinxixi.trinketsandbaubles.client.race.elf;
 
 import com.jinqinxixi.trinketsandbaubles.client.race.RaceFeatureRenderer;
 import com.jinqinxixi.trinketsandbaubles.client.race.RaceQuadRenderer;
-import com.jinqinxixi.trinketsandbaubles.capability.base.AbstractRaceCapability;
+import com.jinqinxixi.trinketsandbaubles.capability.api.IRaceAppearance;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.model.PlayerModel;
@@ -55,7 +55,7 @@ public class RaceElfFeatureRenderer implements RaceFeatureRenderer
                        PoseStack pose,
                        MultiBufferSource buffer,
                        int light,
-                       AbstractRaceCapability appearance,
+                       IRaceAppearance appearance,
                        float limbSwing,
                        float limbSwingAmount,
                        float partialTick,
@@ -140,7 +140,7 @@ public class RaceElfFeatureRenderer implements RaceFeatureRenderer
      * and both of these come back the same, which is what sends the drawing down its single-tone
      * path.
      */
-    private static int colourFor(AbstractRaceCapability appearance, boolean outer)
+    private static int colourFor(IRaceAppearance appearance, boolean outer)
     {
         if (appearance.traitColorOption() == 0)
         {

@@ -36,6 +36,12 @@ public class ModCapabilities {
     public static final Capability<ITitanCapability> TITAN_CAPABILITY =
             CapabilityManager.get(new CapabilityToken<ITitanCapability>(){});
 
+    public static final Capability<ITaurusCapability> TAURUS_CAPABILITY =
+            CapabilityManager.get(new CapabilityToken<ITaurusCapability>(){});
+
+    public static final Capability<IHumanCapability> HUMAN_CAPABILITY =
+            CapabilityManager.get(new CapabilityToken<IHumanCapability>(){});
+
     // 静态初始化块，注册所有种族能力
     static {
         RACE_CAPABILITIES.put("dwarves", DWARVES_CAPABILITY);
@@ -45,5 +51,7 @@ public class ModCapabilities {
         RACE_CAPABILITIES.put("fairy", FAIRY_CAPABILITY);
         RACE_CAPABILITIES.put("goblins", GOBLINS_CAPABILITY);
         RACE_CAPABILITIES.put("titan", TITAN_CAPABILITY);
+        RACE_CAPABILITIES.put("taurus", TAURUS_CAPABILITY);
+        RACE_CAPABILITIES.put("human", HUMAN_CAPABILITY);
     }
 }

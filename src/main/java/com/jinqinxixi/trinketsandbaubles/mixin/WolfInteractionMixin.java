@@ -31,9 +31,9 @@
 //                    cir.setReturnValue(InteractionResult.sidedSuccess(true));
 //                }
 //            }
-//            // 潜行右键时不处理，让原版交互生效
+//            // 潜行右键时不处理，让默认交互生效
 //            else if (player.isShiftKeyDown()) {
-//                return; // 让原版的交互处理执行
+//                return; // 让默认的交互处理执行
 //            }
 //        }
 //    }

@@ -1,5 +1,6 @@
 package com.jinqinxixi.trinketsandbaubles.items.baubles;
 
+import com.jinqinxixi.trinketsandbaubles.TrinketsandBaublesMod;
 import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import com.jinqinxixi.trinketsandbaubles.modifier.ModifiableBaubleItem;
 import net.minecraft.ChatFormatting;
@@ -12,6 +13,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -21,6 +23,7 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import top.theillusivec4.curios.api.CuriosApi;
+import top.theillusivec4.curios.api.SlotContext;
 
 import java.util.List;
 
@@ -35,6 +38,30 @@ public class ShieldofHonorItem extends ModifiableBaubleItem {
 
     public ShieldofHonorItem(Properties properties) {
         super(properties);
+    }
+
+    /**
+     * Keeps the resistance up, every tick, for as long as the shield is worn.
+     *
+     * <p>Here rather than in the damage handler, and that is the whole of it: a resistance that is only
+     * refreshed by being hit is a resistance a player never sees, because the effect a shield grants
+     * should be on them from the moment they put it on. The resistance is kept up from the item's
+     * tick handler, so it is there from the moment the shield is worn.
+     */
+    @Override
+    public void curioTick(SlotContext slotContext, ItemStack stack) {
+        keepResistance(slotContext.entity());
+    }
+
+    @Override
+    public void onUnequip(SlotContext slotContext, ItemStack newStack, ItemStack stack) {
+        // The resistance goes with the shield. Left behind it would run its two hundred ticks and hold
+        // a player at damage reduction they are no longer wearing anything for.
+        MobEffectInstance active = slotContext.entity().getEffect(MobEffects.DAMAGE_RESISTANCE);
+
+        if (active != null && active.getDuration() <= RESISTANCE_DURATION) {
+            slotContext.entity().removeEffect(MobEffects.DAMAGE_RESISTANCE);
+        }
     }
 
     private static void spawnProtectionParticles(Player player) {
@@ -59,11 +86,89 @@ public class ShieldofHonorItem extends ModifiableBaubleItem {
         }
     }
 
+    /** Whether this entity is wearing the shield. */
+    public static boolean hasShield(LivingEntity entity) {
+        return isEquipped(entity);
+    }
+
     private static boolean isEquipped(LivingEntity entity) {
         return CuriosApi.getCuriosInventory(entity).resolve()
                 .flatMap(curios -> curios.findFirstCurio(stack ->
                         stack.getItem() instanceof ShieldofHonorItem))
                 .isPresent();
+    }
+
+    /** How long the resistance the shield keeps lasts, refreshed on every hit. */
+    private static final int RESISTANCE_DURATION = 200;
+
+    /**
+     * Keeps a resistance effect on the wearer.
+     *
+     * <p>Applied only when there is none. Nothing is refreshed: the effect lasts two hundred ticks and
+     * the next tick after it lapses supplies a fresh one, so a wearer sees it blink off and on every
+     * ten seconds.
+     *
+     * <p>Applying it only when absent is also why this needs no exemption from the stacking rule — the
+     * rule only acts on an effect arriving where one already is, and this arrives where there is none.
+     */
+    private static void keepResistance(LivingEntity entity) {
+        MobEffectInstance active = entity.getEffect(MobEffects.DAMAGE_RESISTANCE);
+
+        // 没有抗性才加，抗性还在就什么都不做。抗性效果 200 tick 耗尽后下一 tick 补一个新的，
+        // 会有「刚好消失、下一 tick 才补」的短暂空档，这是既有行为。
+        if (active != null) {
+            return;
+        }
+
+        entity.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE,
+                RESISTANCE_DURATION, ModConfig.SHIELD_RESISTANCE_LEVEL.get(), false, false));
+    }
+
+    /**
+     * Stacks one level onto a resistance the wearer already has, and says whether to refuse the effect.
+     *
+     * <p>Written to raise the incoming effect by one when there is room to raise it, and the answer
+     * is whether the game should refuse the effect outright. The answer is
+     * "no" in both cases that matter — an effect that was raised is applied by the game as the stronger
+     * of the two it now has, and one that could not be raised is still a resistance the wearer may want.
+     * The only refusal is an incoming effect weaker than the one already worn, which would otherwise
+     * replace a better resistance with a worse one.
+     *
+     * <p>Nothing is remembered and nothing is flagged. The hook fires once per effect the game applies,
+     * and raising the effect in place is enough: there is no second application for this to answer.
+     *
+     * @return whether the game should refuse the effect
+     */
+    public static boolean stackResistance(LivingEntity entity, MobEffectInstance incoming) {
+        // Only stack on the server. The client may receive the same effect through sync and fire
+        // Applicable again; stacking there would double-count the shield's own level.
+        if (entity.level().isClientSide()) {
+            return false;
+        }
+
+        if (incoming.getEffect() != MobEffects.DAMAGE_RESISTANCE) {
+            return false;
+        }
+
+        MobEffectInstance active = entity.getEffect(MobEffects.DAMAGE_RESISTANCE);
+
+        if (active == null) {
+            return false;
+        }
+
+        int amplifier = incoming.getAmplifier() + 1;
+
+        // A weaker effect than the one already worn, which the game would apply over it.
+        if (active.getAmplifier() > amplifier) {
+            return true;
+        }
+
+        if (amplifier <= ModConfig.SHIELD_RESISTANCE_STACK_LIMIT.get()) {
+            incoming.update(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE,
+                    incoming.getDuration(), amplifier, incoming.isAmbient(), incoming.isVisible()));
+        }
+
+        return false;
     }
 
     public static float onDamage(LivingEntity entity, DamageSource source, float amount) {
@@ -75,10 +180,10 @@ public class ShieldofHonorItem extends ModifiableBaubleItem {
             return amount;
         }
 
-        // 应用基础伤害减免
-        if (!entity.hasEffect(MobEffects.DAMAGE_RESISTANCE)) {
-            amount *= (1.0f - ModConfig.SHIELD_DAMAGE_REDUCTION.get().floatValue());
-        }
+        // The shield does not scale the damage itself. It keeps a resistance effect on the wearer, and
+        // the game applies that — which is why wearing a second source of resistance raises the level
+        // rather than being refused: the effect is the shield's, and a second helping of it stacks.
+        keepResistance(entity);
 
         // 爆炸伤害特殊处理
         if (source.is(DamageTypes.EXPLOSION) ||
@@ -132,22 +237,13 @@ public class ShieldofHonorItem extends ModifiableBaubleItem {
                         ModConfig.SHIELD_MAX_DAMAGE_COUNT.get())
                 .withStyle(ChatFormatting.AQUA));
 
-        Player player = Minecraft.getInstance().player;
-        if (player != null) {
-            boolean hasResistance = player.hasEffect(MobEffects.DAMAGE_RESISTANCE);
-            if (!hasResistance) {
-                tooltip.add(Component.translatable("item.trinketsandbaubles.shield_of_honor.tooltip.active",
-                                (int) (ModConfig.SHIELD_DAMAGE_REDUCTION.get() * 100))
-                        .withStyle(ChatFormatting.GREEN));
-            } else {
-                tooltip.add(Component.translatable("item.trinketsandbaubles.shield_of_honor.tooltip.inactive")
-                        .withStyle(ChatFormatting.GRAY));
-            }
-        } else {
-            tooltip.add(Component.translatable("item.trinketsandbaubles.shield_of_honor.tooltip.base",
-                            (int) (ModConfig.SHIELD_DAMAGE_REDUCTION.get() * 100))
-                    .withStyle(ChatFormatting.GOLD));
-        }
+        // The stacking rule, which is what makes a second source of resistance worth something rather
+        // than being refused. The level shown is the amplifier limit plus one, because amplifier 0 is
+        // already level I.
+        tooltip.add(Component.translatable("item.trinketsandbaubles.shield_of_honor.tooltip5",
+                        ModConfig.SHIELD_RESISTANCE_STACK_LIMIT.get() + 1)
+                .withStyle(ChatFormatting.AQUA));
+
         super.appendHoverText(stack, level, tooltip, flag);
     }
 

@@ -10,17 +10,21 @@ import com.jinqinxixi.trinketsandbaubles.items.baubles.DragonsEyeItem;
 import com.jinqinxixi.trinketsandbaubles.items.baubles.DragonsRingItem;
 import com.jinqinxixi.trinketsandbaubles.items.baubles.PolarizedStoneItem;
 import com.jinqinxixi.trinketsandbaubles.items.baubles.ShieldofHonorItem;
-import com.jinqinxixi.trinketsandbaubles.client.renderer.DragonsEyeRenderer;
 import com.jinqinxixi.trinketsandbaubles.items.ModCreativeModeTab;
 import com.jinqinxixi.trinketsandbaubles.items.ModItem;
 
 import com.jinqinxixi.trinketsandbaubles.loot.LootTableHandler;
+import com.jinqinxixi.trinketsandbaubles.init.ModElements;
+import com.jinqinxixi.trinketsandbaubles.init.ModEntities;
 import com.jinqinxixi.trinketsandbaubles.capability.mana.ManaData;
 import com.jinqinxixi.trinketsandbaubles.capability.mana.hud.ManaHudOverlay;
 import com.jinqinxixi.trinketsandbaubles.modifier.CurioAttributeEvents;
 import com.jinqinxixi.trinketsandbaubles.network.handler.NetworkHandler;
 import com.jinqinxixi.trinketsandbaubles.recast.AnvilRecastRegistry;
 import com.jinqinxixi.trinketsandbaubles.util.ScanSystem;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraftforge.event.entity.living.MobEffectEvent;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.logging.LogUtils;
@@ -30,15 +34,16 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import com.jinqinxixi.trinketsandbaubles.traits.elements.Element;
+import com.jinqinxixi.trinketsandbaubles.traits.elements.ItemElements;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RenderGuiEvent;
-import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -71,6 +76,17 @@ public class TrinketsandBaublesMod
         ModCreativeModeTab.register(modEventBus);
         ModBlocks.register(modEventBus);
         EFFECTS.register(modEventBus);
+        ModElements.register(modEventBus);
+        ModEntities.register(modEventBus);
+        // 注册配方里「匹配某个元素物品」的 ingredient 序列化器（龙元素变体配方用它）。
+        modEventBus.addListener((net.minecraftforge.registries.RegisterEvent event) -> {
+            if (event.getRegistryKey().equals(net.minecraftforge.registries.ForgeRegistries.Keys.RECIPE_SERIALIZERS))
+            {
+                net.minecraftforge.common.crafting.CraftingHelper.register(
+                        com.jinqinxixi.trinketsandbaubles.util.recipes.ElementIngredient.ID,
+                        com.jinqinxixi.trinketsandbaubles.util.recipes.ElementIngredient.Serializer.INSTANCE);
+            }
+        });
         modEventBus.register(ModConfig.class);
         // 通用事件监听
         MinecraftForge.EVENT_BUS.register(LootTableHandler.class);
@@ -99,12 +115,6 @@ public class TrinketsandBaublesMod
         // 客户端专属内容集中处理
         if (FMLEnvironment.dist == Dist.CLIENT) {
             modEventBus.addListener(this::clientSetup);
-            MinecraftForge.EVENT_BUS.addListener(
-                    EventPriority.NORMAL,
-                    false,
-                    RenderLevelStageEvent.class,
-                    DragonsEyeRenderer::onRenderWorld
-            );
         }
     }
 
@@ -124,7 +134,7 @@ public class TrinketsandBaublesMod
 
     private void onConfigLoad(final ModConfigEvent.Loading event) {
         if (event.getConfig().getType() == net.minecraftforge.fml.config.ModConfig.Type.COMMON) {
-            ScanSystem.initializeOreGroups();
+            // 组式矿石探测已替换为贪婪之眼（GreedyEyesSystem），无需在这里初始化矿石组。
         }
     }
 
@@ -138,6 +148,33 @@ public class TrinketsandBaublesMod
                     event.getAmount()
             );
             event.setAmount(newDamage);
+        }
+
+        /**
+         * Stacks a resistance arriving on a wearer who already has one.
+         *
+         * <p>The shield keeps a resistance on its wearer, and the tooltip promises that receiving
+         * the same effect again is worth a level — so a potion of resistance on top of the shield's
+         * own raises the level rather than being refused by an equal effect. Only a wearer of the
+         * shield is answered, so everyone else's resistance behaves as it always did.
+         *
+         * <p>The effect is changed in place, and the event is refused only when the answer says so.
+         * The shield's own resistance is not exempted — it does not need to be, because the shield
+         * applies it only when the wearer has none, and an effect arriving on a wearer who has none is
+         * not stacked.
+         */
+        @SubscribeEvent
+        public static void onEffectApplicable(MobEffectEvent.Applicable event) {
+            if (!(event.getEntity() instanceof net.minecraft.world.entity.player.Player player)
+                    || !ShieldofHonorItem.hasShield(player)) {
+                return;
+            }
+
+            MobEffectInstance effect = event.getEffectInstance();
+
+            if (effect != null && ShieldofHonorItem.stackResistance(player, effect)) {
+                event.setResult(net.minecraftforge.eventbus.api.Event.Result.DENY);
+            }
         }
     }
 
@@ -185,6 +222,9 @@ public class TrinketsandBaublesMod
 
     private void clientSetup(FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
+            // 注册饰品的「戴上显示外观」渲染器（海之石、伤害盾、末影王冠、法埃利斯之爪）。
+            com.jinqinxixi.trinketsandbaubles.client.curios.AccessoryRenderers.register();
+
             // 注册吸引模式材质参数
             ItemProperties.register(
                     ModItem.POLARIZED_STONE.get(),
@@ -199,6 +239,46 @@ public class TrinketsandBaublesMod
                     new ResourceLocation(MOD_ID, "deflection_mode"),
                     (stack, level, entity, seed) ->
                             stack.hasTag() && stack.getTag().getBoolean(PolarizedStoneItem.DEFLECTION_MODE_TAG) ? 1.0F : 0.0F
+            );
+
+            // 龙戒/龙宝石的元素变体材质：读物品堆上的元素 NBT，模型据此切到火/冰/雷贴图。
+            // 0.25=火、0.5=冰、0.75=雷，与模型 overrides 里的阈值对应。
+            ResourceLocation elementProperty = new ResourceLocation(MOD_ID, "element");
+            for (Item item : new Item[]{ModItem.DRAGONS_RING.get(), ModItem.DRAGON_GEM.get()}) {
+                ItemProperties.register(
+                        item,
+                        elementProperty,
+                        (stack, level, entity, seed) -> {
+                            Element element = ItemElements.getPrimary(stack,
+                                    com.jinqinxixi.trinketsandbaubles.init.ModElements.NEUTRAL.get());
+                            if (element == com.jinqinxixi.trinketsandbaubles.init.ModElements.FIRE.get()) {
+                                return 0.25F;
+                            }
+                            if (element == com.jinqinxixi.trinketsandbaubles.init.ModElements.ICE.get()) {
+                                return 0.5F;
+                            }
+                            if (element == com.jinqinxixi.trinketsandbaubles.init.ModElements.LIGHTNING.get()) {
+                                return 0.75F;
+                            }
+                            return 0.0F;
+                        }
+                );
+            }
+
+            // 装饰饰品的图标按外观变体切换：predicate 值是当前外观序号（8~17），模型 overrides 据此
+            // 换成对应的种族特征模型（牛角/魅魔角/通用角/龙角/猫尾），0~7 用基础图标。
+            ItemProperties.register(
+                    ModItem.COSMETIC.get(),
+                    new ResourceLocation(MOD_ID, "cosmetic"),
+                    (stack, level, entity, seed) ->
+                            com.jinqinxixi.trinketsandbaubles.items.baubles.CosmeticItem.featureOf(stack).ordinal()
+            );
+
+            // 魔法糖果的图标按堆叠比例切换：堆得越多贴图越换（0.25/0.5/0.75 三档）。
+            ItemProperties.register(
+                    ModItem.MANA_CANDY.get(),
+                    new ResourceLocation(MOD_ID, "candy"),
+                    (stack, level, entity, seed) -> (float) stack.getCount() / (float) stack.getMaxStackSize()
             );
         });
     }

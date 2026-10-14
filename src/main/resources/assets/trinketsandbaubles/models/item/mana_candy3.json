@@ -1,7 +1,7 @@
 {
     "parent" : "item/generated", 
     "textures" : {
-        "layer0" : "xat:items/mana_candy3"
+        "layer0" : "trinketsandbaubles:item/mana_candy3"
     }, 
 
     "display" : {

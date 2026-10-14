@@ -405,7 +405,7 @@ public class RaceAttributesConfig {
             FAELES_WALL_CLIMB = BUILDER.comment("猫猫效果是否允许攀爬墙壁")
                     .define("fwallClimb", true);
 
-            FAELES_CLIMB_SPEED = BUILDER.comment("猫猫效果爬墙速度（原版梯子速度约为0.11）")
+            FAELES_CLIMB_SPEED = BUILDER.comment("猫猫效果爬墙速度（梯子速度约为0.11）")
                     .defineInRange("climbSpeed", 0.11D, 0.05D, 0.3D);
 
             FAELES_CLIMB_HORIZONTAL_DRAG = BUILDER.comment("猫猫效果爬墙时的水平移动阻力")
@@ -513,7 +513,7 @@ public class RaceAttributesConfig {
             FAIRY_DEW_WALL_CLIMB = BUILDER.comment("仙女效果是否允许攀爬墙壁")
                     .define("wallClimb", true);
 
-            FAIRY_DEW_CLIMB_SPEED = BUILDER.comment("仙女效果爬墙速度（原版梯子速度约为0.11）")
+            FAIRY_DEW_CLIMB_SPEED = BUILDER.comment("仙女效果爬墙速度（梯子速度约为0.11）")
                     .defineInRange("climbSpeed", 0.11D, 0.05D, 0.3D);
 
             FAIRY_DEW_CLIMB_HORIZONTAL_DRAG = BUILDER.comment("仙女效果爬墙时的水平移动阻力")
@@ -714,6 +714,114 @@ public class RaceAttributesConfig {
         }
     }
 
+    // 金牛族属性配置
+    public static class TaurusAttributes {
+        public final ForgeConfigSpec.DoubleValue MAX_HEALTH;
+        public final ForgeConfigSpec.DoubleValue FOLLOW_RANGE;
+        public final ForgeConfigSpec.DoubleValue KNOCKBACK_RESISTANCE;
+        public final ForgeConfigSpec.DoubleValue MOVEMENT_SPEED;
+        public final ForgeConfigSpec.DoubleValue FLYING_SPEED;
+        public final ForgeConfigSpec.DoubleValue ATTACK_DAMAGE;
+        public final ForgeConfigSpec.DoubleValue ATTACK_KNOCKBACK;
+        public final ForgeConfigSpec.DoubleValue ATTACK_SPEED;
+        public final ForgeConfigSpec.DoubleValue ARMOR;
+        public final ForgeConfigSpec.DoubleValue ARMOR_TOUGHNESS;
+        public final ForgeConfigSpec.DoubleValue LUCK;
+        public final ForgeConfigSpec.DoubleValue SWIM_SPEED;
+        public final ForgeConfigSpec.DoubleValue NAMETAG_DISTANCE;
+        public final ForgeConfigSpec.DoubleValue ENTITY_GRAVITY;
+        public final ForgeConfigSpec.DoubleValue STEP_HEIGHT;
+        public final ForgeConfigSpec.DoubleValue BLOCK_REACH;
+        public final ForgeConfigSpec.DoubleValue ENTITY_REACH;
+
+        public final ForgeConfigSpec.DoubleValue TAURUS_MANA_BONUS;
+        public final ForgeConfigSpec.DoubleValue TAURUS_SCALE_FACTOR;
+        // 踏击（冲撞）能力参数
+        public final ForgeConfigSpec.DoubleValue TAURUS_STAMPEDE_DAMAGE;
+        public final ForgeConfigSpec.DoubleValue TAURUS_STAMPEDE_MANA_COST;
+        public final ForgeConfigSpec.IntValue TAURUS_STAMPEDE_CHARGE_TIME;
+        public final ForgeConfigSpec.DoubleValue TAURUS_STAMPEDE_VELOCITY_MIN;
+        public final ForgeConfigSpec.DoubleValue TAURUS_STAMPEDE_VELOCITY_MAX;
+
+        public TaurusAttributes(ForgeConfigSpec.Builder builder) {
+            builder.comment("金牛族属性配置").push("taurus");
+
+            MAX_HEALTH = builder.comment("生命值倍率")
+                    .defineInRange("max_health", 0.5, -10.0, 10.0);
+
+            FOLLOW_RANGE = builder.comment("跟随范围倍率")
+                    .defineInRange("follow_range", 0.0, -10.0, 10.0);
+
+            KNOCKBACK_RESISTANCE = builder.comment("击退抗性")
+                    .defineInRange("knockback_resistance", 0.5, -10.0, 1.0);
+
+            MOVEMENT_SPEED = builder.comment("移动速度倍率")
+                    .defineInRange("movement_speed", -0.1, -10.0, 10.0);
+
+            FLYING_SPEED = builder.comment("飞行速度倍率")
+                    .defineInRange("flying_speed", 0.0, -10.0, 10.0);
+
+            ATTACK_DAMAGE = builder.comment("攻击伤害倍率")
+                    .defineInRange("attack_damage", 0.2, -10.0, 10.0);
+
+            ATTACK_KNOCKBACK = builder.comment("攻击击退力度")
+                    .defineInRange("attack_knockback", 0.0, -10.0, 10.0);
+
+            ATTACK_SPEED = builder.comment("攻击速度倍率")
+                    .defineInRange("attack_speed", 0.0, -10.0, 10.0);
+
+            ARMOR = builder.comment("护甲值加成")
+                    .defineInRange("armor", 0.2, -10.0, 50.0);
+
+            ARMOR_TOUGHNESS = builder.comment("护甲韧性加成")
+                    .defineInRange("armor_toughness", 0.3, -10.0, 50.0);
+
+            LUCK = builder.comment("幸运值加成")
+                    .defineInRange("luck", 0.0, -10.0, 10.0);
+
+            SWIM_SPEED = builder.comment("游泳速度倍率")
+                    .defineInRange("swim_speed", -0.15, -10.0, 10.0);
+
+            NAMETAG_DISTANCE = builder.comment("名称标签显示距离倍率")
+                    .defineInRange("nametag_distance", 0.0, -10.0, 10.0);
+
+            ENTITY_GRAVITY = builder.comment("重力影响倍率")
+                    .defineInRange("entity_gravity", 0.0, -10.0, 10.0);
+
+            STEP_HEIGHT = builder.comment("步高增加值")
+                    .defineInRange("step_height", 1.0, -10.0, 10.0);
+
+            BLOCK_REACH = builder.comment("方块交互距离倍率")
+                    .defineInRange("block_reach", 1.0, -10.0, 10.0);
+
+            ENTITY_REACH = builder.comment("实体交互距离倍率")
+                    .defineInRange("entity_reach", 0.0, -10.0, 10.0);
+
+            TAURUS_MANA_BONUS = BUILDER.comment("魔力值增加量")
+                    .defineInRange("manaBonus", 0.0, 0, 10000);
+
+            TAURUS_SCALE_FACTOR = BUILDER.comment("金牛族体型缩放 1 为正常体型")
+                    .defineInRange("scale", 1.2D, 0.1D, 10.0D);
+
+            TAURUS_STAMPEDE_DAMAGE = BUILDER.comment("踏击（冲撞）满蓄伤害")
+                    .defineInRange("stampedeDamage", 10.0D, 0.0D, 10000.0D);
+
+            TAURUS_STAMPEDE_MANA_COST = BUILDER.comment("踏击（冲撞）满蓄魔力消耗")
+                    .defineInRange("stampedeManaCost", 20.0D, 0.0D, 10000.0D);
+
+            TAURUS_STAMPEDE_CHARGE_TIME = BUILDER.comment("踏击蓄满所需 tick 数")
+                    .defineInRange("stampedeChargeTime", 40, 1, 1200);
+
+            TAURUS_STAMPEDE_VELOCITY_MIN = BUILDER.comment("踏击最小冲刺速度（未蓄力）")
+                    .defineInRange("stampedeVelocityMin", 3.0D, 0.0D, 20.0D);
+
+            TAURUS_STAMPEDE_VELOCITY_MAX = BUILDER.comment("踏击最大冲刺速度（满蓄力）")
+                    .defineInRange("stampedeVelocityMax", 6.0D, 0.0D, 20.0D);
+
+            builder.pop();
+        }
+    }
+
     // 为每个种族创建配置实例
     public static final DwarvesAttributes DWARVES;
     public static final DragonAttributes DRAGON;
@@ -722,6 +830,7 @@ public class RaceAttributesConfig {
     public static final FairyAttributes FAIRY;
     public static final GoblinsAttributes GOBLINS;
     public static final TitanAttributes TITAN;
+    public static final TaurusAttributes TAURUS;
 
     static {
         BUILDER.comment("种族属性配置系统").push("races");
@@ -734,6 +843,7 @@ public class RaceAttributesConfig {
         FAIRY = new FairyAttributes(BUILDER);
         GOBLINS = new GoblinsAttributes(BUILDER);
         TITAN = new TitanAttributes(BUILDER);
+        TAURUS = new TaurusAttributes(BUILDER);
 
         BUILDER.pop();
         SPEC = BUILDER.build();

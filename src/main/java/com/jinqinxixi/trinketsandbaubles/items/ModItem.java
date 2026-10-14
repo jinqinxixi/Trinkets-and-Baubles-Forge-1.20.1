@@ -105,6 +105,11 @@ public class ModItem {
             TeddyBear::new
     );
 
+    public static final RegistryObject<Item> COSMETIC = registerCurio(
+            "cosmetic",
+            CosmeticItem::new
+    );
+
     public static final RegistryObject<Item> DRAGONS_EYE = registerCurio(
             "dragons_eye",
             DragonsEyeItem::new
@@ -173,6 +178,11 @@ public class ModItem {
     public static final RegistryObject<Item> TITAN_RING = registerCurio(
             "titan_ring",
             TitanRingItem::new
+    );
+
+    public static final RegistryObject<Item> TAURUS_RING = registerCurio(
+            "taurus_ring",
+            TaurusRingItem::new
     );
 
     public static final RegistryObject<Item> GLOWING_POWDER = ITEMS.register(
@@ -250,6 +260,16 @@ public class ModItem {
     public static final RegistryObject<Item> DRAGON_GEM = ITEMS.register(
             "dragon_gem",
             DragonGemPotion::new
+    );
+
+    public static final RegistryObject<Item> TAURUS_FOOD = ITEMS.register(
+            "taurus_food",
+            TaurusFoodPotion::new
+    );
+
+    public static final RegistryObject<Item> SPARK_POWDER = ITEMS.register(
+            "spark_powder",
+            SparkPowderItem::new
     );
 
 

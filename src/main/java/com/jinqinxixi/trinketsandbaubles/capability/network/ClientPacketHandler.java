@@ -22,10 +22,15 @@ public class ClientPacketHandler {
      */
     @OnlyIn(Dist.CLIENT)
     public static void handlePacket(SyncRaceCapabilityPacket packet) {
-        Player player = Minecraft.getInstance().player;
-        if (player == null) return;
+        // 用 playerId 从客户端世界找到「数据所属的那个玩家」，把种族数据应用到他身上。不能固定
+        // 取本地玩家——多人时别的玩家的种族数据要应用到别的玩家，否则
+        // 大家都看不到彼此的角/翅/体型。
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null) return;
 
-        apply(player, packet);
+        if (mc.level.getEntity(packet.getPlayerId()) instanceof Player player) {
+            apply(player, packet);
+        }
     }
 
     /**
@@ -46,6 +51,7 @@ public class ClientPacketHandler {
             case "dragon" -> applyTo(player, ModCapabilities.DRAGON_CAPABILITY, packet);
             case "fairy" -> applyTo(player, ModCapabilities.FAIRY_CAPABILITY, packet);
             case "goblins" -> applyTo(player, ModCapabilities.GOBLINS_CAPABILITY, packet);
+            case "taurus" -> applyTo(player, ModCapabilities.TAURUS_CAPABILITY, packet);
             default -> {
                 // A race this client has never heard of. Left alone rather than treated as an
                 // error: a server running a newer version may name one, and a client with no
@@ -70,6 +76,8 @@ public class ClientPacketHandler {
                         packet.getTraitVariant(),
                         packet.getPrimaryTraitColor(),
                         packet.getSecondaryTraitColor(),
+                        packet.getAuxTraitColor(),
+                        packet.getAuxTraitVariant(),
                         packet.getTraitColorOption());
             }
         });

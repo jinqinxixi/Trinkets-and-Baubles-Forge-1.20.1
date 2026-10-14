@@ -193,4 +193,26 @@ public class TitanCapability extends AbstractRaceCapability implements ITitanCap
                 block == Blocks.DARK_OAK_SAPLING ||
                 block == Blocks.MANGROVE_PROPAGULE;
     }
+
+    /**
+     * The colours this race's features are drawn in before a player chooses any.
+     *
+     * <p>The race's own default values, which are what make it look right out of the box:
+     * an elf's ears begin in skin tones and a dragon's wings in its own dark purple, rather than in
+     * the white that a race with no colours of its own would fall back to.
+     */
+    @Override
+    protected int defaultPrimaryColor() {
+        return 0x999999;
+    }
+
+    @Override
+    protected int defaultSecondaryColor() {
+        return 0x31302B;
+    }
+
+    @Override
+    protected int defaultAuxColor() {
+        return 0x999999;
+    }
 }

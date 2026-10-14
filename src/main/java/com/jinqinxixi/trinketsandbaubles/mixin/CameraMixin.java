@@ -91,8 +91,7 @@ public class CameraMixin {
                     return Math.max(startingDistance * 0.3, cameraScale);
                 }
             } catch (Exception e) {
-                System.out.println("Error in CameraMixin: " + e.getMessage());
-                e.printStackTrace();
+                com.jinqinxixi.trinketsandbaubles.TrinketsandBaublesMod.LOGGER.error("调整第三人称相机距离失败", e);
             }
         }
         return startingDistance;

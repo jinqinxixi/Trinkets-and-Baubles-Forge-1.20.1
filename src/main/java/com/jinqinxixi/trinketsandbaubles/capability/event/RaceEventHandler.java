@@ -10,6 +10,7 @@ import com.jinqinxixi.trinketsandbaubles.capability.registry.ModCapabilities;
 import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import com.jinqinxixi.trinketsandbaubles.config.RaceAttributesConfig;
 import com.jinqinxixi.trinketsandbaubles.util.RaceRingUtil;
+import com.jinqinxixi.trinketsandbaubles.util.RaceScaleHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.TickTask;
@@ -19,7 +20,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Arrow;
@@ -53,6 +53,7 @@ public class RaceEventHandler {
     private static final String GOBLINS_CAP_KEY = "GoblinsCapability";
     private static final String FAIRY_CAP_KEY = "FairyCapability";
     private static final String DRAGON_CAP_KEY = "DragonCapability";
+    private static final String TAURUS_CAP_KEY = "TaurusCapability";
 
     @SubscribeEvent
     public static void onAttachCapabilities(AttachCapabilitiesEvent<Entity> event) {
@@ -71,6 +72,10 @@ public class RaceEventHandler {
                     new FairyCapability(player));
             registerRaceCapability(event, player, "dragon", ModCapabilities.DRAGON_CAPABILITY,
                     new DragonCapability(player));
+            registerRaceCapability(event, player, "taurus", ModCapabilities.TAURUS_CAPABILITY,
+                    new TaurusCapability(player));
+            registerRaceCapability(event, player, "human", ModCapabilities.HUMAN_CAPABILITY,
+                    new HumanCapability(player));
         }
     }
 
@@ -105,6 +110,7 @@ public class RaceEventHandler {
         saveCapabilityData(player, ModCapabilities.GOBLINS_CAPABILITY, GOBLINS_CAP_KEY);
         saveCapabilityData(player, ModCapabilities.FAIRY_CAPABILITY, FAIRY_CAP_KEY);
         saveCapabilityData(player, ModCapabilities.DRAGON_CAPABILITY, DRAGON_CAP_KEY);
+        saveCapabilityData(player, ModCapabilities.TAURUS_CAPABILITY, TAURUS_CAP_KEY);
     }
 
     private static <T extends IBaseRaceCapability> void saveCapabilityData(
@@ -114,10 +120,10 @@ public class RaceEventHandler {
         player.getCapability(capability).ifPresent(cap -> {
             if (cap.isActive()) {
                 CompoundTag playerData = player.getPersistentData();
-                CompoundTag capData = new CompoundTag();
-                capData.putBoolean("WasActive", true);
-                capData.putFloat("CurrentMaxMana", ManaData.getMaxMana(player));
-                playerData.put(key, capData);
+                // 照 serializeNBT 存全部：active 状态 + 外观颜色 + 魔力。之前只存 WasActive/CurrentMaxMana，
+                // 颜色没存，死亡复活后颜色回默认。serializeNBT 本身会带上 saveAppearance（颜色）和
+                // saveAdditional（魔力），一起存进来，复活时 deserializeNBT 一并还原。
+                playerData.put(key, cap.serializeNBT());
             }
         });
     }
@@ -144,8 +150,25 @@ public class RaceEventHandler {
                     originalData.getString(LAST_ACTIVE_RACE_KEY));
         }
 
+        // 跨维度时把各种族保存的完整 NBT（含外观颜色）也复制过去，否则 restoreRaceAbility
+        // 恢复时读不到颜色，回默认。照死亡路径的做法，颜色跟着种族一起跨维度。
+        copyCapabilityNbt(originalData, newPlayerData, DWARVES_CAP_KEY);
+        copyCapabilityNbt(originalData, newPlayerData, ELVES_CAP_KEY);
+        copyCapabilityNbt(originalData, newPlayerData, FAELES_CAP_KEY);
+        copyCapabilityNbt(originalData, newPlayerData, TITAN_CAP_KEY);
+        copyCapabilityNbt(originalData, newPlayerData, GOBLINS_CAP_KEY);
+        copyCapabilityNbt(originalData, newPlayerData, FAIRY_CAP_KEY);
+        copyCapabilityNbt(originalData, newPlayerData, DRAGON_CAP_KEY);
+        copyCapabilityNbt(originalData, newPlayerData, TAURUS_CAP_KEY);
+
         if (!player.level().isClientSide()) {
             scheduleRaceAbilityRestore(player);
+        }
+    }
+
+    private static void copyCapabilityNbt(CompoundTag from, CompoundTag to, String key) {
+        if (from.contains(key)) {
+            to.put(key, from.getCompound(key));
         }
     }
 
@@ -168,6 +191,7 @@ public class RaceEventHandler {
                 restoreRaceCapabilityFromKey(original, serverPlayer, GOBLINS_CAP_KEY, ModCapabilities.GOBLINS_CAPABILITY);
                 restoreRaceCapabilityFromKey(original, serverPlayer, FAIRY_CAP_KEY, ModCapabilities.FAIRY_CAPABILITY);
                 restoreRaceCapabilityFromKey(original, serverPlayer, DRAGON_CAP_KEY, ModCapabilities.DRAGON_CAPABILITY);
+                restoreRaceCapabilityFromKey(original, serverPlayer, TAURUS_CAP_KEY, ModCapabilities.TAURUS_CAPABILITY);
 
                 // 如果有之前保存的种族，且现在没有任何种族戒指，则恢复该种族
                 if (!savedRace.isEmpty() && !RaceRingUtil.hasAnyRaceRing(serverPlayer)) {
@@ -188,10 +212,14 @@ public class RaceEventHandler {
         if (originalData.contains(capabilityKey)) {
             CompoundTag capData = originalData.getCompound(capabilityKey);
             player.getCapability(capability).ifPresent(cap -> {
-                if (capData.getBoolean("WasActive")) {
-                    cap.setActive(true);
-                    if (capData.contains("CurrentMaxMana")) {
-                        ManaData.setMaxMana(player, capData.getFloat("CurrentMaxMana"));
+                // 照 deserializeNBT 恢复全部：active 状态 + 外观颜色 + 魔力。之前只 setActive(true)，
+                // 颜色回默认。deserializeNBT 会读回 saveAppearance 存的颜色和 active 字段。
+                if (capData.getBoolean("active")) {
+                    cap.deserializeNBT(capData);
+                    // deserializeNBT 只设了 isActive 和字段，不触发 setActive 的体型/属性副作用。
+                    // 补上：体型（瞬间到位）和属性（+血量等），否则复活后体型回 1.0、属性丢失。
+                    if (cap instanceof AbstractRaceCapability race) {
+                        race.applyEffects();
                     }
                 }
             });
@@ -211,13 +239,35 @@ public class RaceEventHandler {
         AbstractRaceCapability.clearAllRaceAbilities(player);
         String raceName = playerData.getString(LAST_ACTIVE_RACE_KEY);
 
-        Capability<? extends IBaseRaceCapability> capability =
-                ModCapabilities.RACE_CAPABILITIES.get(raceName.toLowerCase());
-        if (capability != null) {
-            player.getCapability(capability).ifPresent(cap -> cap.setActive(true));
-            restorePlayerMana(player);
+        // 种族名 → 保存 NBT 的 key，读完整 NBT（含外观颜色）恢复，而不是只 setActive(true)。
+        String capKey = switch (raceName.toLowerCase()) {
+            case "dwarves" -> DWARVES_CAP_KEY;
+            case "elves" -> ELVES_CAP_KEY;
+            case "faeles" -> FAELES_CAP_KEY;
+            case "titan" -> TITAN_CAP_KEY;
+            case "goblins" -> GOBLINS_CAP_KEY;
+            case "fairy" -> FAIRY_CAP_KEY;
+            case "dragon" -> DRAGON_CAP_KEY;
+            case "taurus" -> TAURUS_CAP_KEY;
+            default -> null;
+        };
+
+        if (capKey != null && playerData.contains(capKey)) {
+            Capability<? extends IBaseRaceCapability> capability =
+                    ModCapabilities.RACE_CAPABILITIES.get(raceName.toLowerCase());
+            if (capability != null) {
+                CompoundTag saved = playerData.getCompound(capKey);
+                player.getCapability(capability).ifPresent(cap -> {
+                    cap.deserializeNBT(saved);
+                    // 补体型/属性副作用（deserializeNBT 只设字段，不触发 setActive 的副作用）。
+                    if (cap instanceof AbstractRaceCapability race) {
+                        race.applyEffects();
+                    }
+                });
+            }
         }
 
+        restorePlayerMana(player);
         playerData.remove(LAST_ACTIVE_RACE_KEY);
     }
 
@@ -276,12 +326,28 @@ public class RaceEventHandler {
                 player.getPersistentData().putString(LAST_ACTIVE_RACE_KEY, "dragon");
             }
         });
+
+        // 存完整 NBT（含外观颜色），跨维度恢复时用 deserializeNBT 还原，否则颜色回默认。
+        saveCapabilityData(player, ModCapabilities.DWARVES_CAPABILITY, DWARVES_CAP_KEY);
+        saveCapabilityData(player, ModCapabilities.ELVES_CAPABILITY, ELVES_CAP_KEY);
+        saveCapabilityData(player, ModCapabilities.FAELES_CAPABILITY, FAELES_CAP_KEY);
+        saveCapabilityData(player, ModCapabilities.TITAN_CAPABILITY, TITAN_CAP_KEY);
+        saveCapabilityData(player, ModCapabilities.GOBLINS_CAPABILITY, GOBLINS_CAP_KEY);
+        saveCapabilityData(player, ModCapabilities.FAIRY_CAPABILITY, FAIRY_CAP_KEY);
+        saveCapabilityData(player, ModCapabilities.DRAGON_CAPABILITY, DRAGON_CAP_KEY);
+        saveCapabilityData(player, ModCapabilities.TAURUS_CAPABILITY, TAURUS_CAP_KEY);
     }
 
     @SubscribeEvent
     public static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
 
         refreshRaceCapabilities(event.getEntity());
+
+        // And tells the client what the race looks like, which the two events below already do and
+        // this one did not. Without it a player who set a colour saw it while they were in the world
+        // and lost it on the next login: the value was saved on the server the whole time, but the
+        // client had never been told it, so it drew the defaults.
+        syncRaceCapabilities(event.getEntity());
     }
 
     @SubscribeEvent
@@ -313,6 +379,8 @@ public class RaceEventHandler {
         player.getCapability(ModCapabilities.FAIRY_CAPABILITY)
                 .ifPresent(cap -> { if (cap.isActive()) cap.sync(); });
         player.getCapability(ModCapabilities.DRAGON_CAPABILITY)
+                .ifPresent(cap -> { if (cap.isActive()) cap.sync(); });
+        player.getCapability(ModCapabilities.TAURUS_CAPABILITY)
                 .ifPresent(cap -> { if (cap.isActive()) cap.sync(); });
     }
 
@@ -358,6 +426,9 @@ public class RaceEventHandler {
     @SubscribeEvent
     public static void onLivingTick(LivingEvent.LivingTickEvent event) {
         if (event.getEntity() instanceof Player player) {
+            // 推进体型缩放的平滑过渡。无论是否激活种族都要推进 —— 移除种族后也要从当前值
+            // 平滑回 1.0，否则碰撞箱会瞬间弹回正常体型。
+            RaceScaleHelper.tick(player);
             updateRaceCapabilities(player);
         }
     }
@@ -376,6 +447,8 @@ public class RaceEventHandler {
         player.getCapability(ModCapabilities.FAIRY_CAPABILITY)
                 .ifPresent(cap -> { if (cap.isActive()) cap.tick(); });
         player.getCapability(ModCapabilities.DRAGON_CAPABILITY)
+                .ifPresent(cap -> { if (cap.isActive()) cap.tick(); });
+        player.getCapability(ModCapabilities.TAURUS_CAPABILITY)
                 .ifPresent(cap -> { if (cap.isActive()) cap.tick(); });
     }
 
@@ -453,6 +526,15 @@ public class RaceEventHandler {
 
         // 处理泰坦种族水中下沉
         handleTitanWaterMovement(player);
+
+        // Counts the glide push cooldowns down and holds glides up. The gliding itself is the game's,
+        // but the game clears its flag every tick because the player wears no elytra, so it is written
+        // back here.
+        com.jinqinxixi.trinketsandbaubles.capability.glide.GlideHandler.tickCooldowns();
+
+        if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
+            com.jinqinxixi.trinketsandbaubles.capability.glide.GlideHandler.tickGliding(serverPlayer);
+        }
     }
 
     private static void handleTitanWaterMovement(Player player) {
@@ -478,20 +560,6 @@ public class RaceEventHandler {
             }
         });
     }
-    @SubscribeEvent
-    public static void onEntityMount(EntityMountEvent event) {
-        if (event.isMounting() &&
-                event.getEntityMounting() instanceof Player player &&
-                event.getEntityBeingMounted() instanceof AbstractHorse horse) {
-
-            player.getCapability(ModCapabilities.GOBLINS_CAPABILITY).ifPresent(cap -> {
-                if (cap.isActive()) {
-                    ((GoblinsCapability)cap).handleMount(horse);
-                }
-            });
-        }
-    }
-
     @SubscribeEvent
     public static void onCreeperTarget(LivingChangeTargetEvent event) {
         if (event.getNewTarget() instanceof Player player &&

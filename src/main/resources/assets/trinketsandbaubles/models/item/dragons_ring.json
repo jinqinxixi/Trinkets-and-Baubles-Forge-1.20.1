@@ -20,5 +20,19 @@
 
             "scale" : [1.7, 1.7, 1.7]
         }
-    }
+    },
+    "overrides" : [
+        {
+            "predicate" : { "trinketsandbaubles:element" : 0.25 },
+            "model" : "trinketsandbaubles:item/dragons_ring_fire"
+        },
+        {
+            "predicate" : { "trinketsandbaubles:element" : 0.5 },
+            "model" : "trinketsandbaubles:item/dragons_ring_ice"
+        },
+        {
+            "predicate" : { "trinketsandbaubles:element" : 0.75 },
+            "model" : "trinketsandbaubles:item/dragons_ring_lightning"
+        }
+    ]
 }

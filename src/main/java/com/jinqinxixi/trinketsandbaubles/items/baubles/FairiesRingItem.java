@@ -254,6 +254,10 @@ public class FairiesRingItem extends ModifiableBaubleItem {
             tooltip.add(Component.translatable("item.trinketsandbaubles.fairies_ring.tooltip13",
                             flightKeyName)
                     .withStyle(ChatFormatting.GREEN));
+            tooltip.add(Component.translatable("item.trinketsandbaubles.glide.hint")
+                    .withStyle(ChatFormatting.GOLD));
+            tooltip.add(Component.translatable("item.trinketsandbaubles.glide.boost_hint")
+                    .withStyle(ChatFormatting.GOLD));
             tooltip.add(Component.translatable("item.trinketsandbaubles.fairies_ring.press_shift")
                     .withStyle(ChatFormatting.GRAY));
         }

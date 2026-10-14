@@ -3,6 +3,7 @@ package com.jinqinxixi.trinketsandbaubles.modeffects;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.entity.player.Player;
@@ -21,14 +22,13 @@ public class LightningResistanceEffect extends MobEffect {
     public static void onLivingHurt(LivingHurtEvent event) {
         if (event.getEntity() instanceof Player player && !player.level().isClientSide) {
 
-            if (event.getSource().is(ResourceKey.create(Registries.DAMAGE_TYPE,
-                    new ResourceLocation("iceandfire", "dragon_lightning")))) {
+            // 雷免疫：闪电伤害 + 冰火传说的龙雷伤害。
+            boolean lightning = event.getSource().is(DamageTypeTags.IS_LIGHTNING)
+                    || event.getSource().is(ResourceKey.create(Registries.DAMAGE_TYPE,
+                            new ResourceLocation("iceandfire", "dragon_lightning")));
 
-                // 检查玩家是否有这个效果
-                if (player.hasEffect(ModEffects.LIGHTNING_RESISTANCE.get())) {
-                    // 取消伤害
-                    event.setCanceled(true);
-                }
+            if (lightning && player.hasEffect(ModEffects.LIGHTNING_RESISTANCE.get())) {
+                event.setCanceled(true);
             }
         }
     }

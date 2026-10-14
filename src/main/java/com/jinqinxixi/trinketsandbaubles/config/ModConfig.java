@@ -2,6 +2,7 @@ package com.jinqinxixi.trinketsandbaubles.config;
 
 
 import com.jinqinxixi.trinketsandbaubles.TrinketsandBaublesMod;
+import com.jinqinxixi.trinketsandbaubles.util.ActivationMethod;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -45,12 +46,16 @@ public class ModConfig {
     public static final ForgeConfigSpec.DoubleValue DASH_MANA_COST;
     public static final ForgeConfigSpec.DoubleValue DASH_JUMP_BOOST;
 
-    // 龙眼扫描范围配置
-    public static ForgeConfigSpec.ConfigValue<List<? extends String>> VALUABLE_ORES;
-    public static ForgeConfigSpec.ConfigValue<List<? extends String>> COMMON_ORES;
-    public static ForgeConfigSpec.ConfigValue<List<? extends String>> REDSTONE_ORES;
-    public static ForgeConfigSpec.IntValue MAX_RENDER_BLOCKS;
-    public static ForgeConfigSpec.IntValue RENDER_RANGE;
+    // 贪婪之眼配置（默认值）
+    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> GREEDY_EYES_TARGETS;
+    public static final ForgeConfigSpec.IntValue GREEDY_EYES_RANGE_VERTICAL;
+    public static final ForgeConfigSpec.IntValue GREEDY_EYES_RANGE_HORIZONTAL;
+    public static final ForgeConfigSpec.IntValue GREEDY_EYES_FREQUENCY;
+    public static final ForgeConfigSpec.IntValue GREEDY_EYES_PARTICLES;
+    public static final ForgeConfigSpec.BooleanValue GREEDY_EYES_CLOSEST;
+    public static final ForgeConfigSpec.DoubleValue GREEDY_EYES_COST;
+    public static final ForgeConfigSpec.EnumValue<ActivationMethod> GREEDY_EYES_GROWL_ACTIVATION;
+    public static final ForgeConfigSpec.IntValue GREEDY_EYES_VOLUME;
 
 
     // 末影王冠配置
@@ -89,6 +94,8 @@ public class ModConfig {
     // 荣誉之盾配置
     public static final ForgeConfigSpec.IntValue SHIELD_MAX_DAMAGE_COUNT;
     public static final ForgeConfigSpec.DoubleValue SHIELD_DAMAGE_REDUCTION;
+    public static final ForgeConfigSpec.IntValue SHIELD_RESISTANCE_LEVEL;
+    public static final ForgeConfigSpec.IntValue SHIELD_RESISTANCE_STACK_LIMIT;
     public static final ForgeConfigSpec.DoubleValue SHIELD_EXPLOSION_REDUCTION;
     public static ForgeConfigSpec.BooleanValue ENABLE_DAMAGE_SHIELD_EFFECT;
     public static ForgeConfigSpec.DoubleValue DAMAGE_SHIELD_TRIGGER_CHANCE;
@@ -248,51 +255,59 @@ public class ModConfig {
                 .comment("跳跃时闪避的额外推力系数")
                 .defineInRange("arcingOrb.dashJumpBoost", 0.3D, 0.0D, 1.0D);
 
-        // 巨龙之眼
-        MAX_RENDER_BLOCKS = BUILDER
-                .comment("最大渲染方块数量\n" +
-                        "更大的数值可能会影响性能\n" +
-                        "范围: 50-10000")
-                .defineInRange("dragonsEye.max_render_blocks", 200, 50, 10000);
+        // 贪婪之眼（默认值）
+        BUILDER.comment("贪婪之眼配置").push("greedyEyes");
 
-        RENDER_RANGE = BUILDER
-                .comment("渲染范围（以方块为单位）\n" +
-                        "这个值会被平方来计算实际范围\n" +
-                        "默认值12表示12*12的范围\n" +
-                        "范围: 1-128")
-                .defineInRange("dragonsEye.render_range", 12, 1, 128);
-
-        VALUABLE_ORES = BUILDER
-                .comment("贵重矿物组 - 在这里添加要探测的额外贵重矿石\n" +
-                        "添加方式示例：\n" +
-                        "[\"minecraft:ancient_debris\", \"create:zinc_ore\", \"thermal:silver_ore\"]\n" +
-                        "或者每个矿石单独一行：\n" +
-                        "[\n" +
-                        "    \"minecraft:ancient_debris\",\n" +
-                        "    \"create:zinc_ore\",\n" +
-                        "    \"thermal:silver_ore\"\n" +
-                        "]")
-                .defineList("dragonsEye.valuable.ores",
-                        Arrays.asList(),
+        GREEDY_EYES_TARGETS = BUILDER
+                .comment("寻宝目标列表。格式：方块 id、实体 id 或 #方块tag;#RRGGBB")
+                .defineList("targets",
+                        Arrays.asList(
+                                "#forge:ores/coal;#464646",
+                                "#forge:ores/iron;#FFCC99",
+                                "#forge:ores/gold;#FFD700",
+                                "#forge:ores/lapis;#26619C",
+                                "#forge:ores/redstone;#B02E26",
+                                "#forge:ores/diamond;#00E6FF",
+                                "#forge:ores/emerald;#00FF4D",
+                                "#forge:ores/quartz;#EBEBEB",
+                                "minecraft:chest;#FFD700",
+                                "minecraft:chest_minecart;#FFD700"
+                        ),
                         entry -> entry instanceof String);
 
-        COMMON_ORES = BUILDER
-                .comment("常见矿物组 - 在这里添加要探测的额外普通矿石\n" +
-                        "添加方式示例：\n" +
-                        "[\"create:copper_ore\", \"thermal:tin_ore\", \"mekanism:osmium_ore\"]\n" +
-                        "注意：每个矿石ID之间需要用逗号分隔，最后一个不需要加逗号")
-                .defineList("dragonsEye.common.ores",
-                        Arrays.asList(),
-                        entry -> entry instanceof String);
+        GREEDY_EYES_RANGE_VERTICAL = BUILDER
+                .comment("垂直扫描范围（方块）")
+                .defineInRange("rangeVertical", 6, 0, 32);
 
-        REDSTONE_ORES = BUILDER
-                .comment("红石矿物组 - 在这里添加要探测的额外红石类矿石\n" +
-                        "添加方式示例：\n" +
-                        "[\"thermal:cinnabar_ore\", \"projectred:electrotine_ore\"]\n" +
-                        "注意：矿石ID格式必须是 模组id:方块id")
-                .defineList("dragonsEye.redstone.ores",
-                        Arrays.asList(),
-                        entry -> entry instanceof String);
+        GREEDY_EYES_RANGE_HORIZONTAL = BUILDER
+                .comment("水平扫描范围（方块）")
+                .defineInRange("rangeHorizontal", 12, 0, 32);
+
+        GREEDY_EYES_FREQUENCY = BUILDER
+                .comment("两次扫描间隔（tick）")
+                .defineInRange("frequency", 79, 1, 12000);
+
+        GREEDY_EYES_PARTICLES = BUILDER
+                .comment("非仅最近目标时每次扫描显示的最大粒子数")
+                .defineInRange("particles", 255, 0, 4096);
+
+        GREEDY_EYES_CLOSEST = BUILDER
+                .comment("只高亮最近的目标")
+                .define("closest", true);
+
+        GREEDY_EYES_COST = BUILDER
+                .comment("每次扫描消耗的魔力")
+                .defineInRange("cost", 0.0D, 0.0D, 10000.0D);
+
+        GREEDY_EYES_GROWL_ACTIVATION = BUILDER
+                .comment("龙吼提示触发条件（SNEAK/STAND/ALWAYS/NEVER）")
+                .defineEnum("growlActivation", ActivationMethod.SNEAK);
+
+        GREEDY_EYES_VOLUME = BUILDER
+                .comment("龙吼音量（百分比）")
+                .defineInRange("volume", 100, 0, 100);
+
+        BUILDER.pop();
 
         // 末影王冠
         ENDERMAN_FOLLOW_RANGE = BUILDER
@@ -389,6 +404,18 @@ public class ModConfig {
         SHIELD_DAMAGE_REDUCTION = BUILDER
                 .comment("基础伤害减免百分比")
                 .defineInRange("shield.damageReduction", 0.2D, 0.0D, 1.0D);
+
+        SHIELD_RESISTANCE_LEVEL = BUILDER
+                .comment("荣誉之盾维持的抗性等级（0 = 抗性 I，1 = 抗性 II，以此类推）\n" +
+                        "照原模组做法：盾牌不直接减免伤害，而是维持抗性效果由游戏结算")
+                .defineInRange("shield.resistanceLevel", 0, 0, 4);
+
+        SHIELD_RESISTANCE_STACK_LIMIT = BUILDER
+                .comment("抗性叠加的等级上限（amplifier 值）\n" +
+                        "0 = 抗性 I，1 = 抗性 II，2 = 抗性 III，3 = 抗性 IV，以此类推\n" +
+                        "再次获得同种效果时在现有等级上 +1 级，但不会超过此上限\n" +
+                        "物品描述里的\"最高 X 级\"会跟随此值变化")
+                .defineInRange("shield.resistanceStackLimit", 3, 0, 255);
 
         SHIELD_EXPLOSION_REDUCTION = BUILDER
                 .comment("爆炸伤害减免系数")

@@ -15,6 +15,7 @@ import java.util.Map;
 
 public class RaceHelper {
     public static final String SAVED_RACE_KEY = "SavedRace";
+    public static final String SAVED_DRAGON_ELEMENT_KEY = "SavedDragonElement";
 
     // 检查玩家当前的种族状态
     public static void checkAndUpdateRaceState(Player player) {
@@ -54,6 +55,16 @@ public class RaceHelper {
     private static void saveRace(ServerPlayer player, String raceName) {
         CompoundTag playerData = player.getPersistentData();
         playerData.putString(SAVED_RACE_KEY, raceName);
+
+        // 龙额外记下元素：吃龙宝石变的是哪种元素，戴戒指会覆盖能力里的元素，摘掉后要按这个还原，
+        // 否则 buff 图标会停在最后戴的戒指的元素上。
+        if ("dragon".equalsIgnoreCase(raceName)) {
+            player.getCapability(ModCapabilities.DRAGON_CAPABILITY).ifPresent(cap -> {
+                if (cap instanceof com.jinqinxixi.trinketsandbaubles.capability.impl.DragonCapability d) {
+                    playerData.putString(SAVED_DRAGON_ELEMENT_KEY, d.getDragonElement());
+                }
+            });
+        }
     }
 
     @Mod.EventBusSubscriber(modid = TrinketsandBaublesMod.MOD_ID)

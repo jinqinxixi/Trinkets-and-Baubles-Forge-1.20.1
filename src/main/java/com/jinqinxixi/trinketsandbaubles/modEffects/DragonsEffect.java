@@ -41,8 +41,75 @@ public class DragonsEffect extends MobEffect {
     private static final String ORIGINAL_MANA_TAG = "DragonOriginalMaxMana";
     private static final String CRYSTAL_BONUS_TAG = "CrystalManaBonus"; //记录水晶增加的魔力值
 
+    /**
+     * 按龙元素的注册名取对应的效果：火红、冰蓝、雷紫，无元素（基础巨龙）用黑灰色「dragon」。
+     */
+    public static MobEffect dragonEffect(String element)
+    {
+        return switch (element == null ? "" : element)
+        {
+            case "fire" -> ModEffects.FIRE_DRAGON.get();
+            case "ice" -> ModEffects.ICE_DRAGON.get();
+            case "lightning" -> ModEffects.LIGHTNING_DRAGON.get();
+            default -> ModEffects.DRAGON.get();
+        };
+    }
+
+    /** 玩家身上当前的龙效果（四种元素效果之一），没有则 null。 */
+    public static MobEffectInstance dragonEffectOn(LivingEntity entity)
+    {
+        for (MobEffect effect : new MobEffect[]
+        {
+                ModEffects.DRAGON.get(),
+                ModEffects.FIRE_DRAGON.get(),
+                ModEffects.ICE_DRAGON.get(),
+                ModEffects.LIGHTNING_DRAGON.get()
+        })
+        {
+            MobEffectInstance present = entity.getEffect(effect);
+            if (present != null)
+            {
+                return present;
+            }
+        }
+        return null;
+    }
+
+    /** 玩家是否处于龙变身状态（身上有任一元素的龙效果）。 */
+    public static boolean isDragon(LivingEntity entity)
+    {
+        return dragonEffectOn(entity) != null;
+    }
+
+    /** 清掉玩家身上任一元素的龙效果。 */
+    public static void clearDragonEffect(LivingEntity entity)
+    {
+        for (MobEffect effect : new MobEffect[]
+        {
+                ModEffects.DRAGON.get(),
+                ModEffects.FIRE_DRAGON.get(),
+                ModEffects.ICE_DRAGON.get(),
+                ModEffects.LIGHTNING_DRAGON.get()
+        })
+        {
+            if (entity.hasEffect(effect))
+            {
+                entity.removeEffect(effect);
+            }
+        }
+    }
+
     public DragonsEffect() {
         super(MobEffectCategory.BENEFICIAL, 0xFF4500);
+    }
+
+    /**
+     * 按元素配色的构造：三种元素龙共享同一套逻辑与同一张龙头图案，只有 buff 图标和药水颜色不同
+     * ——火红、冰蓝、雷紫。效果图标的贴图按效果注册名各放一张，玩家就能从 buff 栏一眼认出变的是
+     * 哪种龙。
+     */
+    public DragonsEffect(int color) {
+        super(MobEffectCategory.BENEFICIAL, color);
     }
 /*
     @Override
@@ -88,14 +155,15 @@ public class DragonsEffect extends MobEffect {
     public static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
         Player player = event.getEntity();
         initializeFlightEnabled(player);
-        MobEffectInstance effect = player.getEffect(ModEffects.DRAGON.get());
+        MobEffectInstance effect = dragonEffectOn(player);
 
         if (effect != null) {
-            player.removeEffect(ModEffects.DRAGON.get());
+            // 登录时把龙效果换成无限期的那一种：效果是哪个元素就换回哪个，颜色跟着元素走。
+            clearDragonEffect(player);
             RaceScaleHelper.setModelScale(player,
                     ModConfig.DRAGON_SCALE_FACTOR.get().floatValue());
             player.addEffect(new MobEffectInstance(
-                    ModEffects.DRAGON.get(),
+                    effect.getEffect(),
                     -1,
                     0,
                     false,
@@ -109,7 +177,7 @@ public class DragonsEffect extends MobEffect {
         CompoundTag data = player.getPersistentData();
         if (!data.contains("DragonFlightEnabled")) {
             // 添加检查：只有拥有龙效果的玩家才能获得飞行能力
-            if (player.hasEffect(ModEffects.DRAGON.get())) {
+            if (isDragon(player)) {
                 data.putBoolean("DragonFlightEnabled", true);
                 if (!player.isCreative()) {
                     player.getAbilities().mayfly = true;
@@ -127,7 +195,7 @@ public class DragonsEffect extends MobEffect {
             }
         } else {
             // 即使已经有标记，也要检查是否应该有飞行能力
-            boolean shouldHaveFlight = player.hasEffect(ModEffects.DRAGON.get());
+            boolean shouldHaveFlight = isDragon(player);
             if (!shouldHaveFlight && !player.isCreative()) {
                 data.putBoolean("DragonFlightEnabled", false);
                 player.getAbilities().mayfly = false;
@@ -202,13 +270,23 @@ public class DragonsEffect extends MobEffect {
                 data.putBoolean(BONUS_TAG, true);
             }
 
-            player.addEffect(new MobEffectInstance(
-                    MobEffects.FIRE_RESISTANCE,
-                    100,
-                    0,
-                    false,
-                    false
-            ));
+            // 按元素给对应免疫，buff 图标三种颜色区分（火=火焰抗性、冰/雷=模组抗性效果）。
+            player.getCapability(com.jinqinxixi.trinketsandbaubles.capability.registry.ModCapabilities.DRAGON_CAPABILITY)
+                    .ifPresent(cap -> {
+                        MobEffect immunity = switch (cap.getDragonElement())
+                        {
+                            case "ice" -> ModEffects.ICE_RESISTANCE.get();
+                            case "lightning" -> ModEffects.LIGHTNING_RESISTANCE.get();
+                            default -> MobEffects.FIRE_RESISTANCE;
+                        };
+                        player.addEffect(new MobEffectInstance(
+                                immunity,
+                                100,
+                                0,
+                                false,
+                                false
+                        ));
+                    });
 
             boolean nightVisionEnabled = player.getPersistentData().getBoolean("DragonNightVisionEnabled");
             if (nightVisionEnabled) {
@@ -227,7 +305,7 @@ public class DragonsEffect extends MobEffect {
     public static void onPlayerGameModeChange(PlayerEvent.PlayerChangeGameModeEvent event) {
         Player player = event.getEntity();
 
-        if (player.hasEffect(ModEffects.DRAGON.get())) {
+        if (isDragon(player)) {
             if (event.getNewGameMode() != GameType.SURVIVAL) {
                 player.getAbilities().setFlyingSpeed(0.05f);
             } else {
@@ -263,7 +341,7 @@ public class DragonsEffect extends MobEffect {
     @SubscribeEvent
     public static void onPlayerDeath(LivingDeathEvent event) {
         if (event.getEntity() instanceof Player player) {
-            MobEffectInstance effect = player.getEffect(ModEffects.DRAGON.get());
+            MobEffectInstance effect = dragonEffectOn(player);
             if (effect != null) {
                 CompoundTag playerData = player.getPersistentData();
                 playerData.putBoolean("HasDragonEffect", true);
@@ -274,6 +352,9 @@ public class DragonsEffect extends MobEffect {
                 effectData.putBoolean("DragonNightVisionEnabled",
                         playerData.getBoolean("DragonNightVisionEnabled"));
                 effectData.putFloat("CurrentMaxMana", ManaData.getMaxMana(player));
+                // 记下变的是哪种元素的龙，复活后按元素加回对应颜色的效果，buff 图标才不串色。
+                player.getCapability(com.jinqinxixi.trinketsandbaubles.capability.registry.ModCapabilities.DRAGON_CAPABILITY)
+                        .ifPresent(cap -> effectData.putString("DragonElement", cap.getDragonElement()));
 
                 if (playerData.contains(ORIGINAL_MANA_TAG)) {
                     effectData.putFloat(ORIGINAL_MANA_TAG, playerData.getFloat(ORIGINAL_MANA_TAG));
@@ -320,7 +401,8 @@ public class DragonsEffect extends MobEffect {
                             player.level().getServer().getTickCount() + 2,
                             () -> {
                                 player.addEffect(new MobEffectInstance(
-                                        ModEffects.DRAGON.get(),
+                                        dragonEffect(effectData.contains("DragonElement")
+                                                ? effectData.getString("DragonElement") : "fire"),
                                         -1,
                                         0,
                                         false,
@@ -421,7 +503,7 @@ public class DragonsEffect extends MobEffect {
             return;
         }
 
-        if (!player.level().isClientSide && player.hasEffect(ModEffects.DRAGON.get())) {
+        if (!player.level().isClientSide && isDragon(player)) {
             Level level = player.level();
             if (player.getRandom().nextFloat() < 0.4f) {
                 level.playSound(

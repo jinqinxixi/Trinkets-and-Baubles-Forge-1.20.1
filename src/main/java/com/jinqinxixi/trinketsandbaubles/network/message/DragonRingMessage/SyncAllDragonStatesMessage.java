@@ -12,11 +12,13 @@ import java.util.function.Supplier;
 public class SyncAllDragonStatesMessage {
     private final boolean flightEnabled;
     private final boolean dragonBreathActive;
+    private final String dragonElement;
     private final int playerId;
 
-    public SyncAllDragonStatesMessage(boolean flightEnabled, boolean dragonBreathActive, int playerId) {
+    public SyncAllDragonStatesMessage(boolean flightEnabled, boolean dragonBreathActive, String dragonElement, int playerId) {
         this.flightEnabled = flightEnabled;
         this.dragonBreathActive = dragonBreathActive;
+        this.dragonElement = dragonElement == null ? "fire" : dragonElement;
         this.playerId = playerId;
     }
 
@@ -24,6 +26,7 @@ public class SyncAllDragonStatesMessage {
         return new SyncAllDragonStatesMessage(
                 buf.readBoolean(),
                 buf.readBoolean(),
+                buf.readUtf(),
                 buf.readInt()
         );
     }
@@ -31,6 +34,7 @@ public class SyncAllDragonStatesMessage {
     public void encode(FriendlyByteBuf buf) {
         buf.writeBoolean(flightEnabled);
         buf.writeBoolean(dragonBreathActive);
+        buf.writeUtf(dragonElement);
         buf.writeInt(playerId);
     }
 
@@ -48,6 +52,9 @@ public class SyncAllDragonStatesMessage {
                         }
                         if (message.dragonBreathActive != dragonCap.isDragonBreathActive()) {
                             dragonCap.toggleDragonBreath();
+                        }
+                        if (dragonCap instanceof com.jinqinxixi.trinketsandbaubles.capability.impl.DragonCapability d) {
+                            d.setDragonElement(message.dragonElement);
                         }
                     });
 

@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " # ",
+    "#C#",
+    " # "
+  ],
+  "key": {
+    "#": {
+      "item": "minecraft:redstone"
+    },
+    "C": {
+      "item": "trinketsandbaubles:mana_reagent"
+    }
+  },
+  "result": {
+    "item": "trinketsandbaubles:spark_powder",
+    "count": 4
+  }
+}

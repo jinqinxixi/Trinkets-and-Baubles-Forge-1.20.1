@@ -54,6 +54,29 @@ public interface IRaceAppearance
     void setSecondaryTraitColor(int colour);
 
     /**
+     * A third colour, for the races that are drawn in three.
+     *
+     * <p>Horns name three tint slots in their model and use all of them: the horn, the ridge around
+     * its base, and a third tone for the parts that read as separate material. A race drawn in one or
+     * two colours never reads this and is free to leave it alone.
+     */
+    int auxTraitColor();
+
+    void setAuxTraitColor(int colour);
+
+    /**
+     * A second shape selector, for the races that ship a second choice.
+     *
+     * <p>Separate from {@link #traitVariant()} because the two answer different questions. The first
+     * chooses the race's main form; this one chooses something that varies independently of it. A
+     * dragon's horns are the case it exists for: the wings are always wings, and the horns are one of
+     * three shapes, so one slider could not express both.
+     */
+    int auxTraitVariant();
+
+    void setAuxTraitVariant(int variant);
+
+    /**
      * How {@link #primaryTraitColor()} and {@link #secondaryTraitColor()} are read.
      *
      * <p>Zero means the features take their colour from the player's own skin — the natural look,

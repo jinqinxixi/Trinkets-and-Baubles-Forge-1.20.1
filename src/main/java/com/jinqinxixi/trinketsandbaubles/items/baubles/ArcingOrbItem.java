@@ -4,6 +4,8 @@ import com.jinqinxixi.trinketsandbaubles.client.keybind.KeyBindings;
 import com.jinqinxixi.trinketsandbaubles.config.ModConfig;
 import com.jinqinxixi.trinketsandbaubles.capability.mana.ManaData;
 import com.jinqinxixi.trinketsandbaubles.modifier.ModifiableBaubleItem;
+import com.jinqinxixi.trinketsandbaubles.network.message.Messages.EffectsRenderPacket;
+import com.jinqinxixi.trinketsandbaubles.util.RaceScaleHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -465,21 +467,19 @@ public class ArcingOrbItem extends ModifiableBaubleItem  {
                 }
             }
 
-            // 显示魔法阵效果
-            if (player.level() instanceof ServerLevel serverLevel) {
-                Vec3 lookVec = player.getLookAngle();
-                float playerScale = player.getScale();
-                Vec3 circleCenter = player.getEyePosition().add(
-                        lookVec.multiply(2 * playerScale, 2 * playerScale, 2 * playerScale)
-                );
-                createMagicCircle(serverLevel, circleCenter, currentCharge, player);
+            // 蓄力阶段：只放充能音效，不画魔法阵（蓄力只有音效、无粒子）。
+            if (player.level() instanceof ServerLevel serverLevel && player.tickCount % 2 == 0) {
+                float progress = Math.min(currentCharge / ModConfig.MAX_CHARGE.get().floatValue(), 1.0F);
+                serverLevel.playSound(null, player.getX(), player.getY(), player.getZ(),
+                        SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS,
+                        0.2F, 0.4F + 0.6F * progress);
             }
         }
     }
 
     private void createMagicCircle(ServerLevel level, Vec3 center, float chargeAmount, Player player) {
         // 获取玩家当前的缩放比例
-        float playerScale = player.getScale(); // 获取玩家当前的缩放比例
+        float playerScale = RaceScaleHelper.getCurrentModelScale(player); // 获取玩家当前的缩放比例
 
         // 根据玩家大小调整魔法阵大小和位置
         double radius = (1.2 + (chargeAmount / ModConfig.MAX_CHARGE.get().floatValue()) * 0.5) * playerScale;
@@ -688,17 +688,25 @@ public class ArcingOrbItem extends ModifiableBaubleItem  {
 
         Vec3 lookVec = player.getLookAngle();
         Vec3 playerPos = player.getEyePosition();
-        float playerScale = player.getScale();
+        float playerScale = RaceScaleHelper.getCurrentModelScale(player);
 
-        // 增加射程和效果范围
-        double range = 40.0 * playerScale;
+        // 射程：沿视线 15 格。
+        double range = 15.0;
         double baseRadius = 1.2 * playerScale;
 
         Vec3 beamStart = playerPos.add(lookVec.scale(2));
         Vec3 beamEnd = beamStart.add(lookVec.scale(range));
 
-        // 创建主效果
-        createAdvancedEnergyBeam(serverLevel, beamStart, beamEnd, baseRadius, chargeAmount);
+        // 魔法球特效：一道蓝紫闪电弧（起点→终点）+ 终点闪电球，替换掉原来那套 vanilla 粒子魔法阵。
+        int lightningColor = 0x26619C;
+        new EffectsRenderPacket(EffectsRenderPacket.LIGHTNING,
+                beamStart.x, beamStart.y, beamStart.z,
+                beamEnd.x, beamEnd.y, beamEnd.z,
+                lightningColor, 0.9F, 3.0F).sendNear(serverLevel);
+        new EffectsRenderPacket(EffectsRenderPacket.LIGHTNING_ORB,
+                beamEnd.x, beamEnd.y, beamEnd.z,
+                beamEnd.x, beamEnd.y, beamEnd.z,
+                lightningColor, 0.9F, 3.0F).sendNear(serverLevel);
 
         // 扩大伤害范围
         AABB damageBox = new AABB(
@@ -717,20 +725,10 @@ public class ArcingOrbItem extends ModifiableBaubleItem  {
             Vec3 entityPos = entity.position().add(0, entity.getBbHeight() * 0.5, 0);
             if (isInBeamPath(beamStart, beamEnd, entityPos, baseRadius * 3)) {
                 entity.hurt(level.damageSources().indirectMagic(player, player), damage);
-                createAdvancedHitEffect(serverLevel, entityPos);
             }
         }
 
-        // 增强音效组合
-        level.playSound(null, playerPos.x, playerPos.y, playerPos.z,
-                SoundEvents.WARDEN_SONIC_BOOM,
-                SoundSource.PLAYERS, 0.8F, 0.5F);
-        level.playSound(null, playerPos.x, playerPos.y, playerPos.z,
-                SoundEvents.LIGHTNING_BOLT_THUNDER,
-                SoundSource.PLAYERS, 1.5F, 0.8F);
-        level.playSound(null, playerPos.x, playerPos.y, playerPos.z,
-                SoundEvents.BEACON_ACTIVATE,
-                SoundSource.PLAYERS, 1.0F, 2.0F);
+        // 释放音效：不额外播自研音效，闪电特效自带落雷声（ClientEffects 里 LIGHTNING_BOLT_IMPACT）。
     }
 
     private void createAdvancedEnergyBeam(ServerLevel level, Vec3 start, Vec3 end, double baseRadius, float chargeAmount) {

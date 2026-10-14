@@ -6,6 +6,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -29,15 +30,15 @@ public class DragonsEyeFireItem extends DragonsEyeItem {
     @SubscribeEvent
     public static void onLivingHurt(LivingAttackEvent event) {
         if (event.getEntity() instanceof Player player && !player.level().isClientSide) {
-            // 检查是否是龙火伤害
-            if (event.getSource().is(ResourceKey.create(Registries.DAMAGE_TYPE,
-                    new ResourceLocation("iceandfire", "dragon_fire")))) {
+            // 火免疫：火焰伤害 + 冰火传说的龙火伤害。
+            boolean fire = event.getSource().is(DamageTypeTags.IS_FIRE)
+                    || event.getSource().is(ResourceKey.create(Registries.DAMAGE_TYPE,
+                            new ResourceLocation("iceandfire", "dragon_fire")));
 
-                // 使用新的 API 方法检查玩家是否装备了这个饰品
+            if (fire) {
                 if (CuriosApi.getCuriosInventory(player).resolve().isPresent() &&
                         CuriosApi.getCuriosInventory(player).resolve().get()
                                 .findFirstCurio(ModItem.DRAGONS_EYE_FIRE.get()).isPresent()) {
-                    // 取消伤害
                     event.setCanceled(true);
                 }
             }

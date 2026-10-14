@@ -1,6 +1,6 @@
 package com.jinqinxixi.trinketsandbaubles.client.race;
 
-import com.jinqinxixi.trinketsandbaubles.capability.base.AbstractRaceCapability;
+import com.jinqinxixi.trinketsandbaubles.capability.api.IRaceAppearance;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -34,7 +34,7 @@ public interface RaceFeatureRenderer
                 PoseStack pose,
                 MultiBufferSource buffer,
                 int light,
-                AbstractRaceCapability appearance,
+                IRaceAppearance appearance,
                 float limbSwing,
                 float limbSwingAmount,
                 float partialTick,

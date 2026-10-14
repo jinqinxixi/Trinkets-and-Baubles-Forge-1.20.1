@@ -129,7 +129,7 @@ public class FairyCapability extends AbstractRaceCapability implements IFairyCap
         } else if (flightEnabled) {
             // 对于创造和旁观模式，只给予飞行权限，不修改速度
             player.getAbilities().mayfly = true;
-            // 保持原版速度
+            // 保持默认速度
             player.getAbilities().setFlyingSpeed(0.05f);
             player.onUpdateAbilities();
         }
@@ -178,6 +178,9 @@ public class FairyCapability extends AbstractRaceCapability implements IFairyCap
             player.getAbilities().setFlyingSpeed(0.05f); // 恢复默认飞行速度
             player.onUpdateAbilities();
         }
+
+        // Nothing to undo for the glide: it is the game's own, and the race it was granted by is no
+        // longer active, which is what the gliding check reads.
     }
 
 
@@ -194,6 +197,7 @@ public class FairyCapability extends AbstractRaceCapability implements IFairyCap
                     new SyncAllDragonStatesMessage(
                             flightEnabled,    // 飞行状态
                             false,           // dragonBreathActive (对于仙女始终为 false)
+                            "fire",          // dragonElement（仙女无元素，占位）
                             serverPlayer.getId()
                     )
             );
@@ -211,5 +215,27 @@ public class FairyCapability extends AbstractRaceCapability implements IFairyCap
     protected void loadAdditional(CompoundTag tag) {
         super.loadAdditional(tag);
         flightEnabled = tag.contains("FlightEnabled") ? tag.getBoolean("FlightEnabled") : true;
+    }
+
+    /**
+     * The colours this race's features are drawn in before a player chooses any.
+     *
+     * <p>The race's own default values, which are what make it look right out of the box:
+     * an elf's ears begin in skin tones and a dragon's wings in its own dark purple, rather than in
+     * the white that a race with no colours of its own would fall back to.
+     */
+    @Override
+    protected int defaultPrimaryColor() {
+        return 0xBEF4E7;
+    }
+
+    @Override
+    protected int defaultSecondaryColor() {
+        return 0x0EAEAE;
+    }
+
+    @Override
+    protected int defaultAuxColor() {
+        return 0xBEF4E7;
     }
 }

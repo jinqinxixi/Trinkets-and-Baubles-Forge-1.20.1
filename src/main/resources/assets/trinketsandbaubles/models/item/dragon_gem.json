@@ -20,5 +20,19 @@
 
             "scale" : [1.7, 1.7, 1.7]
         }
-    }
+    },
+    "overrides" : [
+        {
+            "predicate" : { "trinketsandbaubles:element" : 0.25 },
+            "model" : "trinketsandbaubles:item/dragon_gem_fire"
+        },
+        {
+            "predicate" : { "trinketsandbaubles:element" : 0.5 },
+            "model" : "trinketsandbaubles:item/dragon_gem_ice"
+        },
+        {
+            "predicate" : { "trinketsandbaubles:element" : 0.75 },
+            "model" : "trinketsandbaubles:item/dragon_gem_lightning"
+        }
+    ]
 }

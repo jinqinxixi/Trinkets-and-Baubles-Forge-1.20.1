@@ -41,9 +41,10 @@ public abstract class AbstractRaceCapability implements IBaseRaceCapability, IRa
      * machine happens to have cached. A player who picked green ears sees green ears on every
      * client, and the server is the one that decides.
      *
-     * <p>Defaults are the ones that need no configuration: features shown, the first shape, and the
-     * colours taken from the player's own skin. A race that never touches any of this is drawn, and
-     * looks like the player it is on.
+     * <p>Each colour starts at the race's own default, which its subclass supplies — an elf's ears
+     * begin in skin tones, a dragon's in its own dark purple. Those defaults are the race's own
+     * values, and they are what makes a race look right before a player has touched anything. White
+     * is only the fallback for a race that names none.
      */
     protected boolean showTraits = true;
 
@@ -53,12 +54,44 @@ public abstract class AbstractRaceCapability implements IBaseRaceCapability, IRa
 
     protected int secondaryTraitColor = 0xFFFFFF;
 
-    /** Zero means take the colours from the player's skin; above zero means use them as given. */
+    /** A third colour, for the models that name three tint slots. */
+    protected int auxTraitColor = 0xFFFFFF;
+
+    /** A second shape selector, for the races that ship a second choice. */
+    protected int auxTraitVariant = 0;
+
+    /** Zero means the colours are used as they stand; see {@link #setTraitColorOption}. */
     protected int traitColorOption = 0;
 
 
     public AbstractRaceCapability(Player player) {
         this.player = player;
+
+        // Taken once, at construction, so that the fields hold the race's own colours from the first
+        // frame rather than staying white until a player opens the appearance screen.
+        this.primaryTraitColor = defaultPrimaryColor();
+        this.secondaryTraitColor = defaultSecondaryColor();
+        this.auxTraitColor = defaultAuxColor();
+    }
+
+    /**
+     * The colour this race's features are drawn in before a player chooses one.
+     *
+     * <p>Overridden by each race with its own value. White for a race that does not
+     * override, which is the honest answer for a race whose colours nobody has decided.
+     */
+    protected int defaultPrimaryColor() {
+        return 0xFFFFFF;
+    }
+
+    /** The second colour, or the same as the first for a race drawn in one tone. */
+    protected int defaultSecondaryColor() {
+        return defaultPrimaryColor();
+    }
+
+    /** The third colour, or the same as the first for a race whose models name only one slot. */
+    protected int defaultAuxColor() {
+        return defaultPrimaryColor();
     }
 
     protected interface AttributeValueProvider {
@@ -166,10 +199,11 @@ public abstract class AbstractRaceCapability implements IBaseRaceCapability, IRa
             }
             // 移除属性
             removeAttributes();
+            // 先置为非激活，再重置体型：resetScaleFactor 触发的尺寸刷新会读 getActiveScale，
+            // 只有 isActive 已为 false，遍历注册表才找不到激活种族、返回 1.0f，碰撞箱才真正回位。
+            this.isActive = false;
             // 重置体型
             resetScaleFactor();
-            // 设置状态
-            this.isActive = false;
         }
 
         sync();
@@ -179,7 +213,10 @@ public abstract class AbstractRaceCapability implements IBaseRaceCapability, IRa
         if (!isActive) return;
 
         applyAttributes();
-        applyScaleFactor();
+        // 恢复路径（登录/切维度）用「瞬间」设置体型，而不是平滑。玩家重进游戏时种族已经是
+        // 这个（scaleFactor 已从 NBT 恢复），体型应直接到位；走平滑会从 1.0 慢慢变大/变小一次，
+        // 很突兀。变身路径（setActive）仍走 applyScaleFactor 的平滑。
+        RaceScaleHelper.setModelScale(player, scaleFactor);
         sync();
     }
 
@@ -285,6 +322,36 @@ public abstract class AbstractRaceCapability implements IBaseRaceCapability, IRa
     }
 
     @Override
+    public int auxTraitColor() {
+        return auxTraitColor;
+    }
+
+    @Override
+    public void setAuxTraitColor(int colour) {
+        if (this.auxTraitColor == colour) {
+            return;
+        }
+
+        this.auxTraitColor = colour;
+        sync();
+    }
+
+    @Override
+    public int auxTraitVariant() {
+        return auxTraitVariant;
+    }
+
+    @Override
+    public void setAuxTraitVariant(int variant) {
+        if (this.auxTraitVariant == variant) {
+            return;
+        }
+
+        this.auxTraitVariant = variant;
+        sync();
+    }
+
+    @Override
     public int traitColorOption() {
         return traitColorOption;
     }
@@ -321,6 +388,8 @@ public abstract class AbstractRaceCapability implements IBaseRaceCapability, IRa
         tag.putInt("traitVariant", traitVariant);
         tag.putInt("primaryTraitColor", primaryTraitColor);
         tag.putInt("secondaryTraitColor", secondaryTraitColor);
+        tag.putInt("auxTraitColor", auxTraitColor);
+        tag.putInt("auxTraitVariant", auxTraitVariant);
         tag.putInt("traitColorOption", traitColorOption);
     }
 
@@ -348,6 +417,14 @@ public abstract class AbstractRaceCapability implements IBaseRaceCapability, IRa
             secondaryTraitColor = tag.getInt("secondaryTraitColor");
         }
 
+        if (tag.contains("auxTraitColor")) {
+            auxTraitColor = tag.getInt("auxTraitColor");
+        }
+
+        if (tag.contains("auxTraitVariant")) {
+            auxTraitVariant = tag.getInt("auxTraitVariant");
+        }
+
         if (tag.contains("traitColorOption")) {
             traitColorOption = tag.getInt("traitColorOption");
         }
@@ -358,15 +435,54 @@ public abstract class AbstractRaceCapability implements IBaseRaceCapability, IRa
         this.isActive = tag.getBoolean("active");
         this.permanentManaDecrease = tag.getFloat("permanentManaDecrease");
         loadAppearance(tag);
+
+        // Said out loud because the alternative is guessing: whether a colour survives a relog is
+        // decided by whether these keys are in the saved tag at all, and that cannot be seen from the
+        // outside. A line naming what was read, and whether each key was present, answers it.
+        com.jinqinxixi.trinketsandbaubles.TrinketsandBaublesMod.LOGGER.info(
+                "[race {}] loaded appearance: hasPrimary={} primary={} hasSecondary={} secondary={}",
+                getRaceId(),
+                tag.contains("primaryTraitColor"), primaryTraitColor,
+                tag.contains("secondaryTraitColor"), secondaryTraitColor);
+
         if (tag.contains("CurrentMaxMana")) {
             ManaData.setMaxMana(player, tag.getFloat("CurrentMaxMana"));
         }
         loadAdditional(tag);
     }
 
+    /**
+     * Writes an appearance straight onto this capability, without telling anyone.
+     *
+     * <p>For the server, applying what a client asked for. It does not go through the setters, which
+     * each answer a change by syncing back — on the server that would be replying to the packet that
+     * is still being handled.
+     *
+     * <p>The echo is the caller's job, and it matters: the client that made the change already shows
+     * it, but every other client that can see this player does not, and neither does this one after
+     * the next login. One reply serves all three.
+     */
+    public void applyAppearance(boolean show, int variant, int primary, int secondary,
+                                int aux, int auxVariant, int colorOption) {
+        this.showTraits = show;
+        this.traitVariant = variant;
+        this.primaryTraitColor = primary;
+        this.secondaryTraitColor = secondary;
+        this.auxTraitColor = aux;
+        this.auxTraitVariant = auxVariant;
+        this.traitColorOption = colorOption;
+    }
+
     @Override
     public void sync() {
-        if (!player.level().isClientSide && player instanceof ServerPlayer serverPlayer) {
+        if (player.level().isClientSide) {
+            // A change made on the client has to be sent to the server, which is the copy that is
+            // saved. Without this the colours a player picks last exactly as long as they stay in the
+            // world: the client shows them, and the value written to disk is the server's, which was
+            // never told.
+            RaceCapabilityNetworking.sendAppearanceUpdate(this);
+        } else if (player instanceof ServerPlayer serverPlayer) {
+            // A change made on the server goes out to the client that owns this player.
             RaceCapabilityNetworking.sendToPlayer(this, serverPlayer);
         }
     }
@@ -401,9 +517,10 @@ public abstract class AbstractRaceCapability implements IBaseRaceCapability, IRa
     public void updateStateOnly(boolean active, float scale) {
         this.isActive = active;
         this.scaleFactor = scale;
-        if (isActive) {
-            RaceScaleHelper.setSmoothModelScale(player, scale, 20);
-        }
+        // 收到同步包后，重新按「当前激活种族」计算目标体型并刷新尺寸。不能用同步包里的 scale
+        // 直接设目标 —— 移除种族的同步包带的是被移除种族（如龙的 1.2）的旧值，会把刚切到的
+        // 新种族（如仙女 0.25）覆盖回去。重新遍历所有种族，找真正激活的那个才是对的。
+        RaceScaleHelper.refreshTarget(player);
     }
 
     /**
@@ -417,11 +534,14 @@ public abstract class AbstractRaceCapability implements IBaseRaceCapability, IRa
      * one packet but mean different things: one is what the race does, the other is what it looks
      * like, and a caller that has only one of them to hand should be able to say so.
      */
-    public void updateAppearance(boolean show, int variant, int primary, int secondary, int colorOption) {
+    public void updateAppearance(boolean show, int variant, int primary, int secondary,
+                                 int aux, int auxVariant, int colorOption) {
         this.showTraits = show;
         this.traitVariant = variant;
         this.primaryTraitColor = primary;
         this.secondaryTraitColor = secondary;
+        this.auxTraitColor = aux;
+        this.auxTraitVariant = auxVariant;
         this.traitColorOption = colorOption;
     }
 
@@ -505,12 +625,9 @@ public abstract class AbstractRaceCapability implements IBaseRaceCapability, IRa
     }
 
     protected void resetScaleFactor() {
+        // 启动平滑过渡回 1.0。平滑是异步的（每 tick 由 RaceEventHandler 推进），这里不能
+        // 再读当前值做同步校验 —— 读到的是过渡起点（旧体型），会误判并瞬间弹回正常体型。
         RaceScaleHelper.setSmoothModelScale(player, 1.0f, 20);
-        float currentScale = RaceScaleHelper.getCurrentModelScale(player);
-        if (Math.abs(currentScale - 1.0f) > 0.01f) {
-            // 如果没有正确恢复，强制设置
-            RaceScaleHelper.setModelScale(player, 1.0f);
-        }
     }
 
     protected void handleWallClimbInternal(double climbSpeed, double horizontalDrag) {

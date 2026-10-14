@@ -21,5 +21,7 @@ public class ClientEvents {
         event.register(KeyBindings.DRAGON_NIGHT_VISION_KEY);
         event.register(KeyBindings.DRAGON_BREATH_KEY);
         event.register(KeyBindings.DRAGON_FLIGHT_TOGGLE_KEY);
+        event.register(KeyBindings.WOLF_RIDER_KEY);
+        event.register(KeyBindings.RACE_ABILITY_KEY);
     }
 }

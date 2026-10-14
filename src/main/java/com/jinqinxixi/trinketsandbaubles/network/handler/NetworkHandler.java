@@ -2,14 +2,19 @@ package com.jinqinxixi.trinketsandbaubles.network.handler;
 
 import com.jinqinxixi.trinketsandbaubles.network.message.DragonRingMessage.*;
 import com.jinqinxixi.trinketsandbaubles.network.message.DragonsEyeMessage.DragonsEyeToggleMessage;
+import com.jinqinxixi.trinketsandbaubles.network.message.DragonsEyeMessage.GreedyEyesSyncMessage;
 import com.jinqinxixi.trinketsandbaubles.network.message.DragonsEyeMessage.UpdateEffectsMessage;
 import com.jinqinxixi.trinketsandbaubles.network.message.DragonsEyeMessage.UpdateTargetsMessage;
 import com.jinqinxixi.trinketsandbaubles.network.message.ManaMessage.ManaSyncMessage;
+import com.jinqinxixi.trinketsandbaubles.network.message.SilentRocketPacket;
 import com.jinqinxixi.trinketsandbaubles.TrinketsandBaublesMod;
 import com.jinqinxixi.trinketsandbaubles.network.message.Messages.ChargeKeyMessage;
 import com.jinqinxixi.trinketsandbaubles.network.message.Messages.DashKeyPressMessage;
 import com.jinqinxixi.trinketsandbaubles.network.message.Messages.PolarizedStoneToggleMessage;
 import com.jinqinxixi.trinketsandbaubles.network.message.Messages.StopChargeMessage;
+import com.jinqinxixi.trinketsandbaubles.network.message.Messages.WolfRiderKeyMessage;
+import com.jinqinxixi.trinketsandbaubles.network.message.Messages.RaceAbilityMessage;
+import com.jinqinxixi.trinketsandbaubles.network.message.Messages.EffectsRenderPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkRegistry;
@@ -70,6 +75,20 @@ public class NetworkHandler {
                 .consumerMainThread(UpdateTargetsMessage::handle)
                 .add();
 
+        // 贪婪之眼同步包（服务端发、客户端收），两端注册，见 PLAN 第 6.5 节。
+        INSTANCE.messageBuilder(GreedyEyesSyncMessage.class, nextId())
+                .encoder(GreedyEyesSyncMessage::encode)
+                .decoder(GreedyEyesSyncMessage::decode)
+                .consumerMainThread(GreedyEyesSyncMessage::handle)
+                .add();
+
+        // 滑翔推进的静音火箭同步（服务端发、客户端收），两端注册。
+        INSTANCE.messageBuilder(SilentRocketPacket.class, nextId())
+                .encoder(SilentRocketPacket::encode)
+                .decoder(SilentRocketPacket::decode)
+                .consumerMainThread(SilentRocketPacket::handle)
+                .add();
+
         INSTANCE.messageBuilder(DragonFlightToggleMessage.class, nextId())
                 .encoder(DragonFlightToggleMessage::encode)
                 .decoder(DragonFlightToggleMessage::decode)
@@ -80,6 +99,15 @@ public class NetworkHandler {
                 .encoder(SyncAllDragonStatesMessage::encode)
                 .decoder(SyncAllDragonStatesMessage::decode)
                 .consumerMainThread(SyncAllDragonStatesMessage::handle)
+                .add();
+
+        // 服务端→客户端的特效渲染（闪电箭、魔法球、龙息等自定义粒子）。必须两端都注册：服务端要
+        // 发送它，客户端要接收它；只注册在客户端会让服务端发送时因 id 未注册而静默失败，特效谁都
+        // 看不见。
+        INSTANCE.messageBuilder(EffectsRenderPacket.class, nextId())
+                .encoder(EffectsRenderPacket::encode)
+                .decoder(EffectsRenderPacket::new)
+                .consumerMainThread(EffectsRenderPacket::handle)
                 .add();
 
     }
@@ -129,6 +157,27 @@ public class NetworkHandler {
                 .decoder(UpdateEffectsMessage::decode)
                 .consumerMainThread(UpdateEffectsMessage::handle)
                 .add();
+
+        // Gliding: a glide starting, and a push being asked for.
+        INSTANCE.messageBuilder(com.jinqinxixi.trinketsandbaubles.network.message.Messages.GlideMessage.class, nextId())
+                .encoder(com.jinqinxixi.trinketsandbaubles.network.message.Messages.GlideMessage::encode)
+                .decoder(com.jinqinxixi.trinketsandbaubles.network.message.Messages.GlideMessage::decode)
+                .consumerMainThread(com.jinqinxixi.trinketsandbaubles.network.message.Messages.GlideMessage::handle)
+                .add();
+
+        // 哥布林骑狼按键
+        INSTANCE.messageBuilder(WolfRiderKeyMessage.class, nextId())
+                .encoder(WolfRiderKeyMessage::encode)
+                .decoder(WolfRiderKeyMessage::decode)
+                .consumerMainThread(WolfRiderKeyMessage::handle)
+                .add();
+
+        // 种族技能键（金牛踏击等）
+        INSTANCE.messageBuilder(RaceAbilityMessage.class, nextId())
+                .encoder(RaceAbilityMessage::encode)
+                .decoder(RaceAbilityMessage::decode)
+                .consumerMainThread(RaceAbilityMessage::handle)
+                .add();
     }
 
     // 仅客户端需要的消息
@@ -140,7 +189,6 @@ public class NetworkHandler {
                 .decoder(PolarizedStoneToggleMessage::decode)
                 .consumerMainThread(PolarizedStoneToggleMessage::handle)
                 .add();
-
 
     }
 

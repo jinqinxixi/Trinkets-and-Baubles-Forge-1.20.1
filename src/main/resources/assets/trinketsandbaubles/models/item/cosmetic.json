@@ -1,0 +1,30 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "trinketsandbaubles:item/page"
+  },
+  "display": {
+    "thirdPerson": {
+      "rotation": [-90, 0, 0],
+      "translation": [0, 1, -3],
+      "scale": [0.55, 0.55, 0.55]
+    },
+    "firstPerson": {
+      "rotation": [0, -135, 25],
+      "translation": [0, 4, 2],
+      "scale": [1.7, 1.7, 1.7]
+    }
+  },
+  "overrides": [
+    { "predicate": { "trinketsandbaubles:cosmetic": 8 }, "model": "trinketsandbaubles:race/taurus/tuarian_horns" },
+    { "predicate": { "trinketsandbaubles:cosmetic": 9 }, "model": "trinketsandbaubles:race/taurus/tuarian_horns" },
+    { "predicate": { "trinketsandbaubles:cosmetic": 10 }, "model": "trinketsandbaubles:race/taurus/tuarian_horns_f" },
+    { "predicate": { "trinketsandbaubles:cosmetic": 11 }, "model": "trinketsandbaubles:race/taurus/tuarian_horns_f" },
+    { "predicate": { "trinketsandbaubles:cosmetic": 12 }, "model": "trinketsandbaubles:race/taurus/tuarian_cowbell" },
+    { "predicate": { "trinketsandbaubles:cosmetic": 13 }, "model": "trinketsandbaubles:race/succubus/succubus_horns" },
+    { "predicate": { "trinketsandbaubles:cosmetic": 14 }, "model": "trinketsandbaubles:race/generic/horns" },
+    { "predicate": { "trinketsandbaubles:cosmetic": 15 }, "model": "trinketsandbaubles:race/generic/horns_inverted" },
+    { "predicate": { "trinketsandbaubles:cosmetic": 16 }, "model": "trinketsandbaubles:race/dragon/dragon_horns" },
+    { "predicate": { "trinketsandbaubles:cosmetic": 17 }, "model": "trinketsandbaubles:race/faelis/tail" }
+  ]
+}
